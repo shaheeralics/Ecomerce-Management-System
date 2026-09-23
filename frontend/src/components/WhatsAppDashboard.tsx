@@ -1,28 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-    Package, 
-    MessageSquare, 
-    Settings, 
-    Plus, 
-    Trash2, 
-    Edit3, 
-    Camera, 
-    Video, 
-    Mic, 
-    Square, 
-    Play, 
-    Pause, 
-    Volume2, 
-    CheckCircle, 
-    X, 
-    ChevronRight, 
-    ChevronLeft, 
-    FileText, 
-    Upload, 
-    Check, 
+import {
+    Package,
+    MessageSquare,
+    Settings,
+    Plus,
+    Trash2,
+    Edit3,
+    Camera,
+    Video,
+    Mic,
+    Square,
+    Play,
+    Pause,
+    Volume2,
+    CheckCircle,
+    X,
+    ChevronRight,
+    ChevronLeft,
+    FileText,
+    Upload,
+    Check,
     RotateCcw,
-    Undo2,
-    Redo2,
     Layers,
     Tag,
     Info,
@@ -33,72 +31,75 @@ import {
     Move,
     Shield,
     Sparkles,
-    Copy
+    Copy,
+    ZoomIn,
+    ZoomOut,
+    Minimize2
 } from 'lucide-react';
 
 const apiGuidanceData = {
-  metaToken: {
-    title: 'How to get Meta WhatsApp Token',
-    content: '1. Go to Meta for Developers portal (developers.facebook.com).\n2. Create or select your Business App.\n3. Add WhatsApp product.\n4. Under WhatsApp > API Setup, copy the "Temporary access token".\n5. For a permanent token, create a System User in Facebook Business Manager with whatsapp_business_messaging permissions.'
-  },
-  metaPhoneId: {
-    title: 'How to get Meta Phone Number ID',
-    content: '1. In Meta Developer App, go to WhatsApp > API Setup.\n2. Under "Send and receive messages", copy the "Phone number ID".'
-  },
-  metaWabaId: {
-    title: 'How to get WhatsApp Business Account ID (WABA ID)',
-    content: '1. In Meta Developer App, go to WhatsApp > API Setup.\n2. Copy the "WhatsApp Business Account ID" displayed under your phone number.'
-  },
-  metaVerifyToken: {
-    title: 'How to set Meta Verify Token',
-    content: 'Enter any custom secure string here (e.g. pawanda_secret_token_123) and enter the exact same string in Meta Webhook verification setting.'
-  },
-  llmApiKey: {
-    title: 'How to get LLM API Key',
-    content: 'For Gemini: Go to Google AI Studio (aistudio.google.com) and click "Get API Key".\nFor OpenAI: Go to platform.openai.com/api-keys.'
-  }
+    metaToken: {
+        title: 'How to get Meta WhatsApp Token',
+        content: '1. Go to Meta for Developers portal (developers.facebook.com).\n2. Create or select your Business App.\n3. Add WhatsApp product.\n4. Under WhatsApp > API Setup, copy the "Temporary access token".\n5. For a permanent token, create a System User in Facebook Business Manager with whatsapp_business_messaging permissions.'
+    },
+    metaPhoneId: {
+        title: 'How to get Meta Phone Number ID',
+        content: '1. In Meta Developer App, go to WhatsApp > API Setup.\n2. Under "Send and receive messages", copy the "Phone number ID".'
+    },
+    metaWabaId: {
+        title: 'How to get WhatsApp Business Account ID (WABA ID)',
+        content: '1. In Meta Developer App, go to WhatsApp > API Setup.\n2. Copy the "WhatsApp Business Account ID" displayed under your phone number.'
+    },
+    metaVerifyToken: {
+        title: 'How to set Meta Verify Token',
+        content: 'Enter any custom secure string here (e.g. pawanda_secret_token_123) and enter the exact same string in Meta Webhook verification setting.'
+    },
+    llmApiKey: {
+        title: 'How to get LLM API Key',
+        content: 'For Gemini: Go to Google AI Studio (aistudio.google.com) and click "Get API Key".\nFor OpenAI: Go to platform.openai.com/api-keys.'
+    }
 };
 
 interface Product {
-  id: number;
-  title: string;
-  brand: string | null;
-  gender: string;
-  color: string | null;
-  size_original: string | null;
-  starting_price: number;
-  minimum_price: number;
-  description: string | null;
-  status: string;
-  main_image_url: string | null;
-  extra_image_urls: string | null;
-  video_url: string | null;
-  voice_note_url: string | null;
-  created_at: string;
+    id: number;
+    title: string;
+    brand: string | null;
+    gender: string;
+    color: string | null;
+    size_original: string | null;
+    starting_price: number;
+    minimum_price: number;
+    description: string | null;
+    status: string;
+    main_image_url: string | null;
+    extra_image_urls: string | null;
+    video_url: string | null;
+    voice_note_url: string | null;
+    created_at: string;
 }
 
 interface ImageItem {
-  id: string;
-  file?: File;
-  url: string;
-  isExisting?: boolean;
+    id: string;
+    file?: File;
+    url: string;
+    isExisting?: boolean;
 }
 
 interface AudioTrackClip {
-  id: string;
-  track: 'main' | 'voiceover';
-  name: string;
-  start: number;
-  end: number;
-  sourceStart?: number;
-  buffer?: AudioBuffer;
-  isDeleted?: boolean;
+    id: string;
+    track: 'main' | 'voiceover';
+    name: string;
+    start: number;
+    end: number;
+    sourceStart?: number;
+    buffer?: AudioBuffer;
+    isDeleted?: boolean;
 }
 
 interface TimelineHistoryStep {
-  mainClips: AudioTrackClip[];
-  voiceoverClips: AudioTrackClip[];
-  audioDuration: number;
+    mainClips: AudioTrackClip[];
+    voiceoverClips: AudioTrackClip[];
+    audioDuration: number;
 }
 
 // Convert Web Audio API AudioBuffer to WAV Blob
@@ -182,7 +183,7 @@ const WhatsAppDashboard = () => {
 
     // Image items list for alignment, reordering & thumbnail selection
     const [productImages, setProductImages] = useState<ImageItem[]>([]);
-    
+
     // Video state
     const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
     const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
@@ -202,7 +203,7 @@ const WhatsAppDashboard = () => {
     // Punch-In Overwrite Timeline State
     const [audioDuration, setAudioDuration] = useState(0);
     const [seekTime, setSeekTime] = useState(0);
-    
+
     // CapCut Multi-Track Studio States (Track 1: Main | Track 2: Voice-Over)
     const [showTimelineEditor, setShowTimelineEditor] = useState(false);
     const [mainClips, setMainClips] = useState<AudioTrackClip[]>([]);
@@ -215,6 +216,9 @@ const WhatsAppDashboard = () => {
     const [trimEnd, setTrimEnd] = useState(0);
     const [waveformPeaks, setWaveformPeaks] = useState<number[]>([]);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [timelineZoom, setTimelineZoom] = useState(1);
+    const [isTimelineRecording, setIsTimelineRecording] = useState(false);
+    const timelineScrollRef = useRef<HTMLDivElement | null>(null);
     const timelineTrackRef = useRef<HTMLDivElement | null>(null);
 
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -248,11 +252,18 @@ const WhatsAppDashboard = () => {
     // Preview Modal for viewing product media
     const [activeMediaPreview, setActiveMediaPreview] = useState<{ type: 'video' | 'audio', url: string, title: string } | null>(null);
 
+    // Live Audio Visualizer State
+    const [visualizerData, setVisualizerData] = useState<number[]>(new Array(35).fill(30));
+    const audioContextRef = useRef<AudioContext | null>(null);
+    const analyserRef = useRef<AnalyserNode | null>(null);
+    const dataArrayRef = useRef<Uint8Array | null>(null);
+    const animationFrameRef = useRef<number | null>(null);
+
     // Fetch products
     const fetchProducts = async () => {
         setLoading(true);
         try {
-            const res = await fetch('/api/products');
+            const res = await fetch(`/api/products?_t=${Date.now()}`);
             const data = await res.json();
             if (data.success) setProducts(data.data);
         } catch (err) {
@@ -422,6 +433,45 @@ const WhatsAppDashboard = () => {
                 overwriteSeekRef.current = null;
             }
 
+            // Setup Real-time Audio Visualizer
+            const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+            audioContextRef.current = audioCtx;
+            const analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 256;
+            analyser.smoothingTimeConstant = 0.5;
+            const source = audioCtx.createMediaStreamSource(stream);
+            source.connect(analyser);
+            analyserRef.current = analyser;
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            dataArrayRef.current = dataArray;
+
+            const updateVisualizer = () => {
+                if (!analyserRef.current || !dataArrayRef.current) return;
+                analyserRef.current.getByteTimeDomainData(dataArrayRef.current as any);
+
+                // Compute overall mic volume via RMS
+                let sum = 0;
+                for (let j = 0; j < dataArrayRef.current.length; j++) {
+                    const v = (dataArrayRef.current[j] - 128) / 128;
+                    sum += v * v;
+                }
+                const rms = Math.sqrt(sum / dataArrayRef.current.length);
+                const volume = Math.min(1, rms * 4); // boost sensitivity
+
+                // Generate bars: natural waveform shape modulated by live volume
+                const newData: number[] = [];
+                for (let i = 0; i < 35; i++) {
+                    const baseShape = Math.sin(i * 0.45) * 20 + Math.cos(i * 1.1) * 12 + 45;
+                    const jitter = (Math.random() - 0.5) * volume * 40;
+                    const h = baseShape + (volume * 35) + jitter;
+                    newData.push(Math.max(15, Math.min(95, h)));
+                }
+                setVisualizerData(newData);
+                animationFrameRef.current = requestAnimationFrame(updateVisualizer);
+            };
+            updateVisualizer();
+
             mediaRecorderRef.current.ondataavailable = (event) => {
                 if (event.data.size > 0) audioChunksRef.current.push(event.data);
             };
@@ -500,6 +550,9 @@ const WhatsAppDashboard = () => {
                 prevAudioBlobRef.current = null;
                 overwriteSeekRef.current = null;
                 stream.getTracks().forEach(track => track.stop());
+
+                if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+                if (audioContextRef.current?.state !== 'closed') audioContextRef.current?.close();
             };
 
             mediaRecorderRef.current.start();
@@ -570,11 +623,59 @@ const WhatsAppDashboard = () => {
     const togglePlayPause = () => {
         if (!audioElementRef.current) return;
         if (audioElementRef.current.paused) {
-            audioElementRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+            audioElementRef.current.play().then(() => setIsPlaying(true)).catch(() => { });
         } else {
             audioElementRef.current.pause();
             setIsPlaying(false);
         }
+    };
+
+    // Inline Timeline Voice-Over Recording (records into Track 2 without leaving editor)
+    const timelineRecordStartRef = useRef<number>(0);
+    const timelineRecordTimerRef = useRef<number | null>(null);
+
+    const startTimelineRecording = () => {
+        if (isTimelineRecording) {
+            stopTimelineRecording();
+            return;
+        }
+        const recordStart = seekTime;
+        timelineRecordStartRef.current = recordStart;
+        setIsTimelineRecording(true);
+
+        // Start actual mic recording using the existing startRecording with seekTime
+        startRecording(recordStart);
+
+        // Move the playhead forward as recording progresses
+        let elapsed = 0;
+        timelineRecordTimerRef.current = window.setInterval(() => {
+            elapsed += 0.1;
+            const newTime = recordStart + elapsed;
+            setSeekTime(newTime);
+            // Extend timeline if recording goes beyond current duration
+            if (newTime > audioDuration) {
+                setAudioDuration(newTime);
+            }
+            // Auto-scroll timeline to keep playhead visible
+            if (timelineScrollRef.current && timelineTrackRef.current) {
+                const scrollContainer = timelineScrollRef.current;
+                const trackWidth = timelineTrackRef.current.scrollWidth;
+                const playheadX = (newTime / Math.max(audioDuration, newTime)) * trackWidth;
+                const containerWidth = scrollContainer.clientWidth;
+                if (playheadX > scrollContainer.scrollLeft + containerWidth - 50) {
+                    scrollContainer.scrollLeft = playheadX - containerWidth + 80;
+                }
+            }
+        }, 100);
+    };
+
+    const stopTimelineRecording = () => {
+        setIsTimelineRecording(false);
+        if (timelineRecordTimerRef.current) {
+            clearInterval(timelineRecordTimerRef.current);
+            timelineRecordTimerRef.current = null;
+        }
+        stopRecording();
     };
 
     // Push a new snapshot state into history stack
@@ -622,7 +723,7 @@ const WhatsAppDashboard = () => {
         }
     };
 
-    // Keyboard Shortcuts listener (Space: Play/Pause, Delete/Backspace: Delete selected clip, Ctrl+Z: Undo, Ctrl+Y/Ctrl+Shift+Z: Redo)
+    // Keyboard Shortcuts listener (Space: Play/Pause, Delete/Backspace: Delete selected clip, Ctrl+Z: Undo, Ctrl+Y/Ctrl+Shift+Z: Redo, Ctrl+/Ctrl-: Zoom)
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (!showTimelineEditor) return;
@@ -648,6 +749,12 @@ const WhatsAppDashboard = () => {
             } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
                 e.preventDefault();
                 handleRedo();
+            } else if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+')) {
+                e.preventDefault();
+                setTimelineZoom(prev => Math.min(5, prev + 0.5));
+            } else if ((e.ctrlKey || e.metaKey) && e.key === '-') {
+                e.preventDefault();
+                setTimelineZoom(prev => Math.max(1, prev - 0.5));
             }
         };
 
@@ -797,6 +904,7 @@ const WhatsAppDashboard = () => {
         window.addEventListener('mouseup', onMouseUp);
     };
 
+    /*
     // Nudge selected clip left or right by N seconds
     const nudgeSelectedClip = (seconds: number) => {
         if (!selectedClipId) return;
@@ -831,6 +939,7 @@ const WhatsAppDashboard = () => {
             });
         }
     };
+    */
 
     // Split clip at exact playhead position (Multi-cut)
     const splitClipAtPlayhead = () => {
@@ -848,15 +957,15 @@ const WhatsAppDashboard = () => {
                 const offsetFromClipStart = splitTime - target.start;
                 const targetSourceStart = target.sourceStart ?? 0;
 
-                const c1: AudioTrackClip = { 
-                    ...target, 
-                    id: `vo-${Date.now()}-A`, 
+                const c1: AudioTrackClip = {
+                    ...target,
+                    id: `vo-${Date.now()}-A`,
                     end: splitTime,
                     sourceStart: targetSourceStart
                 };
-                const c2: AudioTrackClip = { 
-                    ...target, 
-                    id: `vo-${Date.now()}-B`, 
+                const c2: AudioTrackClip = {
+                    ...target,
+                    id: `vo-${Date.now()}-B`,
                     start: splitTime,
                     sourceStart: targetSourceStart + offsetFromClipStart
                 };
@@ -878,15 +987,15 @@ const WhatsAppDashboard = () => {
                 const offsetFromClipStart = splitTime - target.start;
                 const targetSourceStart = target.sourceStart ?? target.start;
 
-                const c1: AudioTrackClip = { 
-                    ...target, 
-                    id: `main-${Date.now()}-A`, 
+                const c1: AudioTrackClip = {
+                    ...target,
+                    id: `main-${Date.now()}-A`,
                     end: splitTime,
                     sourceStart: targetSourceStart
                 };
-                const c2: AudioTrackClip = { 
-                    ...target, 
-                    id: `main-${Date.now()}-B`, 
+                const c2: AudioTrackClip = {
+                    ...target,
+                    id: `main-${Date.now()}-B`,
                     start: splitTime,
                     sourceStart: targetSourceStart + offsetFromClipStart
                 };
@@ -916,16 +1025,16 @@ const WhatsAppDashboard = () => {
     };
 
     // Reset all cuts
-    const resetAllCuts = () => {
-        const freshMain: AudioTrackClip[] = [{ id: `main-${Date.now()}`, track: 'main', name: 'Main Track', start: 0, end: audioDuration, sourceStart: 0 }];
-        setMainClips(freshMain);
-        setVoiceoverClips([]);
-        setTrimStart(0);
-        setTrimEnd(audioDuration);
-        setSelectedClipId(null);
-        autoMixPreview(freshMain, [], audioDuration);
-        pushTimelineHistory(freshMain, [], audioDuration);
-    };
+    // const resetAllCuts = () => {
+    //     const freshMain: AudioTrackClip[] = [{ id: `main-${Date.now()}`, track: 'main', name: 'Main Track', start: 0, end: audioDuration, sourceStart: 0 }];
+    //     setMainClips(freshMain);
+    //     setVoiceoverClips([]);
+    //     setTrimStart(0);
+    //     setTrimEnd(audioDuration);
+    //     setSelectedClipId(null);
+    //     autoMixPreview(freshMain, [], audioDuration);
+    //     pushTimelineHistory(freshMain, [], audioDuration);
+    // };
 
     // Helper function to calculate exact end timestamp of the last active clip
     const calculateMaxClipEnd = (mClips: AudioTrackClip[], voClips: AudioTrackClip[]): number => {
@@ -948,7 +1057,7 @@ const WhatsAppDashboard = () => {
             try {
                 const resp = await fetch(audioPreviewUrl);
                 mainSourceBlob = await resp.blob();
-            } catch (err) {}
+            } catch (err) { }
         }
 
         const activeMain = mClips.filter(c => !c.isDeleted);
@@ -1259,6 +1368,8 @@ const WhatsAppDashboard = () => {
             setIsRecording(false);
             setIsPaused(false);
             if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+            if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+            setVisualizerData(new Array(35).fill(30));
         }
     };
 
@@ -1293,7 +1404,7 @@ const WhatsAppDashboard = () => {
         productImages.forEach(img => { if (img.url.startsWith('blob:')) URL.revokeObjectURL(img.url); });
         if (videoPreviewUrl && videoPreviewUrl.startsWith('blob:')) URL.revokeObjectURL(videoPreviewUrl);
         if (audioPreviewUrl && audioPreviewUrl.startsWith('blob:')) URL.revokeObjectURL(audioPreviewUrl);
-        
+
         setProductImages([]);
         setSelectedVideo(null);
         setVideoPreviewUrl(null);
@@ -1306,6 +1417,7 @@ const WhatsAppDashboard = () => {
         setAudioDuration(0);
         prevAudioBlobRef.current = null;
         overwriteSeekRef.current = null;
+        setVisualizerData(new Array(35).fill(30));
     };
 
     // Open Edit Form (Parse main_image_url and extra_image_urls into productImages!)
@@ -1465,20 +1577,18 @@ const WhatsAppDashboard = () => {
             {/* Devsil Teal Sidebar */}
             <div className="w-64 bg-[#0A181D] border-r border-teal-900/30 flex flex-col p-4 flex-shrink-0">
                 <nav className="flex flex-col space-y-1.5 mt-2">
-                    <button 
+                    <button
                         onClick={() => setSubTab('products')}
-                        className={`text-left px-4 py-3 rounded-xl font-medium text-xs transition-all flex items-center gap-3 ${
-                            subTab === 'products' ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/30 font-semibold' : 'text-slate-400 hover:bg-teal-950/40 hover:text-slate-200'
-                        }`}
+                        className={`text-left px-4 py-3 rounded-xl font-medium text-xs transition-all flex items-center gap-3 ${subTab === 'products' ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/30 font-semibold' : 'text-slate-400 hover:bg-teal-950/40 hover:text-slate-200'
+                            }`}
                     >
                         <Package size={17} />
                         Products Catalog
                     </button>
-                    <button 
+                    <button
                         onClick={() => setSubTab('conversations')}
-                        className={`text-left px-4 py-3 rounded-xl font-medium text-xs transition-all flex items-center gap-3 ${
-                            subTab === 'conversations' ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/30 font-semibold' : 'text-slate-400 hover:bg-teal-950/40 hover:text-slate-200'
-                        }`}
+                        className={`text-left px-4 py-3 rounded-xl font-medium text-xs transition-all flex items-center gap-3 ${subTab === 'conversations' ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/30 font-semibold' : 'text-slate-400 hover:bg-teal-950/40 hover:text-slate-200'
+                            }`}
                     >
                         <MessageSquare size={17} />
                         Live Conversations
@@ -1532,10 +1642,10 @@ const WhatsAppDashboard = () => {
 
                         {/* ===== MULTI-PHASE PRODUCT CREATION MODAL ===== */}
                         {showAddModal && (
-                            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-                                <div className="bg-[#09181E] border border-teal-800/40 rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl my-8">
+                            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto pt-10 pb-10">
+                                <div className="bg-[#09181E] border border-teal-800/40 rounded-2xl w-full max-w-3xl flex flex-col max-h-[90vh] shadow-2xl relative">
                                     {/* Modal Header */}
-                                    <div className="px-6 py-4 bg-[#0B1D25] border-b border-teal-900/40 flex items-center justify-between">
+                                    <div className="px-6 py-4 bg-[#0B1D25] border-b border-teal-900/40 flex items-center justify-between flex-shrink-0 rounded-t-2xl z-10">
                                         <div className="flex items-center gap-3">
                                             <div className="w-8 h-8 rounded-lg bg-teal-500/10 border border-teal-500/30 p-1 flex items-center justify-center text-teal-400">
                                                 <Package size={18} />
@@ -1552,13 +1662,12 @@ const WhatsAppDashboard = () => {
                                     {/* Stepper Header (3 Phases) */}
                                     <div className="px-6 py-3 bg-[#071317] border-b border-teal-900/40 flex items-center justify-between gap-2">
                                         {/* Phase 1 */}
-                                        <button 
+                                        <button
                                             onClick={() => setActivePhase(1)}
-                                            className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
-                                                activePhase === 1 
-                                                    ? 'bg-teal-600 text-white shadow' 
-                                                    : activePhase > 1 ? 'bg-teal-950/60 text-teal-300 border border-teal-800/40' : 'bg-[#0E232B] text-slate-400'
-                                            }`}
+                                            className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all ${activePhase === 1
+                                                ? 'bg-teal-600 text-white shadow'
+                                                : activePhase > 1 ? 'bg-teal-950/60 text-teal-300 border border-teal-800/40' : 'bg-[#0E232B] text-slate-400'
+                                                }`}
                                         >
                                             <span className="w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px] font-bold">1</span>
                                             Phase 1: Basic Details
@@ -1567,13 +1676,12 @@ const WhatsAppDashboard = () => {
                                         <ChevronRight size={16} className="text-teal-900 flex-shrink-0" />
 
                                         {/* Phase 2 */}
-                                        <button 
+                                        <button
                                             onClick={() => setActivePhase(2)}
-                                            className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
-                                                activePhase === 2 
-                                                    ? 'bg-teal-600 text-white shadow' 
-                                                    : activePhase > 2 ? 'bg-teal-950/60 text-teal-300 border border-teal-800/40' : 'bg-[#0E232B] text-slate-400'
-                                            }`}
+                                            className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all ${activePhase === 2
+                                                ? 'bg-teal-600 text-white shadow'
+                                                : activePhase > 2 ? 'bg-teal-950/60 text-teal-300 border border-teal-800/40' : 'bg-[#0E232B] text-slate-400'
+                                                }`}
                                         >
                                             <span className="w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px] font-bold">2</span>
                                             Phase 2: Images & Video
@@ -1582,13 +1690,12 @@ const WhatsAppDashboard = () => {
                                         <ChevronRight size={16} className="text-teal-900 flex-shrink-0" />
 
                                         {/* Phase 3 */}
-                                        <button 
+                                        <button
                                             onClick={() => setActivePhase(3)}
-                                            className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
-                                                activePhase === 3 
-                                                    ? 'bg-teal-600 text-white shadow' 
-                                                    : 'bg-[#0E232B] text-slate-400'
-                                            }`}
+                                            className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all ${activePhase === 3
+                                                ? 'bg-teal-600 text-white shadow'
+                                                : 'bg-[#0E232B] text-slate-400'
+                                                }`}
                                         >
                                             <span className="w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px] font-bold">3</span>
                                             Phase 3: Voice Note Pitch
@@ -1596,7 +1703,7 @@ const WhatsAppDashboard = () => {
                                     </div>
 
                                     {/* Modal Body - Phase Content */}
-                                    <div className="p-6">
+                                    <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
                                         {/* PHASE 1: BASIC DETAILS */}
                                         {activePhase === 1 && (
                                             <div className="space-y-4">
@@ -1608,29 +1715,29 @@ const WhatsAppDashboard = () => {
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     <div>
                                                         <label className="block text-xs font-medium text-slate-300 mb-1.5">Product Title *</label>
-                                                        <input 
-                                                            type="text" 
-                                                            value={formData.title} 
-                                                            onChange={e => setFormData({...formData, title: e.target.value})}
+                                                        <input
+                                                            type="text"
+                                                            value={formData.title}
+                                                            onChange={e => setFormData({ ...formData, title: e.target.value })}
                                                             className="w-full bg-[#050D10] border border-teal-900/50 rounded-lg px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
-                                                            placeholder="e.g. Air Jordan 1 Retro High" 
+                                                            placeholder="e.g. Air Jordan 1 Retro High"
                                                         />
                                                     </div>
                                                     <div>
                                                         <label className="block text-xs font-medium text-slate-300 mb-1.5">Brand Name</label>
-                                                        <input 
-                                                            type="text" 
-                                                            value={formData.brand} 
-                                                            onChange={e => setFormData({...formData, brand: e.target.value})}
+                                                        <input
+                                                            type="text"
+                                                            value={formData.brand}
+                                                            onChange={e => setFormData({ ...formData, brand: e.target.value })}
                                                             className="w-full bg-[#050D10] border border-teal-900/50 rounded-lg px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
-                                                            placeholder="e.g. Nike" 
+                                                            placeholder="e.g. Nike"
                                                         />
                                                     </div>
                                                     <div>
                                                         <label className="block text-xs font-medium text-slate-300 mb-1.5">Gender Category</label>
-                                                        <select 
-                                                            value={formData.gender} 
-                                                            onChange={e => setFormData({...formData, gender: e.target.value})}
+                                                        <select
+                                                            value={formData.gender}
+                                                            onChange={e => setFormData({ ...formData, gender: e.target.value })}
                                                             className="w-full bg-[#050D10] border border-teal-900/50 rounded-lg px-3.5 py-2.5 text-xs text-slate-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
                                                         >
                                                             <option value="men">Men</option>
@@ -1640,43 +1747,43 @@ const WhatsAppDashboard = () => {
                                                     </div>
                                                     <div>
                                                         <label className="block text-xs font-medium text-slate-300 mb-1.5">Color</label>
-                                                        <input 
-                                                            type="text" 
-                                                            value={formData.color} 
-                                                            onChange={e => setFormData({...formData, color: e.target.value})}
+                                                        <input
+                                                            type="text"
+                                                            value={formData.color}
+                                                            onChange={e => setFormData({ ...formData, color: e.target.value })}
                                                             className="w-full bg-[#050D10] border border-teal-900/50 rounded-lg px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
-                                                            placeholder="e.g. Red / Black" 
+                                                            placeholder="e.g. Red / Black"
                                                         />
                                                     </div>
                                                     <div>
                                                         <label className="block text-xs font-medium text-slate-300 mb-1.5">Original Size</label>
-                                                        <input 
-                                                            type="text" 
-                                                            value={formData.size_original} 
-                                                            onChange={e => setFormData({...formData, size_original: e.target.value})}
+                                                        <input
+                                                            type="text"
+                                                            value={formData.size_original}
+                                                            onChange={e => setFormData({ ...formData, size_original: e.target.value })}
                                                             className="w-full bg-[#050D10] border border-teal-900/50 rounded-lg px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
-                                                            placeholder="e.g. US 10 / EU 44" 
+                                                            placeholder="e.g. US 10 / EU 44"
                                                         />
                                                     </div>
                                                     <div className="grid grid-cols-2 gap-3">
                                                         <div>
                                                             <label className="block text-xs font-medium text-slate-300 mb-1.5">Starting Price *</label>
-                                                            <input 
-                                                                type="number" 
-                                                                value={formData.starting_price} 
-                                                                onChange={e => setFormData({...formData, starting_price: e.target.value})}
+                                                            <input
+                                                                type="number"
+                                                                value={formData.starting_price}
+                                                                onChange={e => setFormData({ ...formData, starting_price: e.target.value })}
                                                                 className="w-full bg-[#050D10] border border-teal-900/50 rounded-lg px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
-                                                                placeholder="150" 
+                                                                placeholder="150"
                                                             />
                                                         </div>
                                                         <div>
                                                             <label className="block text-xs font-medium text-slate-300 mb-1.5">Minimum Price *</label>
-                                                            <input 
-                                                                type="number" 
-                                                                value={formData.minimum_price} 
-                                                                onChange={e => setFormData({...formData, minimum_price: e.target.value})}
+                                                            <input
+                                                                type="number"
+                                                                value={formData.minimum_price}
+                                                                onChange={e => setFormData({ ...formData, minimum_price: e.target.value })}
                                                                 className="w-full bg-[#050D10] border border-teal-900/50 rounded-lg px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
-                                                                placeholder="100" 
+                                                                placeholder="100"
                                                             />
                                                         </div>
                                                     </div>
@@ -1684,9 +1791,9 @@ const WhatsAppDashboard = () => {
 
                                                 <div>
                                                     <label className="block text-xs font-medium text-slate-300 mb-1.5">Product Description & Notes</label>
-                                                    <textarea 
+                                                    <textarea
                                                         value={formData.description}
-                                                        onChange={e => setFormData({...formData, description: e.target.value})}
+                                                        onChange={e => setFormData({ ...formData, description: e.target.value })}
                                                         rows={3}
                                                         className="w-full bg-[#050D10] border border-teal-900/50 rounded-lg px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none resize-none"
                                                         placeholder="Provide description or selling instructions for the AI bot..."
@@ -1710,13 +1817,13 @@ const WhatsAppDashboard = () => {
                                                         <span className="text-teal-400 font-semibold text-[11px]">Position 1 (Leftmost) = MAIN THUMBNAIL</span>
                                                     </label>
                                                     <div className="border-2 border-dashed border-teal-900/40 hover:border-teal-500 rounded-xl p-5 bg-[#050D10] hover:bg-[#08151A] transition-all text-center group cursor-pointer">
-                                                        <input 
-                                                            type="file" 
-                                                            multiple 
-                                                            accept="image/*" 
-                                                            onChange={handleImageSelect} 
-                                                            className="hidden" 
-                                                            id="product-images-input" 
+                                                        <input
+                                                            type="file"
+                                                            multiple
+                                                            accept="image/*"
+                                                            onChange={handleImageSelect}
+                                                            className="hidden"
+                                                            id="product-images-input"
                                                         />
                                                         <label htmlFor="product-images-input" className="cursor-pointer block">
                                                             <div className="w-10 h-10 rounded-full bg-teal-950/60 group-hover:bg-teal-600/20 text-teal-400 flex items-center justify-center mx-auto mb-2 transition-colors">
@@ -1737,7 +1844,7 @@ const WhatsAppDashboard = () => {
                                                                 {productImages.map((img, i) => (
                                                                     <div key={img.id} className="bg-[#050D10] border border-teal-900/50 rounded-xl p-2.5 flex flex-col justify-between space-y-2 group relative">
                                                                         <div className="h-28 rounded-lg overflow-hidden bg-black relative">
-                                                                            <img src={img.url} alt={`Photo ${i+1}`} className="w-full h-full object-cover" />
+                                                                            <img src={img.url} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
                                                                             {i === 0 ? (
                                                                                 <span className="absolute top-1 left-1 bg-teal-600 text-white text-[9px] px-2 py-0.5 rounded font-bold shadow flex items-center gap-1">
                                                                                     <Star size={10} fill="currentColor" /> MAIN THUMBNAIL
@@ -1747,9 +1854,9 @@ const WhatsAppDashboard = () => {
                                                                                     #{i + 1}
                                                                                 </span>
                                                                             )}
-                                                                            <button 
+                                                                            <button
                                                                                 type="button"
-                                                                                onClick={() => removeImageItem(i)} 
+                                                                                onClick={() => removeImageItem(i)}
                                                                                 className="absolute top-1 right-1 bg-red-600/80 hover:bg-red-600 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity"
                                                                                 title="Remove Image"
                                                                             >
@@ -1759,7 +1866,7 @@ const WhatsAppDashboard = () => {
 
                                                                         {/* Alignment & Reorder Action Bar */}
                                                                         <div className="flex items-center justify-between gap-1 pt-1 border-t border-teal-900/30">
-                                                                            <button 
+                                                                            <button
                                                                                 type="button"
                                                                                 onClick={() => makeMainImage(i)}
                                                                                 disabled={i === 0}
@@ -1770,7 +1877,7 @@ const WhatsAppDashboard = () => {
                                                                             </button>
 
                                                                             <div className="flex items-center gap-1">
-                                                                                <button 
+                                                                                <button
                                                                                     type="button"
                                                                                     onClick={() => moveImageLeft(i)}
                                                                                     disabled={i === 0}
@@ -1779,7 +1886,7 @@ const WhatsAppDashboard = () => {
                                                                                 >
                                                                                     <ArrowLeft size={12} />
                                                                                 </button>
-                                                                                <button 
+                                                                                <button
                                                                                     type="button"
                                                                                     onClick={() => moveImageRight(i)}
                                                                                     disabled={i === productImages.length - 1}
@@ -1810,7 +1917,7 @@ const WhatsAppDashboard = () => {
                                                     {videoPreviewUrl ? (
                                                         <div className="relative rounded-xl border border-teal-900/50 overflow-hidden bg-black p-2">
                                                             <video src={videoPreviewUrl} controls className="w-full max-h-48 rounded-lg object-contain mx-auto" />
-                                                            <button 
+                                                            <button
                                                                 type="button"
                                                                 onClick={removeVideo}
                                                                 className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-lg"
@@ -1820,12 +1927,12 @@ const WhatsAppDashboard = () => {
                                                         </div>
                                                     ) : (
                                                         <div className="border-2 border-dashed border-teal-900/40 hover:border-teal-500 rounded-xl p-5 bg-[#050D10] hover:bg-[#08151A] transition-all text-center group cursor-pointer">
-                                                            <input 
-                                                                type="file" 
-                                                                accept="video/*" 
-                                                                onChange={handleVideoSelect} 
-                                                                className="hidden" 
-                                                                id="product-video-input" 
+                                                            <input
+                                                                type="file"
+                                                                accept="video/*"
+                                                                onChange={handleVideoSelect}
+                                                                className="hidden"
+                                                                id="product-video-input"
                                                             />
                                                             <label htmlFor="product-video-input" className="cursor-pointer block">
                                                                 <div className="w-10 h-10 rounded-full bg-teal-950/60 group-hover:bg-teal-600/20 text-teal-400 flex items-center justify-center mx-auto mb-2 transition-colors">
@@ -1848,497 +1955,426 @@ const WhatsAppDashboard = () => {
                                                 </div>
 
                                                 <div className="bg-[#050D10] border border-teal-900/40 rounded-xl p-6 text-center">
-                                                    <p className="text-xs font-semibold text-slate-200 mb-1">Record & Edit Audio Note</p>
-                                                    <p className="text-[11px] text-slate-400 mb-6">
-                                                        Record voice note. You can Pause/Resume anytime, or scrub the timeline to Overwrite from any position!
-                                                    </p>
 
                                                     {/* Recording Controls */}
                                                     <div className="flex flex-col items-center justify-center gap-4">
-                                                        {!isRecording && !audioPreviewUrl && (
-                                                            <button 
+                                                        {!isRecording && !audioPreviewUrl && !isTimelineRecording && (
+                                                            <button
                                                                 type="button"
                                                                 onClick={() => startRecording()}
-                                                                className="w-16 h-16 rounded-full bg-teal-600 hover:bg-teal-500 text-white flex items-center justify-center shadow-xl shadow-teal-600/40 transition-all transform hover:scale-105"
+                                                                className="w-[60px] h-[60px] rounded-full bg-[#FF3B30] hover:bg-red-500 text-white flex items-center justify-center shadow-lg shadow-red-500/40 transition-all transform hover:scale-105"
                                                             >
                                                                 <Mic size={28} />
                                                             </button>
                                                         )}
 
-                                                        {isRecording && (
-                                                            <div className="space-y-4">
-                                                                <div className="flex items-center justify-center gap-3">
-                                                                    <span className={`w-3 h-3 rounded-full ${isPaused ? 'bg-amber-400' : 'bg-red-500 animate-ping'}`} />
-                                                                    <span className="font-mono text-2xl font-bold text-teal-400">
+                                                        {isRecording && !isTimelineRecording && (
+                                                            <div className="flex items-center w-full max-w-[320px] mx-auto relative h-[60px]">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={isPaused ? resumeRecording : pauseRecording}
+                                                                    className="absolute left-0 z-10 w-[60px] h-[60px] bg-[#FF3B30] hover:bg-red-500 rounded-full flex items-center justify-center shadow-lg shadow-red-500/40 transition-colors cursor-pointer"
+                                                                    title={isPaused ? "Resume Recording" : "Pause Recording"}
+                                                                >
+                                                                    {isPaused ? <Play className="text-white fill-current ml-1" size={24} /> : <Pause className="text-white fill-current" size={24} />}
+                                                                </button>
+                                                                
+                                                                <div className="ml-7 bg-[#FF3B30] h-[48px] w-full rounded-r-full flex items-center pl-10 pr-2 justify-between gap-[3px] shadow-sm overflow-hidden animate-fade-in-right">
+                                                                    <div className="flex items-center gap-1.5 text-white font-mono text-sm ml-1">
+                                                                        <span className={`w-2 h-2 rounded-full ${isPaused ? 'bg-amber-400' : 'bg-white animate-pulse'}`} />
                                                                         {formatTimer(recordingTime)}
-                                                                    </span>
-                                                                    {isPaused && (
-                                                                        <span className="text-xs bg-amber-950/80 text-amber-400 px-2 py-0.5 rounded font-bold border border-amber-800">PAUSED</span>
-                                                                    )}
-                                                                </div>
+                                                                    </div>
 
-                                                                {/* Pause / Resume / Stop Buttons */}
-                                                                <div className="flex items-center justify-center gap-3">
-                                                                    {!isPaused ? (
-                                                                        <button 
-                                                                            type="button"
-                                                                            onClick={pauseRecording}
-                                                                            className="bg-amber-600/90 hover:bg-amber-500 text-white px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow"
-                                                                        >
-                                                                            <Pause size={14} /> Pause
-                                                                        </button>
-                                                                    ) : (
-                                                                        <button 
-                                                                            type="button"
-                                                                            onClick={resumeRecording}
-                                                                            className="bg-teal-600 hover:bg-teal-500 text-white px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow"
-                                                                        >
-                                                                            <Play size={14} /> Resume
-                                                                        </button>
-                                                                    )}
+                                                                    <div className="flex items-center justify-between gap-[3px] h-full flex-1 mx-2 overflow-hidden">
+                                                                        {visualizerData.map((h, i) => (
+                                                                            <div
+                                                                                key={i}
+                                                                                className={`w-[3px] rounded-full transition-all duration-150 ${isPaused ? 'bg-white/40' : 'bg-white'}`}
+                                                                                style={{ height: `${isPaused ? 15 : h}%` }}
+                                                                            />
+                                                                        ))}
+                                                                    </div>
 
-                                                                    <button 
+                                                                    <button
                                                                         type="button"
                                                                         onClick={stopRecording}
-                                                                        className="bg-red-600/90 hover:bg-red-500 text-white px-5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow"
+                                                                        className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center transition-colors flex-shrink-0 mr-1"
+                                                                        title="Finish Recording"
                                                                     >
-                                                                        <Square size={14} className="fill-current" /> Finish Recording
+                                                                        <Square className="text-white fill-current" size={12} />
                                                                     </button>
                                                                 </div>
                                                             </div>
                                                         )}
 
                                                         {/* Recorded Audio Studio Player & Timeline Punch-In Overwrite */}
-                                                        {audioPreviewUrl && !isRecording && (
-                                                            <div className="w-full max-w-lg bg-[#0A1A20] border border-teal-900/40 rounded-xl p-5 space-y-4">
-                                                                <div className="flex items-center justify-between text-xs font-semibold text-teal-400">
-                                                                    <span className="flex items-center gap-1.5"><Volume2 size={16} /> Recorded Voice Note</span>
-                                                                    <span className="text-slate-400 text-[11px]">Duration: {formatTimer(audioDuration)}</span>
+                                                        {audioPreviewUrl && (!isRecording || isTimelineRecording) && (
+                                                            <div className="w-full max-w-lg mx-auto space-y-4">
+                                                                {/* Custom Red Pill Audio Player UI */}
+                                                                <div 
+                                                                    onClick={togglePlayPause}
+                                                                    className="flex items-center w-full max-w-[320px] mx-auto relative h-[60px] cursor-pointer hover:scale-[1.02] transition-transform"
+                                                                    title="Click to Play/Pause"
+                                                                >
+                                                                    <audio
+                                                                        ref={audioElementRef}
+                                                                        src={audioPreviewUrl}
+                                                                        className="hidden"
+                                                                        onLoadedMetadata={() => {
+                                                                            if (audioElementRef.current) setAudioDuration(audioElementRef.current.duration || 0);
+                                                                        }}
+                                                                        onTimeUpdate={() => {
+                                                                            if (audioElementRef.current) setSeekTime(audioElementRef.current.currentTime || 0);
+                                                                        }}
+                                                                    />
+                                                                    <div className="absolute left-0 z-10 w-[60px] h-[60px] bg-[#FF3B30] rounded-full flex items-center justify-center shadow-lg shadow-red-500/40">
+                                                                        {isPlaying ? <Pause className="text-white fill-current" size={24} /> : <Play className="text-white fill-current ml-1" size={24} />}
+                                                                    </div>
+                                                                    <div className="ml-7 bg-[#FF3B30] h-[48px] w-full rounded-r-full flex items-center pl-10 pr-6 justify-between gap-[3px] shadow-sm overflow-hidden">
+                                                                        {new Array(35).fill(10).map((_, i) => {
+                                                                            const peakIdx = Math.floor((i / 35) * (waveformPeaks.length || 35));
+                                                                            const heightPercent = waveformPeaks.length > 0 ? waveformPeaks[peakIdx] : (Math.sin(i * 0.8) * 30 + 50);
+                                                                            const progressPercent = audioDuration > 0 ? seekTime / audioDuration : 0;
+                                                                            const isActive = (i / 35) <= progressPercent;
+                                                                            return (
+                                                                                <div
+                                                                                    key={i}
+                                                                                    className={`w-[3px] rounded-full transition-all duration-150 ${isActive ? 'bg-white' : 'bg-white/40'}`}
+                                                                                    style={{ height: `${heightPercent}%` }}
+                                                                                />
+                                                                            );
+                                                                        })}
+                                                                    </div>
                                                                 </div>
 
-                                                                <audio 
-                                                                    ref={audioElementRef}
-                                                                    src={audioPreviewUrl} 
-                                                                    controls 
-                                                                    className="w-full rounded-lg"
-                                                                    onLoadedMetadata={() => {
-                                                                        if (audioElementRef.current) setAudioDuration(audioElementRef.current.duration || 0);
-                                                                    }}
-                                                                    onTimeUpdate={() => {
-                                                                        if (audioElementRef.current) setSeekTime(audioElementRef.current.currentTime || 0);
-                                                                    }}
-                                                                />
+                                                                {/* Toggle Button for CapCut Visual Editor */}
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setShowTimelineEditor(!showTimelineEditor)}
+                                                                    className="w-full bg-[#0B1E26] hover:bg-teal-950 text-teal-300 border border-teal-800/40 py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow transition-all cursor-pointer"
+                                                                >
+                                                                    {showTimelineEditor ? 'Hide Editor' : 'Edit or Voice over'}
+                                                                </button>
 
-                                                                  {/* Toggle Button for CapCut Visual Editor */}
-                                                                  <button 
-                                                                      type="button"
-                                                                      onClick={() => setShowTimelineEditor(!showTimelineEditor)}
-                                                                      className="w-full bg-[#0B1E26] hover:bg-teal-950 text-teal-300 border border-teal-800/40 py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow transition-all cursor-pointer"
-                                                                  >
-                                                                      <Scissors size={15} /> 
-                                                                      {showTimelineEditor ? 'Hide CapCut Audio Editor' : 'Open CapCut Timeline Editor (Multi-Cut & Mouse Trim)'}
-                                                                  </button>
+                                                                {/* CapCut Visual Multi-Track Timeline Studio Drawer */}
+                                                                {showTimelineEditor && (
+                                                                    <div className="bg-[#050D10] p-4.5 rounded-2xl border border-teal-500/40 shadow-2xl space-y-4 transition-all">
+                                                                        {/* Top Control Toolbar with Edit Icon */}
+                                                                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-teal-900/40 pb-3">
+                                                                            <div className="flex items-center gap-2">
+                                                                                <div className="w-7 h-7 rounded-lg bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400">
+                                                                                    <Edit3 size={15} />
+                                                                                </div>
+                                                                            </div>
 
-                                                                  {/* CapCut Visual Multi-Track Timeline Studio Drawer */}
-                                                                  {showTimelineEditor && (
-                                                                      <div className="bg-[#050D10] p-4.5 rounded-2xl border border-teal-500/40 shadow-2xl space-y-4 transition-all">
-                                                                          {/* Top Control Toolbar with Cut Icon */}
-                                                                          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-teal-900/40 pb-3">
-                                                                              <div className="flex items-center gap-2">
-                                                                                  <div className="w-7 h-7 rounded-lg bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400">
-                                                                                      <Scissors size={15} />
-                                                                                  </div>
-                                                                                  <div>
-                                                                                      <h4 className="text-xs font-bold text-slate-100 flex items-center gap-2">
-                                                                                          CapCut Multi-Track Timeline Studio
-                                                                                      </h4>
-                                                                                      <p className="text-[10px] text-slate-400">Track 1: Main Audio | Track 2: Dedicated Voice-Over (Auto-Mutes Track 1)</p>
-                                                                                  </div>
-                                                                              </div>
+                                                                            {/* Action Bar (Icons Only in One Line) */}
+                                                                            <div className="flex items-center gap-2">
+                                                                                {/* PLAY / PAUSE BUTTON */}
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={togglePlayPause}
+                                                                                    className="bg-teal-600 hover:bg-teal-500 text-white w-8 h-8 rounded-lg flex items-center justify-center shadow transition-all cursor-pointer"
+                                                                                    title="Play or Pause audio (Shortcut: Spacebar)"
+                                                                                >
+                                                                                    {isPlaying ? <Pause size={14} /> : <Play size={14} />}
+                                                                                </button>
 
-                                                                              {/* Action Bar */}
-                                                                              <div className="flex flex-wrap items-center gap-2">
-                                                                                  {/* PLAY / PAUSE BUTTON */}
-                                                                                  <button 
-                                                                                      type="button"
-                                                                                      onClick={togglePlayPause}
-                                                                                      className="bg-teal-600 hover:bg-teal-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow shadow-teal-600/30 transition-all cursor-pointer"
-                                                                                      title="Play or Pause audio (Shortcut: Spacebar)"
-                                                                                  >
-                                                                                      {isPlaying ? <Pause size={14} /> : <Play size={14} />}
-                                                                                      {isPlaying ? 'Pause (Space)' : 'Play (Space)'}
-                                                                                  </button>
+                                                                                {/* RECORD VOICE-OVER */}
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={startTimelineRecording}
+                                                                                    className={`${isTimelineRecording ? 'bg-red-500 animate-pulse' : 'bg-red-600 hover:bg-red-500'} text-white w-8 h-8 rounded-lg flex items-center justify-center shadow transition-all cursor-pointer`}
+                                                                                    title={isTimelineRecording ? "Stop Recording" : "Record Voice-Over at playhead"}
+                                                                                >
+                                                                                    {isTimelineRecording ? <Square size={12} className="fill-current" /> : <Mic size={14} />}
+                                                                                </button>
 
-                                                                                  {/* TRACK SELECTION TOGGLE */}
-                                                                                  <div className="flex items-center bg-[#08181F] p-0.5 rounded-lg border border-teal-900/60 text-xs">
-                                                                                      <button
-                                                                                          type="button"
-                                                                                          onClick={() => setSelectedTrack('main')}
-                                                                                          className={`px-2 py-1 rounded text-[11px] font-semibold transition-all ${
-                                                                                              selectedTrack === 'main' ? 'bg-teal-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'
-                                                                                          }`}
-                                                                                      >
-                                                                                          Track 1 (Main)
-                                                                                      </button>
-                                                                                      <button
-                                                                                          type="button"
-                                                                                          onClick={() => setSelectedTrack('voiceover')}
-                                                                                          className={`px-2 py-1 rounded text-[11px] font-semibold transition-all ${
-                                                                                              selectedTrack === 'voiceover' ? 'bg-amber-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'
-                                                                                          }`}
-                                                                                      >
-                                                                                          Track 2 (Voice-Over)
-                                                                                      </button>
-                                                                                  </div>
+                                                                                {/* CUT / SPLIT AT PLAYHEAD */}
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={splitClipAtPlayhead}
+                                                                                    className="bg-teal-600 hover:bg-teal-500 text-white w-8 h-8 rounded-lg flex items-center justify-center shadow transition-all cursor-pointer"
+                                                                                    title="Cut clip at playhead"
+                                                                                >
+                                                                                    <Scissors size={14} />
+                                                                                </button>
 
-                                                                                  {/* RECORD VOICE-OVER AT PLAYHEAD */}
-                                                                                  <button 
-                                                                                      type="button"
-                                                                                      onClick={() => startRecording(seekTime)}
-                                                                                      className="bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow shadow-red-600/30 transition-all cursor-pointer"
-                                                                                      title="Record Voice-Over on Track 2 starting at playhead timestamp"
-                                                                                  >
-                                                                                      <Mic size={14} /> Record Voice-Over ({formatTimer(seekTime)})
-                                                                                  </button>
+                                                                                {/* ZOOM CONTROLS */}
+                                                                                <div className="flex items-center gap-1 ml-2 border-l border-teal-900/40 pl-2">
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => setTimelineZoom(prev => Math.max(1, prev - 0.5))}
+                                                                                        className="bg-[#0B1E26] hover:bg-teal-900/50 text-teal-300 w-7 h-7 rounded-md flex items-center justify-center transition-all cursor-pointer border border-teal-900/40"
+                                                                                        title="Zoom Out (Ctrl -)"
+                                                                                    >
+                                                                                        <ZoomOut size={13} />
+                                                                                    </button>
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => setTimelineZoom(prev => Math.min(5, prev + 0.5))}
+                                                                                        className="bg-[#0B1E26] hover:bg-teal-900/50 text-teal-300 w-7 h-7 rounded-md flex items-center justify-center transition-all cursor-pointer border border-teal-900/40"
+                                                                                        title="Zoom In (Ctrl +)"
+                                                                                    >
+                                                                                        <ZoomIn size={13} />
+                                                                                    </button>
+                                                                                    {timelineZoom !== 1 && (
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            onClick={() => setTimelineZoom(1)}
+                                                                                            className="bg-[#0B1E26] hover:bg-teal-900/50 text-teal-300 w-7 h-7 rounded-md flex items-center justify-center transition-all cursor-pointer border border-teal-900/40"
+                                                                                            title="Reset Zoom"
+                                                                                        >
+                                                                                            <Minimize2 size={13} />
+                                                                                        </button>
+                                                                                    )}
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
 
-                                                                                  {/* CUT / SPLIT SELECTED TRACK AT PLAYHEAD */}
-                                                                                  <button 
-                                                                                      type="button"
-                                                                                      onClick={splitClipAtPlayhead}
-                                                                                      className="bg-teal-600 hover:bg-teal-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow shadow-teal-600/30 transition-all cursor-pointer"
-                                                                                      title={`Slice ${selectedTrack === 'voiceover' ? 'Track 2' : 'Track 1'} clip at current playhead position`}
-                                                                                  >
-                                                                                      <Scissors size={14} /> Cut {selectedTrack === 'voiceover' ? 'Voice-Over' : 'Main'} Track ({formatTimer(seekTime)})
-                                                                                  </button>
+                                                                        {/* Playhead Info Row */}
+                                                                        <div className="flex items-center justify-between px-1 mb-2">
+                                                                            <div className="text-[10px] font-mono text-teal-400">
+                                                                                Playhead: {formatTimer(seekTime)} / {formatTimer(audioDuration)}
+                                                                            </div>
+                                                                        </div>
 
-                                                                                  {/* SLIDE / MOVE SELECTED CLIP CONTROLS */}
-                                                                                  {selectedClipId && (
-                                                                                      <div className="flex items-center gap-1 bg-[#092027] border border-teal-800/60 p-0.5 rounded-lg">
-                                                                                          <button 
-                                                                                              type="button"
-                                                                                              onClick={() => nudgeSelectedClip(-0.5)}
-                                                                                              className="px-2 py-1 rounded bg-teal-900/60 hover:bg-teal-600 text-teal-200 hover:text-white text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer"
-                                                                                              title="Slide selected clip left by 0.5 sec"
-                                                                                          >
-                                                                                              <ChevronLeft size={12} /> Slide -0.5s
-                                                                                          </button>
-                                                                                          <button 
-                                                                                              type="button"
-                                                                                              onClick={() => nudgeSelectedClip(0.5)}
-                                                                                              className="px-2 py-1 rounded bg-teal-900/60 hover:bg-teal-600 text-teal-200 hover:text-white text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer"
-                                                                                              title="Slide selected clip right by 0.5 sec"
-                                                                                          >
-                                                                                              Slide +0.5s <ChevronRight size={12} />
-                                                                                          </button>
-                                                                                      </div>
-                                                                                  )}
+                                                                        {/* Multi-Track Timeline Box */}
 
-                                                                                  {/* DELETE SELECTED CLIP */}
-                                                                                  <button 
-                                                                                      type="button"
-                                                                                      onClick={deleteSelectedClip}
-                                                                                      disabled={!selectedClipId}
-                                                                                      className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow transition-all ${
-                                                                                          selectedClipId 
-                                                                                              ? 'bg-amber-600 hover:bg-amber-500 text-white cursor-pointer' 
-                                                                                              : 'bg-slate-800 text-slate-500 opacity-50 cursor-not-allowed'
-                                                                                      }`}
-                                                                                      title="Delete highlighted clip segment"
-                                                                                  >
-                                                                                      <Trash2 size={14} /> Delete Selected Clip
-                                                                                  </button>
+                                                                        <div className="space-y-2 text-left">
+                                                                            {/* Scrollable Timeline Wrapper */}
+                                                                            <div
+                                                                                ref={timelineScrollRef}
+                                                                                className="overflow-x-auto overflow-y-hidden rounded-xl border border-teal-900/60 bg-[#08181F] shadow-inner custom-scrollbar"
+                                                                                style={{ maxHeight: '160px' }}
+                                                                            >
+                                                                            {/* Interactive Timeline Canvas spanning both tracks */}
+                                                                            <div
+                                                                                ref={timelineTrackRef}
+                                                                                onMouseDown={handleTimelineMouseDown}
+                                                                                className="relative cursor-pointer select-none group space-y-1 p-1"
+                                                                                style={{ minWidth: `${timelineZoom * 100}%` }}
+                                                                            >
+                                                                                {/* TRACK 1: MAIN AUDIO TRACK */}
+                                                                                <div className="relative h-14 bg-[#051116] rounded-lg border border-teal-900/40 overflow-hidden flex items-center px-2">
+                                                                                    {/* Render Main Audio Clips (Movable with internal waveform peaks & per-clip crop handles) */}
+                                                                                    {audioDuration > 0 && mainClips.map((clip, idx) => {
+                                                                                        if (clip.isDeleted) return null;
+                                                                                        const leftPercent = (clip.start / audioDuration) * 100;
+                                                                                        const widthPercent = ((clip.end - clip.start) / audioDuration) * 100;
+                                                                                        const isSelected = selectedClipId === clip.id;
 
-                                                                                  {/* UNDO / REDO BUTTONS */}
-                                                                                  <div className="flex items-center gap-1 bg-[#092027] border border-teal-800/60 p-0.5 rounded-lg">
-                                                                                      <button 
-                                                                                          type="button"
-                                                                                          onClick={handleUndo}
-                                                                                          disabled={historyIndex <= 0}
-                                                                                          className={`px-2 py-1 rounded text-[11px] font-bold transition-all flex items-center gap-1 ${
-                                                                                              historyIndex > 0 
-                                                                                                  ? 'bg-teal-900/80 hover:bg-teal-600 text-teal-100 hover:text-white cursor-pointer shadow' 
-                                                                                                  : 'bg-slate-900 text-slate-600 opacity-40 cursor-not-allowed'
-                                                                                          }`}
-                                                                                          title="Undo last edit action (Shortcut: Ctrl + Z)"
-                                                                                      >
-                                                                                          <Undo2 size={13} /> Undo
-                                                                                      </button>
-                                                                                      <button 
-                                                                                          type="button"
-                                                                                          onClick={handleRedo}
-                                                                                          disabled={historyIndex >= timelineHistory.length - 1}
-                                                                                          className={`px-2 py-1 rounded text-[11px] font-bold transition-all flex items-center gap-1 ${
-                                                                                              historyIndex < timelineHistory.length - 1 
-                                                                                                  ? 'bg-teal-900/80 hover:bg-teal-600 text-teal-100 hover:text-white cursor-pointer shadow' 
-                                                                                                  : 'bg-slate-900 text-slate-600 opacity-40 cursor-not-allowed'
-                                                                                          }`}
-                                                                                          title="Redo action (Shortcut: Ctrl + Y or Ctrl + Shift + Z)"
-                                                                                      >
-                                                                                          <Redo2 size={13} /> Redo
-                                                                                      </button>
-                                                                                  </div>
+                                                                                        // Slice peak waveform for this clip's source PCM region so waveform moves WITH the clip box!
+                                                                                        const totalPeaks = waveformPeaks.length > 0 ? waveformPeaks.length : 72;
+                                                                                        const srcStart = clip.sourceStart !== undefined ? clip.sourceStart : clip.start;
+                                                                                        const srcEnd = srcStart + (clip.end - clip.start);
+                                                                                        const startIdx = Math.max(0, Math.floor((srcStart / audioDuration) * totalPeaks));
+                                                                                        const endIdx = Math.min(totalPeaks, Math.max(startIdx + 4, Math.ceil((srcEnd / audioDuration) * totalPeaks)));
+                                                                                        const clipPeaks = (waveformPeaks.length > 0 ? waveformPeaks : Array.from({ length: 72 }).map(() => 45)).slice(startIdx, endIdx);
 
-                                                                                  {/* RESET ALL CUTS */}
-                                                                                  <button 
-                                                                                      type="button"
-                                                                                      onClick={resetAllCuts}
-                                                                                      className="bg-[#0B1E26] hover:bg-teal-950 text-slate-300 border border-teal-800/40 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer"
-                                                                                  >
-                                                                                      <RotateCcw size={13} /> Reset Cuts
-                                                                                  </button>
-                                                                              </div>
-                                                                          </div>
+                                                                                        return (
+                                                                                            <div
+                                                                                                key={clip.id}
+                                                                                                onMouseDown={(e) => handleClipMouseDown(e, clip)}
+                                                                                                onClick={(e) => {
+                                                                                                    e.stopPropagation();
+                                                                                                    setSelectedClipId(clip.id);
+                                                                                                    setSelectedTrack('main');
+                                                                                                }}
+                                                                                                className={`absolute top-1 bottom-1 rounded-lg border-2 flex items-center justify-between px-2 transition-all cursor-grab active:cursor-grabbing z-10 overflow-hidden ${isSelected
+                                                                                                    ? 'bg-teal-500/50 border-teal-400 shadow-[0_0_14px_rgba(20,184,166,0.7)] text-white ring-2 ring-teal-300'
+                                                                                                    : 'bg-teal-950/90 border-teal-800/80 hover:border-teal-400 text-teal-200'
+                                                                                                    }`}
+                                                                                                style={{ left: `${leftPercent}%`, width: `${widthPercent}%` }}
+                                                                                                title="Drag clip to move. Drag left/right handle edges to crop/trim clip."
+                                                                                            >
+                                                                                                {/* Left Edge Crop Handle */}
+                                                                                                <div
+                                                                                                    onMouseDown={(e) => handleClipTrimMouseDown(e, clip, 'start')}
+                                                                                                    onClick={(e) => e.stopPropagation()}
+                                                                                                    className="absolute left-0 top-0 bottom-0 w-2 bg-teal-400 hover:bg-white cursor-ew-resize z-30 flex items-center justify-center transition-colors group/leftTrim"
+                                                                                                    title="Drag left edge to crop/trim start"
+                                                                                                >
+                                                                                                    <div className="w-0.5 h-3.5 bg-teal-950 rounded-full" />
+                                                                                                </div>
 
-                                                                          {/* Multi-Track Timeline Box */}
-                                                                          <div className="space-y-2 text-left">
-                                                                              <div className="flex justify-between items-center text-[11px] font-mono text-slate-400">
-                                                                                  <span>Playhead: <strong className="text-teal-400">{formatTimer(seekTime)}</strong> / {formatTimer(audioDuration)}</span>
-                                                                                  <span className="text-slate-300 font-sans">
-                                                                                      💡 Click & drag clips horizontally or use Slide buttons to move audio pieces anywhere!
-                                                                                  </span>
-                                                                              </div>
+                                                                                                {/* Waveform Peaks INSIDE the clip box so voice moves WITH the clip! */}
+                                                                                                <div className="absolute inset-0 flex items-center justify-between px-2 opacity-40 pointer-events-none z-0">
+                                                                                                    {clipPeaks.map((height, i) => (
+                                                                                                        <div
+                                                                                                            key={i}
+                                                                                                            className="w-0.5 bg-teal-300 rounded-full"
+                                                                                                            style={{ height: `${height}%` }}
+                                                                                                        />
+                                                                                                    ))}
+                                                                                                </div>
 
-                                                                              {/* Interactive Timeline Canvas spanning both tracks */}
-                                                                              <div 
-                                                                                  ref={timelineTrackRef}
-                                                                                  onMouseDown={handleTimelineMouseDown}
-                                                                                  className="relative bg-[#08181F] rounded-xl border border-teal-900/60 overflow-hidden cursor-pointer select-none group shadow-inner space-y-1 p-1"
-                                                                              >
-                                                                                  {/* TRACK 1: MAIN AUDIO TRACK */}
-                                                                                  <div className="relative h-14 bg-[#051116] rounded-lg border border-teal-900/40 overflow-hidden flex items-center px-2">
-                                                                                      <span className="absolute top-1 left-2 text-[9px] font-bold text-teal-400/80 uppercase tracking-wider z-20 pointer-events-none">
-                                                                                          TRACK 1 — MAIN AUDIO
-                                                                                      </span>
+                                                                                                <div className="flex items-center gap-1 text-[10px] font-bold truncate pointer-events-none z-10 pl-1.5">
+                                                                                                    <Move size={11} className="text-teal-400/90 flex-shrink-0" />
+                                                                                                    <span className="truncate">{clip.name || `Main Clip #${idx + 1}`} ({formatTimer(clip.start)} - {formatTimer(clip.end)})</span>
+                                                                                                </div>
+                                                                                                {isSelected && (
+                                                                                                    <div className="flex items-center gap-1 z-20 mr-1.5">
+                                                                                                        <button
+                                                                                                            type="button"
+                                                                                                            onClick={(e) => {
+                                                                                                                e.stopPropagation();
+                                                                                                                deleteSelectedClip();
+                                                                                                            }}
+                                                                                                            className="p-1 bg-red-600 hover:bg-red-500 text-white rounded cursor-pointer transition-colors shadow flex items-center justify-center"
+                                                                                                            title="Delete this selected clip piece (Or press Delete / Backspace key)"
+                                                                                                        >
+                                                                                                            <Trash2 size={10} />
+                                                                                                        </button>
+                                                                                                        <span className="text-[8px] bg-teal-600 px-1 py-0.5 rounded font-bold uppercase tracking-wider text-white pointer-events-none">
+                                                                                                            Selected
+                                                                                                        </span>
+                                                                                                    </div>
+                                                                                                )}
 
-                                                                                      {/* Render Main Audio Clips (Movable with internal waveform peaks & per-clip crop handles) */}
-                                                                                      {audioDuration > 0 && mainClips.map((clip, idx) => {
-                                                                                          if (clip.isDeleted) return null;
-                                                                                          const leftPercent = (clip.start / audioDuration) * 100;
-                                                                                          const widthPercent = ((clip.end - clip.start) / audioDuration) * 100;
-                                                                                          const isSelected = selectedClipId === clip.id;
+                                                                                                {/* Right Edge Crop Handle */}
+                                                                                                <div
+                                                                                                    onMouseDown={(e) => handleClipTrimMouseDown(e, clip, 'end')}
+                                                                                                    onClick={(e) => e.stopPropagation()}
+                                                                                                    className="absolute right-0 top-0 bottom-0 w-2 bg-teal-400 hover:bg-white cursor-ew-resize z-30 flex items-center justify-center transition-colors group/rightTrim"
+                                                                                                    title="Drag right edge to crop/trim end"
+                                                                                                >
+                                                                                                    <div className="w-0.5 h-3.5 bg-teal-950 rounded-full" />
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        );
+                                                                                    })}
 
-                                                                                          // Slice peak waveform for this clip's source PCM region so waveform moves WITH the clip box!
-                                                                                          const totalPeaks = waveformPeaks.length > 0 ? waveformPeaks.length : 72;
-                                                                                          const srcStart = clip.sourceStart !== undefined ? clip.sourceStart : clip.start;
-                                                                                          const srcEnd = srcStart + (clip.end - clip.start);
-                                                                                          const startIdx = Math.max(0, Math.floor((srcStart / audioDuration) * totalPeaks));
-                                                                                          const endIdx = Math.min(totalPeaks, Math.max(startIdx + 4, Math.ceil((srcEnd / audioDuration) * totalPeaks)));
-                                                                                          const clipPeaks = (waveformPeaks.length > 0 ? waveformPeaks : Array.from({ length: 72 }).map(() => 45)).slice(startIdx, endIdx);
+                                                                                    {/* Auto-Mute Red Indicator overlay on Track 1 where Voice-Over exists on Track 2 */}
+                                                                                    {audioDuration > 0 && voiceoverClips.map(vo => {
+                                                                                        if (vo.isDeleted) return null;
+                                                                                        const leftPercent = (vo.start / audioDuration) * 100;
+                                                                                        const widthPercent = ((vo.end - vo.start) / audioDuration) * 100;
+                                                                                        return (
+                                                                                            <div
+                                                                                                key={`silenced-${vo.id}`}
+                                                                                                className="absolute top-0 bottom-0 bg-red-950/80 border-x-2 border-red-500/80 flex items-center justify-center pointer-events-none z-15 shadow-inner"
+                                                                                                style={{ left: `${leftPercent}%`, width: `${widthPercent}%` }}
+                                                                                            >
+                                                                                                <span className="text-[9px] font-bold text-red-300 uppercase tracking-tight bg-black/80 px-1.5 py-0.5 rounded border border-red-800 truncate shadow">
+                                                                                                    Muted by Voice-Over
+                                                                                                </span>
+                                                                                            </div>
+                                                                                        );
+                                                                                    })}
+                                                                                </div>
 
-                                                                                          return (
-                                                                                              <div 
-                                                                                                  key={clip.id}
-                                                                                                  onMouseDown={(e) => handleClipMouseDown(e, clip)}
-                                                                                                  onClick={(e) => {
-                                                                                                      e.stopPropagation();
-                                                                                                      setSelectedClipId(clip.id);
-                                                                                                      setSelectedTrack('main');
-                                                                                                  }}
-                                                                                                  className={`absolute top-1 bottom-1 rounded-lg border-2 flex items-center justify-between px-2 transition-all cursor-grab active:cursor-grabbing z-10 overflow-hidden ${
-                                                                                                      isSelected 
-                                                                                                          ? 'bg-teal-500/50 border-teal-400 shadow-[0_0_14px_rgba(20,184,166,0.7)] text-white ring-2 ring-teal-300' 
-                                                                                                          : 'bg-teal-950/90 border-teal-800/80 hover:border-teal-400 text-teal-200'
-                                                                                                  }`}
-                                                                                                  style={{ left: `${leftPercent}%`, width: `${widthPercent}%` }}
-                                                                                                  title="Drag clip to move. Drag left/right handle edges to crop/trim clip."
-                                                                                              >
-                                                                                                  {/* Left Edge Crop Handle */}
-                                                                                                  <div
-                                                                                                      onMouseDown={(e) => handleClipTrimMouseDown(e, clip, 'start')}
-                                                                                                      onClick={(e) => e.stopPropagation()}
-                                                                                                      className="absolute left-0 top-0 bottom-0 w-2 bg-teal-400 hover:bg-white cursor-ew-resize z-30 flex items-center justify-center transition-colors group/leftTrim"
-                                                                                                      title="Drag left edge to crop/trim start"
-                                                                                                  >
-                                                                                                      <div className="w-0.5 h-3.5 bg-teal-950 rounded-full" />
-                                                                                                  </div>
+                                                                                {/* TRACK 2: VOICE-OVER TRACK */}
+                                                                                <div className="relative h-14 bg-[#140F08] rounded-lg border border-amber-900/40 overflow-hidden flex items-center px-2">
+                                                                                    {/* Render Voice-Over Clips (Movable with internal waveform & per-clip crop handles) */}
+                                                                                    {audioDuration > 0 && voiceoverClips.map((vo, idx) => {
+                                                                                        if (vo.isDeleted) return null;
+                                                                                        const leftPercent = (vo.start / audioDuration) * 100;
+                                                                                        const widthPercent = ((vo.end - vo.start) / audioDuration) * 100;
+                                                                                        const isSelected = selectedClipId === vo.id;
+                                                                                        const voPeaks = Array.from({ length: 24 }).map((_, i) => Math.sin(i * 0.5) * 35 + 45);
 
-                                                                                                  {/* Waveform Peaks INSIDE the clip box so voice moves WITH the clip! */}
-                                                                                                  <div className="absolute inset-0 flex items-center justify-between px-2 opacity-40 pointer-events-none z-0">
-                                                                                                      {clipPeaks.map((height, i) => (
-                                                                                                          <div 
-                                                                                                              key={i} 
-                                                                                                              className="w-0.5 bg-teal-300 rounded-full" 
-                                                                                                              style={{ height: `${height}%` }}
-                                                                                                          />
-                                                                                                      ))}
-                                                                                                  </div>
+                                                                                        return (
+                                                                                            <div
+                                                                                                key={vo.id}
+                                                                                                onMouseDown={(e) => handleClipMouseDown(e, vo)}
+                                                                                                onClick={(e) => {
+                                                                                                    e.stopPropagation();
+                                                                                                    setSelectedClipId(vo.id);
+                                                                                                    setSelectedTrack('voiceover');
+                                                                                                }}
+                                                                                                className={`absolute top-1 bottom-1 rounded-lg border-2 flex items-center justify-between px-2 transition-all cursor-grab active:cursor-grabbing z-10 overflow-hidden ${isSelected
+                                                                                                    ? 'bg-amber-500/60 border-amber-400 shadow-[0_0_14px_rgba(245,158,11,0.8)] text-white ring-2 ring-amber-300'
+                                                                                                    : 'bg-amber-950/90 border-amber-600/80 hover:border-amber-400 text-amber-200'
+                                                                                                    }`}
+                                                                                                style={{ left: `${leftPercent}%`, width: `${widthPercent}%` }}
+                                                                                                title="Drag clip to move. Drag left/right handle edges to crop/trim clip."
+                                                                                            >
+                                                                                                {/* Left Edge Crop Handle */}
+                                                                                                <div
+                                                                                                    onMouseDown={(e) => handleClipTrimMouseDown(e, vo, 'start')}
+                                                                                                    onClick={(e) => e.stopPropagation()}
+                                                                                                    className="absolute left-0 top-0 bottom-0 w-2 bg-amber-400 hover:bg-white cursor-ew-resize z-30 flex items-center justify-center transition-colors group/leftTrim"
+                                                                                                    title="Drag left edge to crop/trim start"
+                                                                                                >
+                                                                                                    <div className="w-0.5 h-3.5 bg-amber-950 rounded-full" />
+                                                                                                </div>
 
-                                                                                                  <div className="flex items-center gap-1 text-[10px] font-bold truncate pointer-events-none z-10 pl-1.5">
-                                                                                                      <Move size={11} className="text-teal-400/90 flex-shrink-0" />
-                                                                                                      <span className="truncate">{clip.name || `Main Clip #${idx + 1}`} ({formatTimer(clip.start)} - {formatTimer(clip.end)})</span>
-                                                                                                  </div>
-                                                                                                  {isSelected && (
-                                                                                                      <div className="flex items-center gap-1 z-20 mr-1.5">
-                                                                                                          <button
-                                                                                                              type="button"
-                                                                                                              onClick={(e) => {
-                                                                                                                  e.stopPropagation();
-                                                                                                                  deleteSelectedClip();
-                                                                                                              }}
-                                                                                                              className="p-1 bg-red-600 hover:bg-red-500 text-white rounded cursor-pointer transition-colors shadow flex items-center justify-center"
-                                                                                                              title="Delete this selected clip piece (Or press Delete / Backspace key)"
-                                                                                                          >
-                                                                                                              <Trash2 size={10} />
-                                                                                                          </button>
-                                                                                                          <span className="text-[8px] bg-teal-600 px-1 py-0.5 rounded font-bold uppercase tracking-wider text-white pointer-events-none">
-                                                                                                              Selected
-                                                                                                          </span>
-                                                                                                      </div>
-                                                                                                  )}
+                                                                                                {/* Waveform Peaks INSIDE Voice-Over Clip Box */}
+                                                                                                <div className="absolute inset-0 flex items-center justify-between px-2 opacity-40 pointer-events-none z-0">
+                                                                                                    {voPeaks.map((height, i) => (
+                                                                                                        <div
+                                                                                                            key={i}
+                                                                                                            className="w-0.5 bg-amber-400 rounded-full"
+                                                                                                            style={{ height: `${height}%` }}
+                                                                                                        />
+                                                                                                    ))}
+                                                                                                </div>
 
-                                                                                                  {/* Right Edge Crop Handle */}
-                                                                                                  <div
-                                                                                                      onMouseDown={(e) => handleClipTrimMouseDown(e, clip, 'end')}
-                                                                                                      onClick={(e) => e.stopPropagation()}
-                                                                                                      className="absolute right-0 top-0 bottom-0 w-2 bg-teal-400 hover:bg-white cursor-ew-resize z-30 flex items-center justify-center transition-colors group/rightTrim"
-                                                                                                      title="Drag right edge to crop/trim end"
-                                                                                                  >
-                                                                                                      <div className="w-0.5 h-3.5 bg-teal-950 rounded-full" />
-                                                                                                  </div>
-                                                                                              </div>
-                                                                                          );
-                                                                                      })}
+                                                                                                <div className="flex items-center gap-1 text-[10px] font-bold truncate pointer-events-none z-10 pl-1.5">
+                                                                                                    <Move size={11} className="text-amber-400/90 flex-shrink-0" />
+                                                                                                    <Mic size={11} className="text-amber-400 flex-shrink-0" />
+                                                                                                    <span className="truncate">{vo.name || `Voice-Over #${idx + 1}`} ({formatTimer(vo.start)} - {formatTimer(vo.end)})</span>
+                                                                                                </div>
+                                                                                                {isSelected && (
+                                                                                                    <div className="flex items-center gap-1 z-20 mr-1.5">
+                                                                                                        <button
+                                                                                                            type="button"
+                                                                                                            onClick={(e) => {
+                                                                                                                e.stopPropagation();
+                                                                                                                deleteSelectedClip();
+                                                                                                            }}
+                                                                                                            className="p-1 bg-red-600 hover:bg-red-500 text-white rounded cursor-pointer transition-colors shadow flex items-center justify-center"
+                                                                                                            title="Delete this selected clip piece (Or press Delete / Backspace key)"
+                                                                                                        >
+                                                                                                            <Trash2 size={10} />
+                                                                                                        </button>
+                                                                                                        <span className="text-[8px] bg-amber-600 px-1 py-0.5 rounded font-bold uppercase tracking-wider text-white pointer-events-none">
+                                                                                                            Selected
+                                                                                                        </span>
+                                                                                                    </div>
+                                                                                                )}
 
-                                                                                      {/* Auto-Mute Red Indicator overlay on Track 1 where Voice-Over exists on Track 2 */}
-                                                                                      {audioDuration > 0 && voiceoverClips.map(vo => {
-                                                                                          if (vo.isDeleted) return null;
-                                                                                          const leftPercent = (vo.start / audioDuration) * 100;
-                                                                                          const widthPercent = ((vo.end - vo.start) / audioDuration) * 100;
-                                                                                          return (
-                                                                                              <div
-                                                                                                  key={`silenced-${vo.id}`}
-                                                                                                  className="absolute top-0 bottom-0 bg-red-950/80 border-x-2 border-red-500/80 flex items-center justify-center pointer-events-none z-15 shadow-inner"
-                                                                                                  style={{ left: `${leftPercent}%`, width: `${widthPercent}%` }}
-                                                                                              >
-                                                                                                  <span className="text-[9px] font-bold text-red-300 uppercase tracking-tight bg-black/80 px-1.5 py-0.5 rounded border border-red-800 truncate shadow">
-                                                                                                      Muted by Voice-Over
-                                                                                                  </span>
-                                                                                              </div>
-                                                                                          );
-                                                                                      })}
-                                                                                  </div>
+                                                                                                {/* Right Edge Crop Handle */}
+                                                                                                <div
+                                                                                                    onMouseDown={(e) => handleClipTrimMouseDown(e, vo, 'end')}
+                                                                                                    onClick={(e) => e.stopPropagation()}
+                                                                                                    className="absolute right-0 top-0 bottom-0 w-2 bg-amber-400 hover:bg-white cursor-ew-resize z-30 flex items-center justify-center transition-colors group/rightTrim"
+                                                                                                    title="Drag right edge to crop/trim end"
+                                                                                                >
+                                                                                                    <div className="w-0.5 h-3.5 bg-amber-950 rounded-full" />
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        );
+                                                                                    })}
+                                                                                </div>
 
-                                                                                  {/* TRACK 2: VOICE-OVER TRACK */}
-                                                                                  <div className="relative h-14 bg-[#140F08] rounded-lg border border-amber-900/40 overflow-hidden flex items-center px-2">
-                                                                                      <span className="absolute top-1 left-2 text-[9px] font-bold text-amber-400/80 uppercase tracking-wider z-20 pointer-events-none">
-                                                                                          TRACK 2 — VOICE-OVER TRACK (DEDICATED)
-                                                                                      </span>
+                                                                                {/* Red Playhead Vertical Indicator Across Both Tracks */}
+                                                                                {audioDuration > 0 && (
+                                                                                    <div
+                                                                                        className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-20 pointer-events-none shadow-[0_0_10px_rgba(239,68,68,1)]"
+                                                                                        style={{ left: `${(seekTime / audioDuration) * 100}%` }}
+                                                                                    >
+                                                                                        <div className="w-2.5 h-2.5 bg-red-500 rounded-full -translate-x-[4px] -translate-y-1 border border-white" />
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                            </div> {/* end scrollable wrapper */}
+                                                                        </div>
 
-                                                                                      {/* Render Voice-Over Clips (Movable with internal waveform & per-clip crop handles) */}
-                                                                                      {audioDuration > 0 && voiceoverClips.map((vo, idx) => {
-                                                                                          if (vo.isDeleted) return null;
-                                                                                          const leftPercent = (vo.start / audioDuration) * 100;
-                                                                                          const widthPercent = ((vo.end - vo.start) / audioDuration) * 100;
-                                                                                          const isSelected = selectedClipId === vo.id;
-                                                                                          const voPeaks = Array.from({ length: 24 }).map((_, i) => Math.sin(i * 0.5) * 35 + 45);
+                                                                        {/* Footer Save & Stitch Bar */}
+                                                                        <div className="pt-2 border-t border-teal-900/40 flex items-center justify-end">
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={applyStitchingAndSave}
+                                                                                className="bg-teal-600 hover:bg-teal-500 text-white px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-teal-600/30 transition-all cursor-pointer"
+                                                                            >
+                                                                                <Check size={15} /> Save
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
 
-                                                                                          return (
-                                                                                              <div 
-                                                                                                  key={vo.id}
-                                                                                                  onMouseDown={(e) => handleClipMouseDown(e, vo)}
-                                                                                                  onClick={(e) => {
-                                                                                                      e.stopPropagation();
-                                                                                                      setSelectedClipId(vo.id);
-                                                                                                      setSelectedTrack('voiceover');
-                                                                                                  }}
-                                                                                                  className={`absolute top-1 bottom-1 rounded-lg border-2 flex items-center justify-between px-2 transition-all cursor-grab active:cursor-grabbing z-10 overflow-hidden ${
-                                                                                                      isSelected 
-                                                                                                          ? 'bg-amber-500/60 border-amber-400 shadow-[0_0_14px_rgba(245,158,11,0.8)] text-white ring-2 ring-amber-300' 
-                                                                                                          : 'bg-amber-950/90 border-amber-600/80 hover:border-amber-400 text-amber-200'
-                                                                                                  }`}
-                                                                                                  style={{ left: `${leftPercent}%`, width: `${widthPercent}%` }}
-                                                                                                  title="Drag clip to move. Drag left/right handle edges to crop/trim clip."
-                                                                                              >
-                                                                                                  {/* Left Edge Crop Handle */}
-                                                                                                  <div
-                                                                                                      onMouseDown={(e) => handleClipTrimMouseDown(e, vo, 'start')}
-                                                                                                      onClick={(e) => e.stopPropagation()}
-                                                                                                      className="absolute left-0 top-0 bottom-0 w-2 bg-amber-400 hover:bg-white cursor-ew-resize z-30 flex items-center justify-center transition-colors group/leftTrim"
-                                                                                                      title="Drag left edge to crop/trim start"
-                                                                                                  >
-                                                                                                      <div className="w-0.5 h-3.5 bg-amber-950 rounded-full" />
-                                                                                                  </div>
-
-                                                                                                  {/* Waveform Peaks INSIDE Voice-Over Clip Box */}
-                                                                                                  <div className="absolute inset-0 flex items-center justify-between px-2 opacity-40 pointer-events-none z-0">
-                                                                                                      {voPeaks.map((height, i) => (
-                                                                                                          <div 
-                                                                                                              key={i} 
-                                                                                                              className="w-0.5 bg-amber-400 rounded-full" 
-                                                                                                              style={{ height: `${height}%` }}
-                                                                                                          />
-                                                                                                      ))}
-                                                                                                  </div>
-
-                                                                                                  <div className="flex items-center gap-1 text-[10px] font-bold truncate pointer-events-none z-10 pl-1.5">
-                                                                                                      <Move size={11} className="text-amber-400/90 flex-shrink-0" />
-                                                                                                      <Mic size={11} className="text-amber-400 flex-shrink-0" />
-                                                                                                      <span className="truncate">{vo.name || `Voice-Over #${idx + 1}`} ({formatTimer(vo.start)} - {formatTimer(vo.end)})</span>
-                                                                                                  </div>
-                                                                                                  {isSelected && (
-                                                                                                      <div className="flex items-center gap-1 z-20 mr-1.5">
-                                                                                                          <button
-                                                                                                              type="button"
-                                                                                                              onClick={(e) => {
-                                                                                                                  e.stopPropagation();
-                                                                                                                  deleteSelectedClip();
-                                                                                                              }}
-                                                                                                              className="p-1 bg-red-600 hover:bg-red-500 text-white rounded cursor-pointer transition-colors shadow flex items-center justify-center"
-                                                                                                              title="Delete this selected clip piece (Or press Delete / Backspace key)"
-                                                                                                          >
-                                                                                                              <Trash2 size={10} />
-                                                                                                          </button>
-                                                                                                          <span className="text-[8px] bg-amber-600 px-1 py-0.5 rounded font-bold uppercase tracking-wider text-white pointer-events-none">
-                                                                                                              Selected
-                                                                                                          </span>
-                                                                                                      </div>
-                                                                                                  )}
-
-                                                                                                  {/* Right Edge Crop Handle */}
-                                                                                                  <div
-                                                                                                      onMouseDown={(e) => handleClipTrimMouseDown(e, vo, 'end')}
-                                                                                                      onClick={(e) => e.stopPropagation()}
-                                                                                                      className="absolute right-0 top-0 bottom-0 w-2 bg-amber-400 hover:bg-white cursor-ew-resize z-30 flex items-center justify-center transition-colors group/rightTrim"
-                                                                                                      title="Drag right edge to crop/trim end"
-                                                                                                  >
-                                                                                                      <div className="w-0.5 h-3.5 bg-amber-950 rounded-full" />
-                                                                                                  </div>
-                                                                                              </div>
-                                                                                          );
-                                                                                      })}
-                                                                                  </div>
-
-                                                                                  {/* Red Playhead Vertical Indicator Across Both Tracks */}
-                                                                                  {audioDuration > 0 && (
-                                                                                      <div 
-                                                                                          className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-20 pointer-events-none shadow-[0_0_10px_rgba(239,68,68,1)]"
-                                                                                          style={{ left: `${(seekTime / audioDuration) * 100}%` }}
-                                                                                      >
-                                                                                          <div className="w-2.5 h-2.5 bg-red-500 rounded-full -translate-x-[4px] -translate-y-1 border border-white" />
-                                                                                      </div>
-                                                                                  )}
-                                                                              </div>
-                                                                          </div>
-
-                                                                          {/* Footer Save & Stitch Bar */}
-                                                                          <div className="pt-2 border-t border-teal-900/40 flex items-center justify-between">
-                                                                              <div className="text-[11px] text-slate-400 flex items-center gap-1.5">
-                                                                                  <Info size={13} className="text-teal-400" />
-                                                                                  <span>Track 2 Voice-Over automatically mutes Track 1 during its duration. Click Apply & Save Mix.</span>
-                                                                              </div>
-
-                                                                              <button 
-                                                                                  type="button"
-                                                                                  onClick={applyStitchingAndSave}
-                                                                                  className="bg-teal-600 hover:bg-teal-500 text-white px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-teal-600/30 transition-all cursor-pointer"
-                                                                              >
-                                                                                  <Check size={15} /> Apply & Save Multi-Track Mix
-                                                                              </button>
-                                                                          </div>
-                                                                      </div>
-                                                                  )}
-
-                                                                <button 
+                                                                <button
                                                                     type="button"
                                                                     onClick={clearAudio}
                                                                     className="text-xs text-red-400 hover:text-red-300 font-semibold flex items-center justify-center gap-1.5 mx-auto pt-1"
@@ -2364,9 +2400,9 @@ const WhatsAppDashboard = () => {
 
                                     {/* Modal Footer Controls */}
                                     <div className="px-6 py-4 bg-[#0B1D25] border-t border-teal-900/40 flex items-center justify-between">
-                                        <button 
+                                        <button
                                             type="button"
-                                            onClick={() => setActivePhase(prev => (prev > 1 ? (prev - 1) as 1|2|3 : 1))}
+                                            onClick={() => setActivePhase(prev => (prev > 1 ? (prev - 1) as 1 | 2 | 3 : 1))}
                                             disabled={activePhase === 1}
                                             className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 disabled:opacity-30 disabled:hover:text-slate-400 flex items-center gap-1.5"
                                         >
@@ -2375,15 +2411,15 @@ const WhatsAppDashboard = () => {
 
                                         <div className="flex items-center gap-3">
                                             {activePhase < 3 ? (
-                                                <button 
+                                                <button
                                                     type="button"
-                                                    onClick={() => setActivePhase(prev => (prev < 3 ? (prev + 1) as 1|2|3 : 3))}
+                                                    onClick={() => setActivePhase(prev => (prev < 3 ? (prev + 1) as 1 | 2 | 3 : 3))}
                                                     className="bg-teal-600 hover:bg-teal-500 text-white px-5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow"
                                                 >
                                                     Next Phase <ChevronRight size={16} />
                                                 </button>
                                             ) : (
-                                                <button 
+                                                <button
                                                     type="button"
                                                     onClick={handleSubmit}
                                                     className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 shadow-lg shadow-emerald-600/30"
@@ -2426,11 +2462,10 @@ const WhatsAppDashboard = () => {
                                                 )}
 
                                                 {/* Status Badge */}
-                                                <span className={`absolute top-3 right-3 text-[10px] font-bold px-2.5 py-1 rounded-full border shadow-lg ${
-                                                    product.status === 'available' 
-                                                        ? 'bg-emerald-950/80 text-emerald-400 border-emerald-800' 
-                                                        : 'bg-amber-950/80 text-amber-400 border-amber-800'
-                                                }`}>
+                                                <span className={`absolute top-3 right-3 text-[10px] font-bold px-2.5 py-1 rounded-full border shadow-lg ${product.status === 'available'
+                                                    ? 'bg-emerald-950/80 text-emerald-400 border-emerald-800'
+                                                    : 'bg-amber-950/80 text-amber-400 border-amber-800'
+                                                    }`}>
                                                     {product.status.toUpperCase()}
                                                 </span>
 
@@ -2438,12 +2473,11 @@ const WhatsAppDashboard = () => {
                                                 {allImages.length > 1 && (
                                                     <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded-full border border-teal-800/40 flex items-center gap-1">
                                                         {allImages.map((_, idx) => (
-                                                            <button 
+                                                            <button
                                                                 key={idx}
                                                                 onClick={() => setCardActiveImageIndex(prev => ({ ...prev, [product.id]: idx }))}
-                                                                className={`w-2 h-2 rounded-full transition-all ${
-                                                                    activeImgIdx === idx ? 'bg-teal-400 w-4' : 'bg-slate-500 hover:bg-slate-300'
-                                                                }`}
+                                                                className={`w-2 h-2 rounded-full transition-all ${activeImgIdx === idx ? 'bg-teal-400 w-4' : 'bg-slate-500 hover:bg-slate-300'
+                                                                    }`}
                                                             />
                                                         ))}
                                                     </div>
@@ -2452,7 +2486,7 @@ const WhatsAppDashboard = () => {
                                                 {/* Media Indicators Bar */}
                                                 <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1.5">
                                                     {product.video_url && (
-                                                        <button 
+                                                        <button
                                                             onClick={() => setActiveMediaPreview({ type: 'video', url: product.video_url!, title: product.title })}
                                                             className="bg-[#071317]/90 hover:bg-teal-600 text-teal-300 hover:text-white text-[10px] font-semibold px-2 py-1 rounded-md border border-teal-800/40 flex items-center gap-1 transition-colors"
                                                         >
@@ -2460,7 +2494,7 @@ const WhatsAppDashboard = () => {
                                                         </button>
                                                     )}
                                                     {product.voice_note_url && (
-                                                        <button 
+                                                        <button
                                                             onClick={() => setActiveMediaPreview({ type: 'audio', url: product.voice_note_url!, title: product.title })}
                                                             className="bg-[#071317]/90 hover:bg-emerald-600 text-emerald-300 hover:text-white text-[10px] font-semibold px-2 py-1 rounded-md border border-teal-800/40 flex items-center gap-1 transition-colors"
                                                         >
@@ -2493,18 +2527,17 @@ const WhatsAppDashboard = () => {
 
                                                 {/* Action Buttons */}
                                                 <div className="flex items-center gap-2 pt-1">
-                                                    <button 
+                                                    <button
                                                         onClick={() => toggleStatus(product)}
-                                                        className={`flex-1 text-xs py-2 rounded-xl font-semibold transition-colors ${
-                                                            product.status === 'available'
-                                                                ? 'bg-amber-950/40 text-amber-400 hover:bg-amber-900/50 border border-amber-900/40'
-                                                                : 'bg-emerald-950/40 text-emerald-400 hover:bg-emerald-900/50 border border-emerald-900/40'
-                                                        }`}
+                                                        className={`flex-1 text-xs py-2 rounded-xl font-semibold transition-colors ${product.status === 'available'
+                                                            ? 'bg-amber-950/40 text-amber-400 hover:bg-amber-900/50 border border-amber-900/40'
+                                                            : 'bg-emerald-950/40 text-emerald-400 hover:bg-emerald-900/50 border border-emerald-900/40'
+                                                            }`}
                                                     >
                                                         {product.status === 'available' ? 'Mark Sold' : 'Mark Available'}
                                                     </button>
 
-                                                    <button 
+                                                    <button
                                                         onClick={() => handleEdit(product)}
                                                         className="p-2.5 rounded-xl bg-[#071317] text-slate-300 hover:bg-teal-950/60 border border-teal-900/40 transition-colors"
                                                         title="Edit Product"
@@ -2512,7 +2545,7 @@ const WhatsAppDashboard = () => {
                                                         <Edit3 size={15} />
                                                     </button>
 
-                                                    <button 
+                                                    <button
                                                         onClick={() => handleDelete(product.id)}
                                                         className="p-2.5 rounded-xl bg-red-950/30 text-red-400 hover:bg-red-900/40 border border-red-900/30 transition-colors"
                                                         title="Delete Product"
@@ -2607,16 +2640,16 @@ const WhatsAppDashboard = () => {
                                 <div className="md:col-span-2">
                                     <label className="block text-xs font-semibold text-slate-300 mb-1">WhatsApp Access Token (Permanent / Temporary)</label>
                                     <div className="flex gap-2">
-                                        <input 
-                                            type="password" 
-                                            value={apiSettings.metaToken} 
+                                        <input
+                                            type="password"
+                                            value={apiSettings.metaToken}
                                             onChange={e => setApiSettings({ ...apiSettings, metaToken: e.target.value })}
-                                            className="flex-1 bg-[#050D10] border border-teal-900/50 rounded-xl px-3.5 py-2 text-xs text-slate-100 outline-none focus:ring-2 focus:ring-teal-500" 
-                                            placeholder="EAAG..." 
+                                            className="flex-1 bg-[#050D10] border border-teal-900/50 rounded-xl px-3.5 py-2 text-xs text-slate-100 outline-none focus:ring-2 focus:ring-teal-500"
+                                            placeholder="EAAG..."
                                         />
-                                        <button 
-                                            type="button" 
-                                            onClick={() => setActiveGuidance('metaToken')} 
+                                        <button
+                                            type="button"
+                                            onClick={() => setActiveGuidance('metaToken')}
                                             className="bg-[#0D222A] text-teal-300 hover:bg-teal-950/60 border border-teal-800/30 px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1"
                                         >
                                             <Info size={14} /> Guide
@@ -2627,16 +2660,16 @@ const WhatsAppDashboard = () => {
                                 <div>
                                     <label className="block text-xs font-semibold text-slate-300 mb-1">Phone Number ID</label>
                                     <div className="flex gap-2">
-                                        <input 
-                                            type="text" 
-                                            value={apiSettings.metaPhoneId} 
+                                        <input
+                                            type="text"
+                                            value={apiSettings.metaPhoneId}
                                             onChange={e => setApiSettings({ ...apiSettings, metaPhoneId: e.target.value })}
-                                            className="flex-1 bg-[#050D10] border border-teal-900/50 rounded-xl px-3.5 py-2 text-xs text-slate-100 outline-none focus:ring-2 focus:ring-teal-500" 
-                                            placeholder="101234567890123" 
+                                            className="flex-1 bg-[#050D10] border border-teal-900/50 rounded-xl px-3.5 py-2 text-xs text-slate-100 outline-none focus:ring-2 focus:ring-teal-500"
+                                            placeholder="101234567890123"
                                         />
-                                        <button 
-                                            type="button" 
-                                            onClick={() => setActiveGuidance('metaPhoneId')} 
+                                        <button
+                                            type="button"
+                                            onClick={() => setActiveGuidance('metaPhoneId')}
                                             className="bg-[#0D222A] text-teal-300 hover:bg-teal-950/60 border border-teal-800/30 px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1"
                                         >
                                             <Info size={14} /> Guide
@@ -2647,16 +2680,16 @@ const WhatsAppDashboard = () => {
                                 <div>
                                     <label className="block text-xs font-semibold text-slate-300 mb-1">WhatsApp Business Account ID (WABA ID)</label>
                                     <div className="flex gap-2">
-                                        <input 
-                                            type="text" 
-                                            value={apiSettings.metaWabaId} 
+                                        <input
+                                            type="text"
+                                            value={apiSettings.metaWabaId}
                                             onChange={e => setApiSettings({ ...apiSettings, metaWabaId: e.target.value })}
-                                            className="flex-1 bg-[#050D10] border border-teal-900/50 rounded-xl px-3.5 py-2 text-xs text-slate-100 outline-none focus:ring-2 focus:ring-teal-500" 
-                                            placeholder="109876543210987" 
+                                            className="flex-1 bg-[#050D10] border border-teal-900/50 rounded-xl px-3.5 py-2 text-xs text-slate-100 outline-none focus:ring-2 focus:ring-teal-500"
+                                            placeholder="109876543210987"
                                         />
-                                        <button 
-                                            type="button" 
-                                            onClick={() => setActiveGuidance('metaWabaId')} 
+                                        <button
+                                            type="button"
+                                            onClick={() => setActiveGuidance('metaWabaId')}
                                             className="bg-[#0D222A] text-teal-300 hover:bg-teal-950/60 border border-teal-800/30 px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1"
                                         >
                                             <Info size={14} /> Guide
@@ -2666,39 +2699,39 @@ const WhatsAppDashboard = () => {
 
                                 <div>
                                     <label className="block text-xs font-semibold text-slate-300 mb-1">Meta App ID</label>
-                                    <input 
-                                        type="text" 
-                                        value={apiSettings.metaAppId} 
+                                    <input
+                                        type="text"
+                                        value={apiSettings.metaAppId}
                                         onChange={e => setApiSettings({ ...apiSettings, metaAppId: e.target.value })}
-                                        className="w-full bg-[#050D10] border border-teal-900/50 rounded-xl px-3.5 py-2 text-xs text-slate-100 outline-none focus:ring-2 focus:ring-teal-500" 
-                                        placeholder="987654321098765" 
+                                        className="w-full bg-[#050D10] border border-teal-900/50 rounded-xl px-3.5 py-2 text-xs text-slate-100 outline-none focus:ring-2 focus:ring-teal-500"
+                                        placeholder="987654321098765"
                                     />
                                 </div>
 
                                 <div>
                                     <label className="block text-xs font-semibold text-slate-300 mb-1">Meta App Secret</label>
-                                    <input 
-                                        type="password" 
-                                        value={apiSettings.metaAppSecret} 
+                                    <input
+                                        type="password"
+                                        value={apiSettings.metaAppSecret}
                                         onChange={e => setApiSettings({ ...apiSettings, metaAppSecret: e.target.value })}
-                                        className="w-full bg-[#050D10] border border-teal-900/50 rounded-xl px-3.5 py-2 text-xs text-slate-100 outline-none focus:ring-2 focus:ring-teal-500" 
-                                        placeholder="App Secret" 
+                                        className="w-full bg-[#050D10] border border-teal-900/50 rounded-xl px-3.5 py-2 text-xs text-slate-100 outline-none focus:ring-2 focus:ring-teal-500"
+                                        placeholder="App Secret"
                                     />
                                 </div>
 
                                 <div className="md:col-span-2">
                                     <label className="block text-xs font-semibold text-slate-300 mb-1">Meta Webhook Verify Token</label>
                                     <div className="flex gap-2">
-                                        <input 
-                                            type="text" 
-                                            value={apiSettings.metaVerifyToken} 
+                                        <input
+                                            type="text"
+                                            value={apiSettings.metaVerifyToken}
                                             onChange={e => setApiSettings({ ...apiSettings, metaVerifyToken: e.target.value })}
-                                            className="flex-1 bg-[#050D10] border border-teal-900/50 rounded-xl px-3.5 py-2 text-xs text-slate-100 outline-none focus:ring-2 focus:ring-teal-500" 
-                                            placeholder="pawanda_verify_token..." 
+                                            className="flex-1 bg-[#050D10] border border-teal-900/50 rounded-xl px-3.5 py-2 text-xs text-slate-100 outline-none focus:ring-2 focus:ring-teal-500"
+                                            placeholder="pawanda_verify_token..."
                                         />
-                                        <button 
-                                            type="button" 
-                                            onClick={() => setActiveGuidance('metaVerifyToken')} 
+                                        <button
+                                            type="button"
+                                            onClick={() => setActiveGuidance('metaVerifyToken')}
                                             className="bg-[#0D222A] text-teal-300 hover:bg-teal-950/60 border border-teal-800/30 px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1"
                                         >
                                             <Info size={14} /> Guide
@@ -2709,19 +2742,19 @@ const WhatsAppDashboard = () => {
                                 <div className="md:col-span-2 pt-2 border-t border-teal-900/30">
                                     <label className="block text-xs font-semibold text-teal-400 mb-1">Auto-Generated Webhook Callback URL</label>
                                     <div className="flex gap-2">
-                                        <input 
-                                            type="text" 
-                                            readOnly 
-                                            value={apiSettings.webhookUrl || ''} 
-                                            className="flex-1 bg-[#050D10] border border-teal-900/50 rounded-xl px-3.5 py-2 text-xs text-slate-400 font-mono" 
+                                        <input
+                                            type="text"
+                                            readOnly
+                                            value={apiSettings.webhookUrl || ''}
+                                            className="flex-1 bg-[#050D10] border border-teal-900/50 rounded-xl px-3.5 py-2 text-xs text-slate-400 font-mono"
                                             placeholder="https://...trycloudflare.com/webhook/whatsapp"
                                         />
-                                        <button 
-                                            type="button" 
-                                            onClick={() => { 
-                                                if (apiSettings.webhookUrl) { 
-                                                    navigator.clipboard.writeText(apiSettings.webhookUrl); 
-                                                    alert('Webhook URL copied to clipboard!'); 
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (apiSettings.webhookUrl) {
+                                                    navigator.clipboard.writeText(apiSettings.webhookUrl);
+                                                    alert('Webhook URL copied to clipboard!');
                                                 } else {
                                                     alert('Webhook URL not generated yet.');
                                                 }
@@ -2746,16 +2779,16 @@ const WhatsAppDashboard = () => {
                                 <div>
                                     <label className="block text-xs font-semibold text-slate-300 mb-1">AI Provider API Key (Gemini / OpenAI)</label>
                                     <div className="flex gap-2">
-                                        <input 
-                                            type="password" 
-                                            value={apiSettings.llmApiKey} 
+                                        <input
+                                            type="password"
+                                            value={apiSettings.llmApiKey}
                                             onChange={e => setApiSettings({ ...apiSettings, llmApiKey: e.target.value })}
-                                            className="flex-1 bg-[#050D10] border border-teal-900/50 rounded-xl px-3.5 py-2 text-xs text-slate-100 outline-none focus:ring-2 focus:ring-teal-500" 
-                                            placeholder="AI Key" 
+                                            className="flex-1 bg-[#050D10] border border-teal-900/50 rounded-xl px-3.5 py-2 text-xs text-slate-100 outline-none focus:ring-2 focus:ring-teal-500"
+                                            placeholder="AI Key"
                                         />
-                                        <button 
-                                            type="button" 
-                                            onClick={() => setActiveGuidance('llmApiKey')} 
+                                        <button
+                                            type="button"
+                                            onClick={() => setActiveGuidance('llmApiKey')}
                                             className="bg-[#0D222A] text-teal-300 hover:bg-teal-950/60 border border-teal-800/30 px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1"
                                         >
                                             <Info size={14} /> Guide
@@ -2765,7 +2798,7 @@ const WhatsAppDashboard = () => {
 
                                 <div>
                                     <label className="block text-xs font-semibold text-teal-400 uppercase tracking-wider mb-2">Agent Behavior & System Negotiation Instructions</label>
-                                    <textarea 
+                                    <textarea
                                         className="w-full h-48 p-4 bg-[#050D10] border border-teal-900/40 rounded-xl text-slate-100 focus:ring-2 focus:ring-teal-500 outline-none text-xs leading-relaxed resize-none"
                                         placeholder="Enter instructions for how the AI agent negotiates prices, presents catalog products, and sends audio notes..."
                                         value={systemPrompt}
@@ -2780,7 +2813,7 @@ const WhatsAppDashboard = () => {
 
                         {/* Save Button */}
                         <div className="flex justify-end pt-2">
-                            <button 
+                            <button
                                 onClick={saveAllConfig}
                                 disabled={promptSaving}
                                 className="bg-teal-600 hover:bg-teal-500 text-white px-8 py-3 rounded-xl text-xs font-bold transition-all shadow-lg shadow-teal-600/30 flex items-center gap-2 disabled:opacity-50"

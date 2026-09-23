@@ -1,1 +1,26 @@
 @import "tailwindcss";
+
+/* Global Scrollbar styling matching dark/teal theme */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #050D10; /* Dark background matching modal/drawer */
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #0d3640; /* Dark teal for thumb */
+    border-radius: 4px;
+    border: 1px solid rgba(20, 184, 166, 0.2); /* Subtle teal border */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #14b8a6; /* Brighter teal on hover */
+}
+
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
