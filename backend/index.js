@@ -27,7 +27,7 @@ app.use('/api/products', productRoutes);
 app.use('/api', apiRoutes);
 
 // Catch-all to serve frontend index.html for React Router
-app.get('*', (req, res) => {
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
