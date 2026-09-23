@@ -1,0 +1,66 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Product {
+  id                  Int      @id @default(autoincrement())
+  title               String
+  brand               String?
+  gender              String   // 'men' | 'women'
+  size                String?
+  size_original       String?
+  size_uk             String?
+  size_eu             String?
+  size_cn             String?
+  color               String?
+  source              String   // 'shopify' | 'whatsapp_only'
+  main_image_url      String?
+  extra_image_urls    Json?    // Array of strings in JSON
+  video_url           String?
+  voice_note_url      String?
+  starting_price      Decimal  @db.Decimal(10, 2)
+  minimum_price       Decimal  @db.Decimal(10, 2)
+  status              String   @default("available") // 'available' | 'sold'
+  shopify_product_id  String?
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  conversations       Conversation[]
+}
+
+model Conversation {
+  id                  Int      @id @default(autoincrement())
+  customer_phone      String   @unique
+  status              String   @default("agent_active") // 'agent_active' | 'human_takeover'
+  known_slots         Json?
+  selected_product_id Int?
+  current_offer       Decimal? @db.Decimal(10, 2)
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  product             Product? @relation(fields: [selected_product_id], references: [id])
+  messages            Message[]
+}
+
+model Message {
+  id                  Int      @id @default(autoincrement())
+  conversation_id     Int
+  sender              String   // 'customer' | 'agent' | 'human'
+  type                String   // 'text' | 'image' | 'video' | 'voice'
+  text_content        String?  @db.Text
+  media_url           String?
+  voice_transcript    String?  @db.Text
+  created_at          DateTime @default(now())
+
+  conversation        Conversation @relation(fields: [conversation_id], references: [id])
+}
+
+model AgentConfig {
+  id            Int    @id @default(1)
+  system_prompt String @db.Text
+}
