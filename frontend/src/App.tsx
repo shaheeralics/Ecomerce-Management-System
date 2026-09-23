@@ -35,17 +35,6 @@ function App() {
             <MessageSquare size={16} />
             WhatsApp Agent
           </button>
-          <button
-            onClick={() => setActiveTab('shopify')}
-            className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${
-              activeTab === 'shopify' 
-                ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/30' 
-                : 'text-slate-400 hover:text-slate-200 hover:bg-teal-950/40'
-            }`}
-          >
-            <ShoppingBag size={16} />
-            Shopify Automator
-          </button>
         </div>
       </nav>
 
