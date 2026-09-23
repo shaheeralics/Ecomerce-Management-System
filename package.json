@@ -1,0 +1,13 @@
+{
+  "name": "ecomerce-management-system",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "start": "npm start --workspace=backend",
+    "build": "npm run build --workspace=frontend",
+    "dev": "npm run dev --workspaces"
+  }
+}
