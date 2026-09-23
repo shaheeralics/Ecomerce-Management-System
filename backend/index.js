@@ -50,24 +50,28 @@ app.listen(PORT, '0.0.0.0', async () => {
       console.log('Generated new Verify Token:', verifyToken);
     }
 
-    // 2. Start cloudflared
-    const cloudflared = spawn('npx', ['cloudflared', 'tunnel', '--url', `http://localhost:${PORT}`], { shell: true });
-    
-    cloudflared.stderr.on('data', async (data) => {
-      const output = data.toString();
-      // Match trycloudflare.com URL
-      const match = output.match(/(https:\/\/[a-zA-Z0-9]+-[a-zA-Z0-9-]+\.trycloudflare\.com)/);
-      if (match && match[1]) {
-        const webhookUrl = match[1] + '/webhook/whatsapp';
-        console.log('Cloudflare Tunnel URL detected:', webhookUrl);
-        // Save to DB
-        await db.execute('UPDATE api_settings SET webhook_url = ? WHERE id = 1', [webhookUrl]);
-      }
-    });
+    // 2. Start cloudflared only in development
+    if (process.env.NODE_ENV !== 'production') {
+      const cloudflared = spawn('npx', ['cloudflared', 'tunnel', '--url', `http://localhost:${PORT}`], { shell: true });
+      
+      cloudflared.stderr.on('data', async (data) => {
+        const output = data.toString();
+        // Match trycloudflare.com URL
+        const match = output.match(/(https:\/\/[a-zA-Z0-9]+-[a-zA-Z0-9-]+\.trycloudflare\.com)/);
+        if (match && match[1]) {
+          const webhookUrl = match[1] + '/webhook/whatsapp';
+          console.log('Cloudflare Tunnel URL detected:', webhookUrl);
+          // Save to DB
+          await db.execute('UPDATE api_settings SET webhook_url = ? WHERE id = 1', [webhookUrl]);
+        }
+      });
 
-    cloudflared.on('close', (code) => {
-      console.log(`cloudflared exited with code ${code}`);
-    });
+      cloudflared.on('close', (code) => {
+        console.log(`cloudflared exited with code ${code}`);
+      });
+    } else {
+      console.log('Production environment detected. Skipping local cloudflared tunnel.');
+    }
 
   } catch (err) {
     console.error('Failed to setup tunnel automation:', err);
