@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import WhatsAppDashboard from './components/WhatsAppDashboard';
 import ShopifyDashboard from './components/ShopifyDashboard';
-import { MessageSquare, ShoppingBag } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 
 function App() {
   const [activeTab, setActiveTab] = useState<'whatsapp' | 'shopify'>('whatsapp');
