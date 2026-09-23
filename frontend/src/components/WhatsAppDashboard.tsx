@@ -1483,15 +1483,6 @@ const WhatsAppDashboard = () => {
                         <MessageSquare size={17} />
                         Live Conversations
                     </button>
-                    <button 
-                        onClick={() => setSubTab('settings')}
-                        className={`text-left px-4 py-3 rounded-xl font-medium text-xs transition-all flex items-center gap-3 ${
-                            subTab === 'settings' ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/30 font-semibold' : 'text-slate-400 hover:bg-teal-950/40 hover:text-slate-200'
-                        }`}
-                    >
-                        <Settings size={17} />
-                        Configuration
-                    </button>
                 </nav>
 
                 {/* Dashboard Stats */}
