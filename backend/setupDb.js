@@ -1,12 +1,13 @@
+require('dotenv').config();
 const mysql = require('mysql2/promise');
 
 async function setupDatabase() {
     try {
         const connection = await mysql.createConnection({
-            host: '127.0.0.1',
-            user: 'root',
-            password: '',
-            database: 'ecomerce_automation'
+            host: process.env.DB_HOST || '127.0.0.1',
+            user: process.env.DB_USER || 'root',
+            password: process.env.DB_PASSWORD || '',
+            database: process.env.DB_NAME || 'ecomerce_automation'
         });
 
         console.log('Connected to MySQL. Initializing tables...');
