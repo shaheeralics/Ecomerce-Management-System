@@ -1,11 +1,6 @@
-import { useState } from 'react';
 import WhatsAppDashboard from './components/WhatsAppDashboard';
-import ShopifyDashboard from './components/ShopifyDashboard';
-import { MessageSquare } from 'lucide-react';
 
 function App() {
-  const [activeTab, setActiveTab] = useState<'whatsapp' | 'shopify'>('whatsapp');
-
   return (
     <div className="h-screen w-screen bg-[#071317] text-slate-100 flex flex-col overflow-hidden font-sans">
       {/* Devsil Top Navbar */}
@@ -21,27 +16,11 @@ function App() {
             </h1>
           </div>
         </div>
-
-        {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 bg-[#061014] p-1 rounded-xl border border-teal-900/30">
-          <button
-            onClick={() => setActiveTab('whatsapp')}
-            className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${
-              activeTab === 'whatsapp' 
-                ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/30' 
-                : 'text-slate-400 hover:text-slate-200 hover:bg-teal-950/40'
-            }`}
-          >
-            <MessageSquare size={16} />
-            WhatsApp Agent
-          </button>
-        </div>
       </nav>
 
       {/* Main Full-Bleed Content Workspace */}
       <main className="flex-1 overflow-hidden relative">
-        {activeTab === 'whatsapp' && <WhatsAppDashboard />}
-        {activeTab === 'shopify' && <ShopifyDashboard />}
+        <WhatsAppDashboard />
       </main>
     </div>
   );
