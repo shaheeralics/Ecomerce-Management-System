@@ -281,8 +281,12 @@ const WhatsAppDashboard = () => {
             if (data.success) {
                 if (silentMerge) {
                     setProducts(prev => {
-                        return data.data.map((dbProduct: any) => {
+                        // 1. Map over DB products to merge with existing local ones
+                        const mergedDbProducts = data.data.map((dbProduct: any) => {
+                            // Try to find the product in local state by ID.
+                            // Note: if a temp product just got its real ID updated via xhr.onload, it will match.
                             const localProduct = prev.find(p => p.id === dbProduct.id);
+                            
                             if (localProduct && (dbProduct.status as any) === 'uploading') {
                                 // Preserve local blob URLs to prevent images from flashing/disappearing
                                 return {
@@ -294,6 +298,12 @@ const WhatsAppDashboard = () => {
                             }
                             return dbProduct;
                         });
+
+                        // 2. Retain optimistic products (negative IDs) that are still uploading 
+                        // and haven't been assigned a DB ID yet.
+                        const optimisticProducts = prev.filter(p => p.id < 0);
+
+                        return [...optimisticProducts, ...mergedDbProducts];
                     });
                 } else {
                     setProducts(data.data);
