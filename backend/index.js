@@ -17,12 +17,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Import modules
 const whatsappRoutes = require('./modules/whatsapp');
-const shopifyRoutes = require('./modules/shopify');
 const apiRoutes = require('./modules/api');
 const productRoutes = require('./modules/api/products');
 
 app.use('/webhook/whatsapp', whatsappRoutes);
-app.use('/api/listings', shopifyRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api', apiRoutes);
 
