@@ -410,8 +410,14 @@ const WhatsAppDashboard = () => {
     // Voice Note handling (Record, Pause, Resume, Stop & Web Audio Timeline Punch-In Overwrite)
     const startRecording = async (overwriteSeek?: number) => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorderRef.current = new MediaRecorder(stream);
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true
+                } 
+            });
+            mediaRecorderRef.current = new MediaRecorder(stream, { audioBitsPerSecond: 128000 });
             audioChunksRef.current = [];
 
             // Save prior audio blob and seek timestamp into REFS to avoid stale state closures
