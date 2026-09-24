@@ -11,7 +11,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1139.0",
     "@google/genai": "^2.23.0",
+    "aws-sdk": "^2.1693.0",
     "cloudflared": "^0.7.3",
     "cors": "^2.8.6",
     "dotenv": "^18.0.1",

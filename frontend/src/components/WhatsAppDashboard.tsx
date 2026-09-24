@@ -169,6 +169,19 @@ const WhatsAppDashboard = () => {
     // Multi-phase stepper state (Phase 1: Details, Phase 2: Media Images & Video, Phase 3: Voice Note Pitch)
     const [activePhase, setActivePhase] = useState<1 | 2 | 3>(1);
 
+    // Warn on beforeunload if uploading
+    useEffect(() => {
+        const hasUploading = products.some((p: any) => p.status === 'uploading');
+        if (hasUploading) {
+            const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+                e.preventDefault();
+                e.returnValue = ''; // Standard way to trigger prompt in modern browsers
+            };
+            window.addEventListener('beforeunload', handleBeforeUnload);
+            return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+        }
+    }, [products]);
+
     // Form state
     const [formData, setFormData] = useState({
         title: '',
@@ -260,17 +273,49 @@ const WhatsAppDashboard = () => {
     const animationFrameRef = useRef<number | null>(null);
 
     // Fetch products
-    const fetchProducts = async () => {
-        setLoading(true);
+    const fetchProducts = async (silentMerge = false) => {
+        if (!silentMerge) setLoading(true);
         try {
             const res = await fetch(`/api/products?_t=${Date.now()}`);
             const data = await res.json();
-            if (data.success) setProducts(data.data);
+            if (data.success) {
+                if (silentMerge) {
+                    setProducts(prev => {
+                        return data.data.map((dbProduct: any) => {
+                            const localProduct = prev.find(p => p.id === dbProduct.id);
+                            if (localProduct && (dbProduct.status as any) === 'uploading') {
+                                // Preserve local blob URLs to prevent images from flashing/disappearing
+                                return {
+                                    ...dbProduct,
+                                    main_image_url: dbProduct.main_image_url || localProduct.main_image_url,
+                                    video_url: dbProduct.video_url || localProduct.video_url,
+                                    voice_note_url: dbProduct.voice_note_url || localProduct.voice_note_url
+                                };
+                            }
+                            return dbProduct;
+                        });
+                    });
+                } else {
+                    setProducts(data.data);
+                }
+            }
         } catch (err) {
             console.error('Failed to fetch products:', err);
         }
-        setLoading(false);
+        if (!silentMerge) setLoading(false);
     };
+
+    // Poll for status updates if any product is uploading
+    useEffect(() => {
+        const hasUploading = products.some((p: any) => p.status === 'uploading');
+        if (!hasUploading) return;
+
+        const interval = setInterval(() => {
+            fetchProducts(true);
+        }, 3000);
+
+        return () => clearInterval(interval);
+    }, [products]);
 
     // Fetch agent config
     const fetchAgentConfig = async () => {
@@ -1514,21 +1559,60 @@ const WhatsAppDashboard = () => {
             fd.append('voice_note', audioBlob, fileName);
         }
 
-        try {
-            const url = editingProduct ? `/api/products/${editingProduct.id}` : '/api/products';
-            const method = editingProduct ? 'PUT' : 'POST';
-            const res = await fetch(url, { method, body: fd });
-            const data = await res.json();
-            if (data.success) {
-                alert(editingProduct ? 'Product updated successfully!' : 'Product added successfully!');
-                resetForm();
-                fetchProducts();
-            } else {
-                alert('Error: ' + data.error);
-            }
-        } catch (err) {
-            alert('Failed to save product.');
+        // Optimistic Product Insertion for immediate UI feedback
+        const tempProduct: Product = {
+            id: editingProduct ? editingProduct.id : -Math.floor(Math.random() * 1000000), // temp negative ID if new
+            title: formData.title,
+            brand: formData.brand,
+            gender: formData.gender,
+            color: formData.color,
+            size_original: formData.size_original,
+            starting_price: parseFloat(formData.starting_price) || 0,
+            minimum_price: parseFloat(formData.minimum_price) || 0,
+            description: formData.description,
+            main_image_url: productImages[0]?.file ? URL.createObjectURL(productImages[0].file) : (productImages[0]?.url || null),
+            extra_image_urls: "[]",
+            video_url: selectedVideo ? URL.createObjectURL(selectedVideo) : null,
+            voice_note_url: audioBlob ? URL.createObjectURL(audioBlob as Blob) : null,
+            status: 'uploading' as any, // Custom status just for UI visualization
+            created_at: new Date().toISOString()
+        };
+
+        if (editingProduct) {
+            setProducts(prev => prev.map(p => p.id === tempProduct.id ? { ...p, ...tempProduct } : p));
+        } else {
+            setProducts(prev => [tempProduct, ...prev]);
         }
+        
+        // Immediately close the UI modal
+        resetForm();
+
+        const url = editingProduct ? `/api/products/${editingProduct.id}` : '/api/products';
+        const method = editingProduct ? 'PUT' : 'POST';
+
+        // Background XHR
+        const xhr = new XMLHttpRequest();
+        xhr.open(method, url);
+        xhr.onload = () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                    const resData = JSON.parse(xhr.responseText);
+                    if (resData.success && resData.id && !editingProduct) {
+                        // Replace temp negative ID with the real DB ID to enable immediate interactions
+                        setProducts(prev => prev.map(p => p.id === tempProduct.id ? { ...p, id: resData.id } : p));
+                    }
+                } catch (e) {}
+                fetchProducts(true); // Silent merge to preserve local blobs
+            } else {
+                alert(`Error saving product: ${formData.title}`);
+                fetchProducts(); // Revert temp changes
+            }
+        };
+        xhr.onerror = () => {
+            alert(`Network error saving product: ${formData.title}`);
+            fetchProducts();
+        };
+        xhr.send(fd);
     };
 
     // Delete Product
@@ -2467,13 +2551,26 @@ const WhatsAppDashboard = () => {
                                                     <Camera size={40} className="text-teal-900/60" />
                                                 )}
 
-                                                {/* Status Badge */}
-                                                <span className={`absolute top-3 right-3 text-[10px] font-bold px-2.5 py-1 rounded-full border shadow-lg ${product.status === 'available'
-                                                    ? 'bg-emerald-950/80 text-emerald-400 border-emerald-800'
-                                                    : 'bg-amber-950/80 text-amber-400 border-amber-800'
-                                                    }`}>
-                                                    {product.status.toUpperCase()}
-                                                </span>
+                                                {/* Status Badge & Uploading UI */}
+                                                {(product.status as any) === 'uploading' ? (
+                                                    <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
+                                                        <div className="bg-[#050D10]/90 backdrop-blur-md border border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.3)] rounded-full px-3 py-1.5 flex items-center gap-2">
+                                                            <div className="w-3 h-3 rounded-full border-[1.5px] border-amber-500/30 border-t-amber-500 animate-spin"></div>
+                                                            <span className="text-[10px] font-black text-amber-500 tracking-wider">UPLOADING</span>
+                                                        </div>
+                                                        {/* Fake continuous progress bar inside the badge area */}
+                                                        <div className="w-full bg-[#050D10]/80 rounded-full h-1 overflow-hidden backdrop-blur-sm">
+                                                            <div className="bg-gradient-to-r from-amber-600 to-amber-400 h-full w-[40%] rounded-full animate-[shimmer_1.5s_infinite]"></div>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <span className={`absolute top-3 right-3 text-[10px] font-bold px-2.5 py-1 rounded-full border shadow-lg ${product.status === 'available'
+                                                        ? 'bg-emerald-950/80 text-emerald-400 border-emerald-800'
+                                                        : 'bg-rose-950/80 text-rose-400 border-rose-800'
+                                                        }`}>
+                                                        {product.status.toUpperCase()}
+                                                    </span>
+                                                )}
 
                                                 {/* Multi-Image Dots / Selector */}
                                                 {allImages.length > 1 && (
@@ -2535,7 +2632,8 @@ const WhatsAppDashboard = () => {
                                                 <div className="flex items-center gap-2 pt-1">
                                                     <button
                                                         onClick={() => toggleStatus(product)}
-                                                        className={`flex-1 text-xs py-2 rounded-xl font-semibold transition-colors ${product.status === 'available'
+                                                        disabled={(product.status as any) === 'uploading'}
+                                                        className={`flex-1 text-xs py-2 rounded-xl font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${product.status === 'available'
                                                             ? 'bg-amber-950/40 text-amber-400 hover:bg-amber-900/50 border border-amber-900/40'
                                                             : 'bg-emerald-950/40 text-emerald-400 hover:bg-emerald-900/50 border border-emerald-900/40'
                                                             }`}
@@ -2545,7 +2643,8 @@ const WhatsAppDashboard = () => {
 
                                                     <button
                                                         onClick={() => handleEdit(product)}
-                                                        className="p-2.5 rounded-xl bg-[#071317] text-slate-300 hover:bg-teal-950/60 border border-teal-900/40 transition-colors"
+                                                        disabled={(product.status as any) === 'uploading'}
+                                                        className="p-2.5 rounded-xl bg-[#071317] text-slate-300 hover:bg-teal-950/60 border border-teal-900/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                         title="Edit Product"
                                                     >
                                                         <Edit3 size={15} />
@@ -2553,7 +2652,8 @@ const WhatsAppDashboard = () => {
 
                                                     <button
                                                         onClick={() => handleDelete(product.id)}
-                                                        className="p-2.5 rounded-xl bg-red-950/30 text-red-400 hover:bg-red-900/40 border border-red-900/30 transition-colors"
+                                                        disabled={(product.status as any) === 'uploading'}
+                                                        className="p-2.5 rounded-xl bg-red-950/30 text-red-400 hover:bg-red-900/40 border border-red-900/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                                         title="Delete Product"
                                                     >
                                                         <Trash2 size={15} />
