@@ -1216,15 +1216,16 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
     };
 
     const transcribeAudio = async () => {
-        if (!audioBlob && !editId) return alert('Record or save audio first.');
-        
-        // If editing and no new audio is recorded, we can't transcribe what we don't have as a blob easily
-        if (!audioBlob && editId) return alert('Please record a new audio clip first to transcribe it.');
+        if (!audioBlob && !audioPreviewUrl) return alert('Record or select an audio first.');
 
         setIsTranscribing(true);
         try {
             const fd = new FormData();
-            fd.append('audio', audioBlob!, 'voice.wav');
+            if (audioBlob) {
+                fd.append('audio', audioBlob, 'voice.wav');
+            } else if (audioPreviewUrl) {
+                fd.append('voice_url', audioPreviewUrl);
+            }
             const res = await fetch('/api/voices/transcribe', { method: 'POST', body: fd });
             const data = await res.json();
             if (data.success) {

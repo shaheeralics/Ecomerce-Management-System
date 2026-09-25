@@ -11,7 +11,21 @@ const upload = multer({ storage });
 // Transcribe Audio using Gemini
 router.post('/transcribe', upload.single('audio'), async (req, res) => {
     try {
-        if (!req.file) return res.status(400).json({ success: false, error: 'No audio file provided' });
+        let audioBuffer;
+        let mimeType;
+
+        if (req.file) {
+            audioBuffer = req.file.buffer;
+            mimeType = req.file.mimetype;
+        } else if (req.body.voice_url) {
+            const fetchRes = await fetch(req.body.voice_url);
+            if (!fetchRes.ok) return res.status(400).json({ success: false, error: 'Could not fetch existing audio file' });
+            const arrayBuffer = await fetchRes.arrayBuffer();
+            audioBuffer = Buffer.from(arrayBuffer);
+            mimeType = fetchRes.headers.get('content-type') || 'audio/wav';
+        } else {
+            return res.status(400).json({ success: false, error: 'No audio file or voice URL provided' });
+        }
 
         const [settingsRows] = await db.execute('SELECT llm_api_key FROM api_settings WHERE id = 1');
         const apiKey = settingsRows[0]?.llm_api_key || process.env.LLM_API_KEY;
@@ -23,8 +37,8 @@ router.post('/transcribe', upload.single('audio'), async (req, res) => {
             contents: [
                 {
                     inlineData: {
-                        data: req.file.buffer.toString("base64"),
-                        mimeType: req.file.mimetype
+                        data: audioBuffer.toString("base64"),
+                        mimeType: mimeType
                     }
                 },
                 "You are an expert transcriptionist. Please transcribe exactly what is being said in this audio file. Do not add any conversational filler, markdown formatting, or introductory text. If the audio is in Urdu/Hindi, transcribe it accurately using roman script or native script based on the context. Only output the transcription text."
