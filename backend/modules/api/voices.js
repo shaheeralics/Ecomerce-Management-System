@@ -102,16 +102,30 @@ router.post('/:category', upload.single('voice'), async (req, res) => {
     }
 });
 
-// PUT update voice text info
-router.put('/:id', async (req, res) => {
+// PUT update voice text info and optional audio
+router.put('/:id', upload.single('voice'), async (req, res) => {
     try {
         const { title, usage_instructions, transcription } = req.body;
+        
+        // Update text fields immediately
         await db.execute(`
             UPDATE voice_assets SET title = ?, usage_instructions = ?, transcription = ?
             WHERE id = ?
         `, [title, usage_instructions, transcription, req.params.id]);
 
         res.json({ success: true, message: 'Voice info updated' });
+
+        // Background upload if new voice is provided
+        if (req.file) {
+            (async () => {
+                try {
+                    const voiceUrl = await uploadToOracleS3(req.file);
+                    await db.execute(`UPDATE voice_assets SET voice_url = ? WHERE id = ?`, [voiceUrl, req.params.id]);
+                } catch (bgErr) {
+                    console.error('Background upload failed for voice update', req.params.id, bgErr);
+                }
+            })();
+        }
     } catch (err) {
         console.error('Failed to update voice:', err);
         res.status(500).json({ success: false, error: 'Failed to update voice' });

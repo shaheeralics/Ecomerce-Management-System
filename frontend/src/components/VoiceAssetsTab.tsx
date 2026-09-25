@@ -85,6 +85,7 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
     const [voices, setVoices] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [editId, setEditId] = useState<number | null>(null);
     const [activePhase, setActivePhase] = useState(3); // hardcode to 3 so Phase 3 JSX renders
 
     const [formData, setFormData] = useState({ title: '', usage_instructions: '', transcription: '' });
@@ -1211,6 +1212,7 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
         setVoiceoverClips([]);
         setTimelineHistory([]);
         setShowAddModal(false);
+        setEditId(null);
     };
 
     const transcribeAudio = () => {
@@ -1240,33 +1242,43 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
     };
 
     const submitVoice = () => {
-        if (!formData.title || !audioBlob) return alert('Title and Audio required');
-        const tempId = -Date.now();
+        if (!formData.title) return alert('Title is required');
+        if (!editId && !audioBlob) return alert('Audio recording is required for new voices');
+
+        const tempId = editId || -Date.now();
         const tempVoice = {
             id: tempId,
             category,
             title: formData.title,
             usage_instructions: formData.usage_instructions,
             transcription: formData.transcription,
-            voice_url: audioPreviewUrl,
-            status: 'uploading'
+            status: editId ? 'updating...' : 'uploading...',
+            voice_url: editId ? voices.find(v => v.id === editId)?.voice_url : audioPreviewUrl
         };
-        setVoices(prev => [tempVoice, ...prev]);
+
+        if (editId) {
+            setVoices(prev => prev.map(p => p.id === editId ? { ...p, ...tempVoice } : p));
+        } else {
+            setVoices(prev => [tempVoice, ...prev]);
+        }
+        
         setShowAddModal(false);
 
         const fd = new FormData();
         fd.append('title', formData.title);
         fd.append('usage_instructions', formData.usage_instructions);
         fd.append('transcription', formData.transcription);
-        fd.append('voice', audioBlob, 'voice.wav');
+        if (audioBlob) {
+            fd.append('voice', audioBlob, 'voice.wav');
+        }
 
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', `/api/voices/${category}`);
+        xhr.open(editId ? 'PUT' : 'POST', `/api/voices/${editId ? editId : category}`);
         xhr.onload = () => {
             if (xhr.status >= 200 && xhr.status < 300) {
                 try {
                     const resData = JSON.parse(xhr.responseText);
-                    if (resData.success) {
+                    if (resData.success && !editId) {
                         setVoices(prev => prev.map(p => p.id === tempId ? { ...p, id: resData.id } : p));
                     }
                 } catch (e) { }
@@ -1322,9 +1334,21 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
                                         {voice.status}
                                     </div>
                                 </div>
-                                <button onClick={() => deleteVoice(voice.id)} className="text-slate-500 hover:text-red-400 p-2 bg-slate-900/50 hover:bg-red-950/30 border border-transparent hover:border-red-900/50 rounded-xl transition-all cursor-pointer">
-                                    <Trash2 size={16} />
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <button 
+                                        onClick={() => {
+                                            setFormData({ title: voice.title, usage_instructions: voice.usage_instructions || '', transcription: voice.transcription || '' });
+                                            setEditId(voice.id);
+                                            setShowAddModal(true);
+                                        }} 
+                                        className="text-slate-500 hover:text-amber-400 p-2 bg-slate-900/50 hover:bg-amber-950/30 border border-transparent hover:border-amber-900/50 rounded-xl transition-all cursor-pointer"
+                                    >
+                                        <Edit3 size={16} />
+                                    </button>
+                                    <button onClick={() => deleteVoice(voice.id)} className="text-slate-500 hover:text-red-400 p-2 bg-slate-900/50 hover:bg-red-950/30 border border-transparent hover:border-red-900/50 rounded-xl transition-all cursor-pointer">
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
                             </div>
 
                             {voice.voice_url && (
@@ -1350,7 +1374,7 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
                     <div className="bg-[#0A181D] border border-teal-900/50 rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl my-8 flex flex-col max-h-[90vh]">
                         <div className="bg-[#0B1E26] border-b border-teal-900/50 px-6 py-4 flex items-center justify-between flex-shrink-0">
                             <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
-                                <Mic className="text-teal-400" size={22} /> Add New Voice Asset
+                                <Mic className="text-teal-400" size={22} /> {editId ? 'Edit Voice Asset' : 'Add New Voice Asset'}
                             </h2>
                             <button onClick={resetForm} className="p-2 bg-[#050D10] text-slate-400 hover:text-slate-200 hover:bg-teal-900/30 rounded-xl transition-all cursor-pointer">
                                 <X size={20} />
@@ -1839,8 +1863,8 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
 
                         <div className="p-6 border-t border-teal-900/50 bg-[#0B1E26] flex justify-end gap-3 flex-shrink-0">
                             <button onClick={resetForm} className="px-6 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 text-sm font-semibold transition-all">Cancel</button>
-                            <button onClick={submitVoice} disabled={!formData.title || !audioBlob} className="bg-teal-600 hover:bg-teal-500 text-white px-8 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-teal-600/30 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                                <CheckCircle size={18} /> Save & Upload Voice
+                            <button onClick={submitVoice} disabled={!formData.title || (!editId && !audioBlob)} className="bg-teal-600 hover:bg-teal-500 text-white px-8 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-teal-600/30 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <CheckCircle size={18} /> {editId ? 'Save Changes' : 'Save & Upload Voice'}
                             </button>
                         </div>
                     </div>
