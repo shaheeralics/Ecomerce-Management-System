@@ -134,17 +134,20 @@ router.post('/', uploadMedia, async (req, res) => {
 router.put('/:id', uploadMedia, async (req, res) => {
     try {
         const productId = req.params.id;
-        const { title, brand, gender, color, size_original, starting_price, minimum_price, description } = req.body;
+        const { title, brand, gender, color, size_original, starting_price, minimum_price, status } = req.body;
         
-        // 1. Update text fields and set status to 'uploading'
+        const finalStatus = status || 'available';
+        const initialStatus = (req.files && Object.keys(req.files).length > 0) ? 'uploading' : finalStatus;
+
+        // 1. Update text fields and set status
         await db.execute(`
             UPDATE products SET 
                 title = ?, brand = ?, gender = ?, color = ?, size_original = ?,
-                starting_price = ?, minimum_price = ?, description = ?, status = 'uploading'
+                starting_price = ?, minimum_price = ?, status = ?
             WHERE id = ?
         `, [
             title, brand || null, gender || 'unisex', color || null, size_original || null,
-            parseFloat(starting_price) || 0, parseFloat(minimum_price) || 0, description || null, productId
+            parseFloat(starting_price) || 0, parseFloat(minimum_price) || 0, initialStatus, productId
         ]);
 
         res.json({ success: true, message: 'Product text updated, media uploading in background' });
@@ -156,8 +159,8 @@ router.put('/:id', uploadMedia, async (req, res) => {
                 const videoFiles = files['video'] || [];
                 const voiceFiles = files['voice_note'] || [];
 
-                let updateQuery = `UPDATE products SET status = 'available'`;
-                let params = [];
+                let updateQuery = `UPDATE products SET status = ?`;
+                let params = [finalStatus];
 
                 if (req.body.image_order || (files['images'] && files['images'].length > 0)) {
                     const { mainImageUrl, extraImageUrls } = await processImageOrdering(req);
