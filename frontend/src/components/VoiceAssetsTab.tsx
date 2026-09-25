@@ -1303,29 +1303,43 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {voices.map(voice => (
-                        <div key={voice.id} className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-5 shadow-xl flex flex-col gap-4 group relative hover:border-teal-700/50 transition-colors">
-                            <div className="flex justify-between items-start">
+                        <div key={voice.id} className="relative bg-gradient-to-b from-[#0B1E26]/90 to-[#050D10]/95 backdrop-blur-xl border border-teal-800/40 rounded-3xl p-6 shadow-2xl flex flex-col gap-5 group hover:border-teal-500/50 hover:shadow-[0_0_30px_rgba(20,184,166,0.15)] transition-all duration-300 overflow-hidden">
+                            {/* Subtle futuristic glow */}
+                            <div className="absolute top-0 right-0 w-40 h-40 bg-teal-500/5 rounded-full blur-3xl group-hover:bg-teal-500/10 transition-colors pointer-events-none"></div>
+                            
+                            <div className="flex justify-between items-start relative z-10">
                                 <div>
-                                    <h4 className="text-slate-100 font-bold text-lg">{voice.title}</h4>
-                                    <span className="inline-flex mt-1 items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-teal-500/10 text-teal-400 border border-teal-500/20">
+                                    <h4 className="text-slate-100 font-extrabold text-xl tracking-tight group-hover:text-teal-300 transition-colors">{voice.title}</h4>
+                                    <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest bg-teal-950/50 text-teal-400 border border-teal-500/20 shadow-inner">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse"></div>
                                         {voice.status}
-                                    </span>
+                                    </div>
                                 </div>
-                                <button onClick={() => deleteVoice(voice.id)} className="text-slate-500 hover:text-red-400 p-1 bg-teal-950/30 rounded-lg"><Trash2 size={16} /></button>
+                                <button onClick={() => deleteVoice(voice.id)} className="text-slate-500 hover:text-red-400 p-2 bg-slate-900/50 hover:bg-red-950/30 border border-transparent hover:border-red-900/50 rounded-xl transition-all cursor-pointer">
+                                    <Trash2 size={16} />
+                                </button>
                             </div>
 
                             {voice.voice_url && (
-                                <audio src={voice.voice_url} controls className="w-full h-10 custom-audio-player" />
+                                <div className="relative z-10 my-1">
+                                    <audio src={voice.voice_url} controls className="w-full h-11 custom-audio-player" />
+                                </div>
                             )}
 
-                            <div>
-                                <h5 className="text-teal-500 text-[10px] uppercase font-bold tracking-wider mb-1">When to Use</h5>
-                                <p className="text-slate-300 text-xs line-clamp-3">{voice.usage_instructions || 'None'}</p>
+                            <div className="relative z-10 bg-black/20 rounded-2xl p-4 border border-white/5">
+                                <h5 className="text-teal-500 text-[10px] uppercase font-bold tracking-widest mb-1.5 flex items-center gap-1.5">
+                                    <div className="w-1 h-1 bg-teal-500 rounded-full"></div>
+                                    When to Use
+                                </h5>
+                                <p className="text-slate-300 text-xs line-clamp-3 leading-relaxed">{voice.usage_instructions || 'None'}</p>
                             </div>
 
-                            <div className="mt-auto pt-2 border-t border-teal-900/30">
-                                <h5 className="text-amber-500 text-[10px] uppercase font-bold tracking-wider mb-1">Transcription</h5>
-                                <p className="text-slate-400 text-[11px] italic line-clamp-4 leading-relaxed">{voice.transcription || 'Not transcribed yet.'}</p>
+                            <div className="mt-auto relative z-10">
+                                <h5 className="text-amber-500 text-[10px] uppercase font-bold tracking-widest mb-1.5 flex items-center gap-1.5">
+                                    <div className="w-1 h-1 bg-amber-500 rounded-full"></div>
+                                    Transcription
+                                </h5>
+                                <p className="text-slate-400 text-[11px] italic line-clamp-4 leading-relaxed bg-black/10 rounded-xl p-3 border border-white/5">{voice.transcription || 'Not transcribed yet.'}</p>
                             </div>
                         </div>
                     ))}
