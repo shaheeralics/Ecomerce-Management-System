@@ -69,7 +69,7 @@ function audioBufferToWavBlob(buffer: AudioBuffer): Blob {
     while (offset < buffer.length) {
         for (let i = 0; i < numOfChan; i++) {
             let sample = Math.max(-1, Math.min(1, channels[i][offset]));
-            sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+            sample = (sample < 0 ? sample * 32768 : sample * 32767) | 0;
             out.setInt16(pos, sample, true);
             pos += 2;
         }
@@ -861,15 +861,21 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
                         if (clip.start >= clip.end) continue;
                         const sourceStartSec = clip.sourceStart !== undefined ? clip.sourceStart : clip.start;
                         const clipDurationSec = clip.end - clip.start;
-                        const clipSamplesCount = Math.floor(clipDurationSec * sampleRate);
-                        const srcStartSamp = Math.floor(sourceStartSec * sampleRate);
+                        const clipSamplesCount = Math.round(clipDurationSec * sampleRate);
+                        
+                        const targetStartIdx = Math.round(clip.start * sampleRate);
+                        const srcStartSamp = Math.round(sourceStartSec * sampleRate);
 
                         for (let i = 0; i < clipSamplesCount; i++) {
-                            const timelineSec = clip.start + (i / sampleRate);
-                            const targetIdx = Math.floor(timelineSec * sampleRate);
+                            const targetIdx = targetStartIdx + i;
                             const srcIdx = srcStartSamp + i;
 
-                            const isMutedByVO = activeVO.some(vo => timelineSec >= vo.start && timelineSec <= vo.end);
+                            // Check if this specific sample is muted by any Voice Over
+                            const isMutedByVO = activeVO.some(vo => {
+                                const voStartSamp = Math.round(vo.start * sampleRate);
+                                const voEndSamp = Math.round(vo.end * sampleRate);
+                                return targetIdx >= voStartSamp && targetIdx <= voEndSamp;
+                            });
 
                             if (targetIdx >= 0 && targetIdx < totalSamples) {
                                 if (isMutedByVO) {
@@ -889,16 +895,17 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
                 const voBuf = vo.buffer;
                 const voSourceStartSec = vo.sourceStart !== undefined ? vo.sourceStart : 0;
                 const voDurationSec = vo.end - vo.start;
-                const voSamplesCount = Math.floor(voDurationSec * sampleRate);
-                const voSrcStartSamp = Math.floor(voSourceStartSec * sampleRate);
+                const voSamplesCount = Math.round(voDurationSec * sampleRate);
+                
+                const targetStartIdx = Math.round(vo.start * sampleRate);
+                const voSrcStartSamp = Math.round(voSourceStartSec * sampleRate);
 
                 for (let c = 0; c < channels; c++) {
                     const outData = outputBuf.getChannelData(c);
                     const voData = voBuf.numberOfChannels > c ? voBuf.getChannelData(c) : voBuf.getChannelData(0);
 
                     for (let j = 0; j < voSamplesCount; j++) {
-                        const timelineSec = vo.start + (j / sampleRate);
-                        const targetIdx = Math.floor(timelineSec * sampleRate);
+                        const targetIdx = targetStartIdx + j;
                         const srcIdx = voSrcStartSamp + j;
 
                         if (targetIdx >= 0 && targetIdx < totalSamples && srcIdx >= 0 && srcIdx < voData.length) {
