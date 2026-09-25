@@ -1696,6 +1696,20 @@ const WhatsAppDashboard = () => {
                         <MessageSquare size={17} />
                         Live Conversations
                     </button>
+                    <button
+                        onClick={() => setSubTab('policy')}
+                        className={`text-left px-4 py-3 rounded-xl font-medium text-xs transition-all flex items-center gap-3 ${subTab === 'policy' ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/30 font-semibold' : 'text-slate-400 hover:bg-teal-950/40 hover:text-slate-200'}`}
+                    >
+                        <ShieldAlert size={17} />
+                        Policy Voices
+                    </button>
+                    <button
+                        onClick={() => setSubTab('prerecorded')}
+                        className={`text-left px-4 py-3 rounded-xl font-medium text-xs transition-all flex items-center gap-3 ${subTab === 'prerecorded' ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/30 font-semibold' : 'text-slate-400 hover:bg-teal-950/40 hover:text-slate-200'}`}
+                    >
+                        <Mic2 size={17} />
+                        Pre-recorded Voices
+                    </button>
                 </nav>
 
                 {/* Dashboard Stats */}
