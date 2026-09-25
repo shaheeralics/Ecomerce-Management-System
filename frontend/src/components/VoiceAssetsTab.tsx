@@ -159,9 +159,14 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
     const startRecording = async (overwriteSeek?: number) => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
-                audio: true
+                audio: {
+                    echoCancellation: false,
+                    noiseSuppression: false,
+                    autoGainControl: false
+                }
             });
-            mediaRecorderRef.current = new MediaRecorder(stream, { audioBitsPerSecond: 128000 });
+            // Let the browser choose its best default codec/bitrate to avoid distortion
+            mediaRecorderRef.current = new MediaRecorder(stream);
             audioChunksRef.current = [];
 
             // Save prior audio blob and seek timestamp into REFS to avoid stale state closures
@@ -183,13 +188,15 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
                 overwriteSeekRef.current = null;
             }
 
-            // Setup Real-time Audio Visualizer
             const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
             audioContextRef.current = audioCtx;
             const analyser = audioCtx.createAnalyser();
             analyser.fftSize = 256;
             analyser.smoothingTimeConstant = 0.5;
-            const source = audioCtx.createMediaStreamSource(stream);
+            
+            // Clone the stream for the visualizer so WebAudio doesn't corrupt the MediaRecorder stream (known Safari/Mobile bug)
+            const visualizerStream = stream.clone();
+            const source = audioCtx.createMediaStreamSource(visualizerStream);
             source.connect(analyser);
             analyserRef.current = analyser;
             const bufferLength = analyser.frequencyBinCount;
