@@ -37,7 +37,8 @@ import {
     Copy,
     ZoomIn,
     ZoomOut,
-    Minimize2
+    Minimize2,
+    Menu
 } from 'lucide-react';
 
 const apiGuidanceData = {
@@ -164,6 +165,7 @@ function audioBufferToWavBlob(buffer: AudioBuffer): Blob {
 
 const WhatsAppDashboard = () => {
     const [subTab, setSubTab] = useState<'products' | 'conversations' | 'policy' | 'prerecorded'>('products');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
@@ -289,7 +291,7 @@ const WhatsAppDashboard = () => {
                             // Try to find the product in local state by ID.
                             // Note: if a temp product just got its real ID updated via xhr.onload, it will match.
                             const localProduct = prev.find(p => p.id === dbProduct.id);
-                            
+
                             if (localProduct && (dbProduct.status as any) === 'uploading') {
                                 // Preserve local blob URLs to prevent images from flashing/disappearing
                                 return {
@@ -468,12 +470,8 @@ const WhatsAppDashboard = () => {
     // Voice Note handling (Record, Pause, Resume, Stop & Web Audio Timeline Punch-In Overwrite)
     const startRecording = async (overwriteSeek?: number) => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                audio: {
-                    echoCancellation: true,
-                    noiseSuppression: true,
-                    autoGainControl: true
-                } 
+            const stream = await navigator.mediaDevices.getUserMedia({
+                audio: true
             });
             mediaRecorderRef.current = new MediaRecorder(stream, { audioBitsPerSecond: 128000 });
             audioChunksRef.current = [];
@@ -1596,7 +1594,7 @@ const WhatsAppDashboard = () => {
         } else {
             setProducts(prev => [tempProduct, ...prev]);
         }
-        
+
         // Immediately close the UI modal
         resetForm();
 
@@ -1614,7 +1612,7 @@ const WhatsAppDashboard = () => {
                         // Replace temp negative ID with the real DB ID to enable immediate interactions
                         setProducts(prev => prev.map(p => p.id === tempProduct.id ? { ...p, id: resData.id } : p));
                     }
-                } catch (e) {}
+                } catch (e) { }
                 fetchProducts(true); // Silent merge to preserve local blobs
             } else {
                 alert(`Error saving product: ${formData.title}`);
@@ -1678,7 +1676,7 @@ const WhatsAppDashboard = () => {
     return (
         <div className="h-full w-full bg-[#071317] flex overflow-hidden">
             {/* Devsil Teal Sidebar */}
-            <div className="w-64 bg-[#0A181D] border-r border-teal-900/30 flex flex-col p-4 flex-shrink-0">
+            <div className={`w-64 bg-[#0A181D] border-r border-teal-900/30 flex flex-col p-4 flex-shrink-0 transition-all duration-300 ${isSidebarOpen ? '' : '-ml-64'}`}>
                 <nav className="flex flex-col space-y-1.5 mt-2">
                     <button
                         onClick={() => setSubTab('products')}
@@ -1708,7 +1706,7 @@ const WhatsAppDashboard = () => {
                         className={`text-left px-4 py-3 rounded-xl font-medium text-xs transition-all flex items-center gap-3 ${subTab === 'prerecorded' ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/30 font-semibold' : 'text-slate-400 hover:bg-teal-950/40 hover:text-slate-200'}`}
                     >
                         <Mic2 size={17} />
-                        Pre-recorded Voices
+                        Voice Assets
                     </button>
                 </nav>
 
@@ -1739,1037 +1737,1044 @@ const WhatsAppDashboard = () => {
             </div>
 
             {/* Main Content Workspace */}
-            <div className="flex-1 p-8 bg-[#071317] overflow-auto">
-                {/* ===== PRODUCTS TAB ===== */}
-                {subTab === 'products' && (
-                    <div>
-                        <div className="flex items-center justify-between mb-8 pb-4 border-b border-teal-900/30">
-                            <div>
-                                <h3 className="text-2xl font-bold text-slate-100 tracking-tight">Products Catalog</h3>
-                                <p className="text-slate-400 text-xs mt-1">Manage multi-image alignments, product videos, and punch-in audio notes for AI bot responses.</p>
+            <div className="flex-1 flex flex-col bg-[#071317] overflow-hidden">
+                <div className="h-14 border-b border-teal-900/30 flex items-center px-4 shrink-0">
+                    <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-teal-400 hover:text-white p-2 rounded-lg bg-teal-950/40 hover:bg-teal-900/60 transition-all cursor-pointer">
+                        <Menu size={20} />
+                    </button>
+                </div>
+                <div className="flex-1 p-8 overflow-auto">
+                    {/* ===== PRODUCTS TAB ===== */}
+                    {subTab === 'products' && (
+                        <div>
+                            <div className="flex items-center justify-between mb-8 pb-4 border-b border-teal-900/30">
+                                <div>
+                                    <h3 className="text-2xl font-bold text-slate-100 tracking-tight">Products Catalog</h3>
+                                    <p className="text-slate-400 text-xs mt-1">Manage multi-image alignments, product videos, and punch-in audio notes for AI bot responses.</p>
+                                </div>
+                                <button
+                                    onClick={() => { resetForm(); setShowAddModal(true); }}
+                                    className="bg-teal-600 hover:bg-teal-500 text-white px-5 py-2.5 rounded-xl font-semibold text-xs transition-all shadow-lg shadow-teal-600/30 flex items-center gap-2"
+                                >
+                                    <Plus size={16} />
+                                    Add New Product
+                                </button>
                             </div>
-                            <button
-                                onClick={() => { resetForm(); setShowAddModal(true); }}
-                                className="bg-teal-600 hover:bg-teal-500 text-white px-5 py-2.5 rounded-xl font-semibold text-xs transition-all shadow-lg shadow-teal-600/30 flex items-center gap-2"
-                            >
-                                <Plus size={16} />
-                                Add New Product
-                            </button>
-                        </div>
 
-                        {/* ===== MULTI-PHASE PRODUCT CREATION MODAL ===== */}
-                        {showAddModal && (
-                            <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto pt-10 pb-10">
-                                <div className="bg-[#09181E] border border-teal-800/40 rounded-2xl w-full max-w-3xl flex flex-col max-h-[90vh] shadow-2xl relative">
-                                    {/* Modal Header */}
-                                    <div className="px-6 py-4 bg-[#0B1D25] border-b border-teal-900/40 flex items-center justify-between flex-shrink-0 rounded-t-2xl z-10">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-lg bg-teal-500/10 border border-teal-500/30 p-1 flex items-center justify-center text-teal-400">
-                                                <Package size={18} />
+                            {/* ===== MULTI-PHASE PRODUCT CREATION MODAL ===== */}
+                            {showAddModal && (
+                                <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto pt-10 pb-10">
+                                    <div className="bg-[#09181E] border border-teal-800/40 rounded-2xl w-full max-w-3xl flex flex-col max-h-[90vh] shadow-2xl relative">
+                                        {/* Modal Header */}
+                                        <div className="px-6 py-4 bg-[#0B1D25] border-b border-teal-900/40 flex items-center justify-between flex-shrink-0 rounded-t-2xl z-10">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-lg bg-teal-500/10 border border-teal-500/30 p-1 flex items-center justify-center text-teal-400">
+                                                    <Package size={18} />
+                                                </div>
+                                                <h4 className="text-base font-bold text-slate-100">
+                                                    {editingProduct ? `Edit: ${editingProduct.title}` : 'Create Product Listing'}
+                                                </h4>
                                             </div>
-                                            <h4 className="text-base font-bold text-slate-100">
-                                                {editingProduct ? `Edit: ${editingProduct.title}` : 'Create Product Listing'}
-                                            </h4>
+                                            <button onClick={resetForm} className="text-slate-400 hover:text-slate-200 p-1 rounded-lg hover:bg-teal-950/50 transition-colors">
+                                                <X size={18} />
+                                            </button>
                                         </div>
-                                        <button onClick={resetForm} className="text-slate-400 hover:text-slate-200 p-1 rounded-lg hover:bg-teal-950/50 transition-colors">
-                                            <X size={18} />
-                                        </button>
-                                    </div>
 
-                                    {/* Stepper Header (3 Phases) */}
-                                    <div className="px-6 py-3 bg-[#071317] border-b border-teal-900/40 flex items-center justify-between gap-2">
-                                        {/* Phase 1 */}
-                                        <button
-                                            onClick={() => setActivePhase(1)}
-                                            className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all ${activePhase === 1
-                                                ? 'bg-teal-600 text-white shadow'
-                                                : activePhase > 1 ? 'bg-teal-950/60 text-teal-300 border border-teal-800/40' : 'bg-[#0E232B] text-slate-400'
-                                                }`}
-                                        >
-                                            <span className="w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px] font-bold">1</span>
-                                            Phase 1: Basic Details
-                                        </button>
+                                        {/* Stepper Header (3 Phases) */}
+                                        <div className="px-6 py-3 bg-[#071317] border-b border-teal-900/40 flex items-center justify-between gap-2">
+                                            {/* Phase 1 */}
+                                            <button
+                                                onClick={() => setActivePhase(1)}
+                                                className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all ${activePhase === 1
+                                                    ? 'bg-teal-600 text-white shadow'
+                                                    : activePhase > 1 ? 'bg-teal-950/60 text-teal-300 border border-teal-800/40' : 'bg-[#0E232B] text-slate-400'
+                                                    }`}
+                                            >
+                                                <span className="w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px] font-bold">1</span>
+                                                Phase 1: Basic Details
+                                            </button>
 
-                                        <ChevronRight size={16} className="text-teal-900 flex-shrink-0" />
+                                            <ChevronRight size={16} className="text-teal-900 flex-shrink-0" />
 
-                                        {/* Phase 2 */}
-                                        <button
-                                            onClick={() => setActivePhase(2)}
-                                            className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all ${activePhase === 2
-                                                ? 'bg-teal-600 text-white shadow'
-                                                : activePhase > 2 ? 'bg-teal-950/60 text-teal-300 border border-teal-800/40' : 'bg-[#0E232B] text-slate-400'
-                                                }`}
-                                        >
-                                            <span className="w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px] font-bold">2</span>
-                                            Phase 2: Images & Video
-                                        </button>
+                                            {/* Phase 2 */}
+                                            <button
+                                                onClick={() => setActivePhase(2)}
+                                                className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all ${activePhase === 2
+                                                    ? 'bg-teal-600 text-white shadow'
+                                                    : activePhase > 2 ? 'bg-teal-950/60 text-teal-300 border border-teal-800/40' : 'bg-[#0E232B] text-slate-400'
+                                                    }`}
+                                            >
+                                                <span className="w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px] font-bold">2</span>
+                                                Phase 2: Images & Video
+                                            </button>
 
-                                        <ChevronRight size={16} className="text-teal-900 flex-shrink-0" />
+                                            <ChevronRight size={16} className="text-teal-900 flex-shrink-0" />
 
-                                        {/* Phase 3 */}
-                                        <button
-                                            onClick={() => setActivePhase(3)}
-                                            className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all ${activePhase === 3
-                                                ? 'bg-teal-600 text-white shadow'
-                                                : 'bg-[#0E232B] text-slate-400'
-                                                }`}
-                                        >
-                                            <span className="w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px] font-bold">3</span>
-                                            Phase 3: Voice Note Pitch
-                                        </button>
-                                    </div>
+                                            {/* Phase 3 */}
+                                            <button
+                                                onClick={() => setActivePhase(3)}
+                                                className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all ${activePhase === 3
+                                                    ? 'bg-teal-600 text-white shadow'
+                                                    : 'bg-[#0E232B] text-slate-400'
+                                                    }`}
+                                            >
+                                                <span className="w-5 h-5 rounded-full bg-black/30 flex items-center justify-center text-[10px] font-bold">3</span>
+                                                Phase 3: Voice Note Pitch
+                                            </button>
+                                        </div>
 
-                                    {/* Modal Body - Phase Content */}
-                                    <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
-                                        {/* PHASE 1: BASIC DETAILS */}
-                                        {activePhase === 1 && (
-                                            <div className="space-y-4">
-                                                <div className="flex items-center gap-2 text-teal-400 font-semibold text-xs uppercase tracking-wider mb-2">
-                                                    <FileText size={16} />
-                                                    Step 1 — Product Specifications
-                                                </div>
-
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    <div>
-                                                        <label className="block text-xs font-medium text-slate-300 mb-1.5">Product Title *</label>
-                                                        <input
-                                                            type="text"
-                                                            value={formData.title}
-                                                            onChange={e => setFormData({ ...formData, title: e.target.value })}
-                                                            className="w-full bg-[#050D10] border border-teal-900/50 rounded-lg px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
-                                                            placeholder="e.g. Air Jordan 1 Retro High"
-                                                        />
+                                        {/* Modal Body - Phase Content */}
+                                        <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                                            {/* PHASE 1: BASIC DETAILS */}
+                                            {activePhase === 1 && (
+                                                <div className="space-y-4">
+                                                    <div className="flex items-center gap-2 text-teal-400 font-semibold text-xs uppercase tracking-wider mb-2">
+                                                        <FileText size={16} />
+                                                        Step 1 — Product Specifications
                                                     </div>
-                                                    <div>
-                                                        <label className="block text-xs font-medium text-slate-300 mb-1.5">Brand Name</label>
-                                                        <input
-                                                            type="text"
-                                                            value={formData.brand}
-                                                            onChange={e => setFormData({ ...formData, brand: e.target.value })}
-                                                            className="w-full bg-[#050D10] border border-teal-900/50 rounded-lg px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
-                                                            placeholder="e.g. Nike"
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-xs font-medium text-slate-300 mb-1.5">Gender Category</label>
-                                                        <select
-                                                            value={formData.gender}
-                                                            onChange={e => setFormData({ ...formData, gender: e.target.value })}
-                                                            className="w-full bg-[#050D10] border border-teal-900/50 rounded-lg px-3.5 py-2.5 text-xs text-slate-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
-                                                        >
-                                                            <option value="men">Men</option>
-                                                            <option value="women">Women</option>
-                                                            <option value="unisex">Unisex</option>
-                                                        </select>
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-xs font-medium text-slate-300 mb-1.5">Color</label>
-                                                        <input
-                                                            type="text"
-                                                            value={formData.color}
-                                                            onChange={e => setFormData({ ...formData, color: e.target.value })}
-                                                            className="w-full bg-[#050D10] border border-teal-900/50 rounded-lg px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
-                                                            placeholder="e.g. Red / Black"
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-xs font-medium text-slate-300 mb-1.5">Original Size</label>
-                                                        <input
-                                                            type="text"
-                                                            value={formData.size_original}
-                                                            onChange={e => setFormData({ ...formData, size_original: e.target.value })}
-                                                            className="w-full bg-[#050D10] border border-teal-900/50 rounded-lg px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
-                                                            placeholder="e.g. US 10 / EU 44"
-                                                        />
-                                                    </div>
-                                                    <div className="grid grid-cols-2 gap-3">
+
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                         <div>
-                                                            <label className="block text-xs font-medium text-slate-300 mb-1.5">Starting Price *</label>
+                                                            <label className="block text-xs font-medium text-slate-300 mb-1.5">Product Title *</label>
                                                             <input
-                                                                type="number"
-                                                                value={formData.starting_price}
-                                                                onChange={e => setFormData({ ...formData, starting_price: e.target.value })}
+                                                                type="text"
+                                                                value={formData.title}
+                                                                onChange={e => setFormData({ ...formData, title: e.target.value })}
                                                                 className="w-full bg-[#050D10] border border-teal-900/50 rounded-lg px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
-                                                                placeholder="150"
+                                                                placeholder="e.g. Air Jordan 1 Retro High"
                                                             />
                                                         </div>
                                                         <div>
-                                                            <label className="block text-xs font-medium text-slate-300 mb-1.5">Minimum Price *</label>
+                                                            <label className="block text-xs font-medium text-slate-300 mb-1.5">Brand Name</label>
                                                             <input
-                                                                type="number"
-                                                                value={formData.minimum_price}
-                                                                onChange={e => setFormData({ ...formData, minimum_price: e.target.value })}
+                                                                type="text"
+                                                                value={formData.brand}
+                                                                onChange={e => setFormData({ ...formData, brand: e.target.value })}
                                                                 className="w-full bg-[#050D10] border border-teal-900/50 rounded-lg px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
-                                                                placeholder="100"
+                                                                placeholder="e.g. Nike"
                                                             />
                                                         </div>
-                                                    </div>
-                                                </div>
-
-                                                <div>
-                                                    <label className="block text-xs font-medium text-slate-300 mb-1.5">Product Description & Notes</label>
-                                                    <textarea
-                                                        value={formData.description}
-                                                        onChange={e => setFormData({ ...formData, description: e.target.value })}
-                                                        rows={3}
-                                                        className="w-full bg-[#050D10] border border-teal-900/50 rounded-lg px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none resize-none"
-                                                        placeholder="Provide description or selling instructions for the AI bot..."
-                                                    />
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* PHASE 2: IMAGES & VIDEO ALIGNMENT */}
-                                        {activePhase === 2 && (
-                                            <div className="space-y-6">
-                                                <div className="flex items-center gap-2 text-teal-400 font-semibold text-xs uppercase tracking-wider mb-2">
-                                                    <Camera size={16} />
-                                                    Step 2 — Multi-Image Gallery & Alignment Controls
-                                                </div>
-
-                                                {/* Images Upload */}
-                                                <div>
-                                                    <label className="block text-xs font-semibold text-slate-300 mb-2 flex items-center justify-between">
-                                                        <span>Product Gallery Images</span>
-                                                        <span className="text-teal-400 font-semibold text-[11px]">Position 1 (Leftmost) = MAIN THUMBNAIL</span>
-                                                    </label>
-                                                    <div className="border-2 border-dashed border-teal-900/40 hover:border-teal-500 rounded-xl p-5 bg-[#050D10] hover:bg-[#08151A] transition-all text-center group cursor-pointer">
-                                                        <input
-                                                            type="file"
-                                                            multiple
-                                                            accept="image/*"
-                                                            onChange={handleImageSelect}
-                                                            className="hidden"
-                                                            id="product-images-input"
-                                                        />
-                                                        <label htmlFor="product-images-input" className="cursor-pointer block">
-                                                            <div className="w-10 h-10 rounded-full bg-teal-950/60 group-hover:bg-teal-600/20 text-teal-400 flex items-center justify-center mx-auto mb-2 transition-colors">
-                                                                <Upload size={20} />
-                                                            </div>
-                                                            <span className="text-xs font-semibold text-teal-400 group-hover:underline">Click to add product photos</span>
-                                                            <p className="text-[11px] text-slate-500 mt-1">PNG, JPG, WEBP formats allowed (Max 10MB each)</p>
-                                                        </label>
-                                                    </div>
-
-                                                    {/* Selected Images List with Alignment & Reordering controls */}
-                                                    {productImages.length > 0 && (
-                                                        <div className="mt-4 space-y-2">
-                                                            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                                                                Reorder & Align Images ({productImages.length} items)
-                                                            </p>
-                                                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                                                                {productImages.map((img, i) => (
-                                                                    <div key={img.id} className="bg-[#050D10] border border-teal-900/50 rounded-xl p-2.5 flex flex-col justify-between space-y-2 group relative">
-                                                                        <div className="h-28 rounded-lg overflow-hidden bg-black relative">
-                                                                            <img src={img.url} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
-                                                                            {i === 0 ? (
-                                                                                <span className="absolute top-1 left-1 bg-teal-600 text-white text-[9px] px-2 py-0.5 rounded font-bold shadow flex items-center gap-1">
-                                                                                    <Star size={10} fill="currentColor" /> MAIN THUMBNAIL
-                                                                                </span>
-                                                                            ) : (
-                                                                                <span className="absolute top-1 left-1 bg-black/60 text-slate-300 text-[9px] px-1.5 py-0.5 rounded font-medium">
-                                                                                    #{i + 1}
-                                                                                </span>
-                                                                            )}
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={() => removeImageItem(i)}
-                                                                                className="absolute top-1 right-1 bg-red-600/80 hover:bg-red-600 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity"
-                                                                                title="Remove Image"
-                                                                            >
-                                                                                <X size={12} />
-                                                                            </button>
-                                                                        </div>
-
-                                                                        {/* Alignment & Reorder Action Bar */}
-                                                                        <div className="flex items-center justify-between gap-1 pt-1 border-t border-teal-900/30">
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={() => makeMainImage(i)}
-                                                                                disabled={i === 0}
-                                                                                className="text-[10px] font-semibold px-2 py-1 rounded bg-teal-950/60 hover:bg-teal-600 text-teal-300 hover:text-white border border-teal-800/40 disabled:opacity-30 disabled:hover:bg-teal-950/60 disabled:hover:text-teal-300 transition-colors flex items-center gap-1"
-                                                                                title="Set as Main Thumbnail"
-                                                                            >
-                                                                                <Star size={10} /> Set Main
-                                                                            </button>
-
-                                                                            <div className="flex items-center gap-1">
-                                                                                <button
-                                                                                    type="button"
-                                                                                    onClick={() => moveImageLeft(i)}
-                                                                                    disabled={i === 0}
-                                                                                    className="p-1 rounded bg-[#0A1A20] text-slate-300 hover:bg-teal-950 border border-teal-900/40 disabled:opacity-30"
-                                                                                    title="Move Left"
-                                                                                >
-                                                                                    <ArrowLeft size={12} />
-                                                                                </button>
-                                                                                <button
-                                                                                    type="button"
-                                                                                    onClick={() => moveImageRight(i)}
-                                                                                    disabled={i === productImages.length - 1}
-                                                                                    className="p-1 rounded bg-[#0A1A20] text-slate-300 hover:bg-teal-950 border border-teal-900/40 disabled:opacity-30"
-                                                                                    title="Move Right"
-                                                                                >
-                                                                                    <ArrowRight size={12} />
-                                                                                </button>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                {/* Video Upload */}
-                                                <div className="pt-4 border-t border-teal-900/30">
-                                                    <label className="block text-xs font-semibold text-slate-300 mb-2 flex items-center justify-between">
-                                                        <span className="flex items-center gap-2">
-                                                            <Video size={16} className="text-teal-400" />
-                                                            Product Video Showcase (Optional)
-                                                        </span>
-                                                        <span className="text-slate-500 font-normal text-[11px]">MP4, WEBM format (Max 50MB)</span>
-                                                    </label>
-
-                                                    {videoPreviewUrl ? (
-                                                        <div className="relative rounded-xl border border-teal-900/50 overflow-hidden bg-black p-2">
-                                                            <video src={videoPreviewUrl} controls className="w-full max-h-48 rounded-lg object-contain mx-auto" />
-                                                            <button
-                                                                type="button"
-                                                                onClick={removeVideo}
-                                                                className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-lg"
+                                                        <div>
+                                                            <label className="block text-xs font-medium text-slate-300 mb-1.5">Gender Category</label>
+                                                            <select
+                                                                value={formData.gender}
+                                                                onChange={e => setFormData({ ...formData, gender: e.target.value })}
+                                                                className="w-full bg-[#050D10] border border-teal-900/50 rounded-lg px-3.5 py-2.5 text-xs text-slate-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
                                                             >
-                                                                <Trash2 size={14} /> Remove Video
-                                                            </button>
+                                                                <option value="men">Men</option>
+                                                                <option value="women">Women</option>
+                                                                <option value="unisex">Unisex</option>
+                                                            </select>
                                                         </div>
-                                                    ) : (
+                                                        <div>
+                                                            <label className="block text-xs font-medium text-slate-300 mb-1.5">Color</label>
+                                                            <input
+                                                                type="text"
+                                                                value={formData.color}
+                                                                onChange={e => setFormData({ ...formData, color: e.target.value })}
+                                                                className="w-full bg-[#050D10] border border-teal-900/50 rounded-lg px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
+                                                                placeholder="e.g. Red / Black"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-xs font-medium text-slate-300 mb-1.5">Original Size</label>
+                                                            <input
+                                                                type="text"
+                                                                value={formData.size_original}
+                                                                onChange={e => setFormData({ ...formData, size_original: e.target.value })}
+                                                                className="w-full bg-[#050D10] border border-teal-900/50 rounded-lg px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
+                                                                placeholder="e.g. US 10 / EU 44"
+                                                            />
+                                                        </div>
+                                                        <div className="grid grid-cols-2 gap-3">
+                                                            <div>
+                                                                <label className="block text-xs font-medium text-slate-300 mb-1.5">Starting Price *</label>
+                                                                <input
+                                                                    type="number"
+                                                                    value={formData.starting_price}
+                                                                    onChange={e => setFormData({ ...formData, starting_price: e.target.value })}
+                                                                    className="w-full bg-[#050D10] border border-teal-900/50 rounded-lg px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
+                                                                    placeholder="150"
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <label className="block text-xs font-medium text-slate-300 mb-1.5">Minimum Price *</label>
+                                                                <input
+                                                                    type="number"
+                                                                    value={formData.minimum_price}
+                                                                    onChange={e => setFormData({ ...formData, minimum_price: e.target.value })}
+                                                                    className="w-full bg-[#050D10] border border-teal-900/50 rounded-lg px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
+                                                                    placeholder="100"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-xs font-medium text-slate-300 mb-1.5">Product Description & Notes</label>
+                                                        <textarea
+                                                            value={formData.description}
+                                                            onChange={e => setFormData({ ...formData, description: e.target.value })}
+                                                            rows={3}
+                                                            className="w-full bg-[#050D10] border border-teal-900/50 rounded-lg px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none resize-none"
+                                                            placeholder="Provide description or selling instructions for the AI bot..."
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* PHASE 2: IMAGES & VIDEO ALIGNMENT */}
+                                            {activePhase === 2 && (
+                                                <div className="space-y-6">
+                                                    <div className="flex items-center gap-2 text-teal-400 font-semibold text-xs uppercase tracking-wider mb-2">
+                                                        <Camera size={16} />
+                                                        Step 2 — Multi-Image Gallery & Alignment Controls
+                                                    </div>
+
+                                                    {/* Images Upload */}
+                                                    <div>
+                                                        <label className="block text-xs font-semibold text-slate-300 mb-2 flex items-center justify-between">
+                                                            <span>Product Gallery Images</span>
+                                                            <span className="text-teal-400 font-semibold text-[11px]">Position 1 (Leftmost) = MAIN THUMBNAIL</span>
+                                                        </label>
                                                         <div className="border-2 border-dashed border-teal-900/40 hover:border-teal-500 rounded-xl p-5 bg-[#050D10] hover:bg-[#08151A] transition-all text-center group cursor-pointer">
                                                             <input
                                                                 type="file"
-                                                                accept="video/*"
-                                                                onChange={handleVideoSelect}
+                                                                multiple
+                                                                accept="image/*"
+                                                                onChange={handleImageSelect}
                                                                 className="hidden"
-                                                                id="product-video-input"
+                                                                id="product-images-input"
                                                             />
-                                                            <label htmlFor="product-video-input" className="cursor-pointer block">
+                                                            <label htmlFor="product-images-input" className="cursor-pointer block">
                                                                 <div className="w-10 h-10 rounded-full bg-teal-950/60 group-hover:bg-teal-600/20 text-teal-400 flex items-center justify-center mx-auto mb-2 transition-colors">
-                                                                    <Video size={20} />
+                                                                    <Upload size={20} />
                                                                 </div>
-                                                                <span className="text-xs font-semibold text-teal-400 group-hover:underline">Upload Product Video Showcase</span>
+                                                                <span className="text-xs font-semibold text-teal-400 group-hover:underline">Click to add product photos</span>
+                                                                <p className="text-[11px] text-slate-500 mt-1">PNG, JPG, WEBP formats allowed (Max 10MB each)</p>
                                                             </label>
                                                         </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
 
-                                        {/* PHASE 3: VOICE NOTE RECORDING & TIMELINE PUNCH-IN OVERWRITE */}
-                                        {activePhase === 3 && (
-                                            <div className="space-y-6">
-                                                <div className="flex items-center gap-2 text-teal-400 font-semibold text-xs uppercase tracking-wider mb-2">
-                                                    <Mic size={16} />
-                                                    Step 3 — Product Voice Note Pitch & Timeline Studio
-                                                </div>
+                                                        {/* Selected Images List with Alignment & Reordering controls */}
+                                                        {productImages.length > 0 && (
+                                                            <div className="mt-4 space-y-2">
+                                                                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                                                    Reorder & Align Images ({productImages.length} items)
+                                                                </p>
+                                                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                                                                    {productImages.map((img, i) => (
+                                                                        <div key={img.id} className="bg-[#050D10] border border-teal-900/50 rounded-xl p-2.5 flex flex-col justify-between space-y-2 group relative">
+                                                                            <div className="h-28 rounded-lg overflow-hidden bg-black relative">
+                                                                                <img src={img.url} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
+                                                                                {i === 0 ? (
+                                                                                    <span className="absolute top-1 left-1 bg-teal-600 text-white text-[9px] px-2 py-0.5 rounded font-bold shadow flex items-center gap-1">
+                                                                                        <Star size={10} fill="currentColor" /> MAIN THUMBNAIL
+                                                                                    </span>
+                                                                                ) : (
+                                                                                    <span className="absolute top-1 left-1 bg-black/60 text-slate-300 text-[9px] px-1.5 py-0.5 rounded font-medium">
+                                                                                        #{i + 1}
+                                                                                    </span>
+                                                                                )}
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => removeImageItem(i)}
+                                                                                    className="absolute top-1 right-1 bg-red-600/80 hover:bg-red-600 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity"
+                                                                                    title="Remove Image"
+                                                                                >
+                                                                                    <X size={12} />
+                                                                                </button>
+                                                                            </div>
 
-                                                <div className="bg-[#050D10] border border-teal-900/40 rounded-xl p-6 text-center">
+                                                                            {/* Alignment & Reorder Action Bar */}
+                                                                            <div className="flex items-center justify-between gap-1 pt-1 border-t border-teal-900/30">
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => makeMainImage(i)}
+                                                                                    disabled={i === 0}
+                                                                                    className="text-[10px] font-semibold px-2 py-1 rounded bg-teal-950/60 hover:bg-teal-600 text-teal-300 hover:text-white border border-teal-800/40 disabled:opacity-30 disabled:hover:bg-teal-950/60 disabled:hover:text-teal-300 transition-colors flex items-center gap-1"
+                                                                                    title="Set as Main Thumbnail"
+                                                                                >
+                                                                                    <Star size={10} /> Set Main
+                                                                                </button>
 
-                                                    {/* Recording Controls */}
-                                                    <div className="flex flex-col items-center justify-center gap-4">
-                                                        {!isRecording && !audioPreviewUrl && !isTimelineRecording && (
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => startRecording()}
-                                                                className="w-[60px] h-[60px] rounded-full bg-[#FF3B30] hover:bg-red-500 text-white flex items-center justify-center shadow-lg shadow-red-500/40 transition-all transform hover:scale-105"
-                                                            >
-                                                                <Mic size={28} />
-                                                            </button>
+                                                                                <div className="flex items-center gap-1">
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => moveImageLeft(i)}
+                                                                                        disabled={i === 0}
+                                                                                        className="p-1 rounded bg-[#0A1A20] text-slate-300 hover:bg-teal-950 border border-teal-900/40 disabled:opacity-30"
+                                                                                        title="Move Left"
+                                                                                    >
+                                                                                        <ArrowLeft size={12} />
+                                                                                    </button>
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => moveImageRight(i)}
+                                                                                        disabled={i === productImages.length - 1}
+                                                                                        className="p-1 rounded bg-[#0A1A20] text-slate-300 hover:bg-teal-950 border border-teal-900/40 disabled:opacity-30"
+                                                                                        title="Move Right"
+                                                                                    >
+                                                                                        <ArrowRight size={12} />
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
                                                         )}
+                                                    </div>
 
-                                                        {isRecording && !isTimelineRecording && (
-                                                            <div className="flex items-center w-full max-w-[320px] mx-auto relative h-[60px]">
+                                                    {/* Video Upload */}
+                                                    <div className="pt-4 border-t border-teal-900/30">
+                                                        <label className="block text-xs font-semibold text-slate-300 mb-2 flex items-center justify-between">
+                                                            <span className="flex items-center gap-2">
+                                                                <Video size={16} className="text-teal-400" />
+                                                                Product Video Showcase (Optional)
+                                                            </span>
+                                                            <span className="text-slate-500 font-normal text-[11px]">MP4, WEBM format (Max 50MB)</span>
+                                                        </label>
+
+                                                        {videoPreviewUrl ? (
+                                                            <div className="relative rounded-xl border border-teal-900/50 overflow-hidden bg-black p-2">
+                                                                <video src={videoPreviewUrl} controls className="w-full max-h-48 rounded-lg object-contain mx-auto" />
                                                                 <button
                                                                     type="button"
-                                                                    onClick={isPaused ? resumeRecording : pauseRecording}
-                                                                    className="absolute left-0 z-10 w-[60px] h-[60px] bg-[#FF3B30] hover:bg-red-500 rounded-full flex items-center justify-center shadow-lg shadow-red-500/40 transition-colors cursor-pointer"
-                                                                    title={isPaused ? "Resume Recording" : "Pause Recording"}
+                                                                    onClick={removeVideo}
+                                                                    className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-lg"
                                                                 >
-                                                                    {isPaused ? <Play className="text-white fill-current ml-1" size={24} /> : <Pause className="text-white fill-current" size={24} />}
+                                                                    <Trash2 size={14} /> Remove Video
                                                                 </button>
-                                                                
-                                                                <div className="ml-7 bg-[#FF3B30] h-[48px] w-full rounded-r-full flex items-center pl-10 pr-2 justify-between gap-[3px] shadow-sm overflow-hidden animate-fade-in-right">
-                                                                    <div className="flex items-center gap-1.5 text-white font-mono text-sm ml-1">
-                                                                        <span className={`w-2 h-2 rounded-full ${isPaused ? 'bg-amber-400' : 'bg-white animate-pulse'}`} />
-                                                                        {formatTimer(recordingTime)}
+                                                            </div>
+                                                        ) : (
+                                                            <div className="border-2 border-dashed border-teal-900/40 hover:border-teal-500 rounded-xl p-5 bg-[#050D10] hover:bg-[#08151A] transition-all text-center group cursor-pointer">
+                                                                <input
+                                                                    type="file"
+                                                                    accept="video/*"
+                                                                    onChange={handleVideoSelect}
+                                                                    className="hidden"
+                                                                    id="product-video-input"
+                                                                />
+                                                                <label htmlFor="product-video-input" className="cursor-pointer block">
+                                                                    <div className="w-10 h-10 rounded-full bg-teal-950/60 group-hover:bg-teal-600/20 text-teal-400 flex items-center justify-center mx-auto mb-2 transition-colors">
+                                                                        <Video size={20} />
+                                                                    </div>
+                                                                    <span className="text-xs font-semibold text-teal-400 group-hover:underline">Upload Product Video Showcase</span>
+                                                                </label>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* PHASE 3: VOICE NOTE RECORDING & TIMELINE PUNCH-IN OVERWRITE */}
+                                            {activePhase === 3 && (
+                                                <div className="space-y-6">
+                                                    <div className="flex items-center gap-2 text-teal-400 font-semibold text-xs uppercase tracking-wider mb-2">
+                                                        <Mic size={16} />
+                                                        Step 3 — Product Voice Note Pitch & Timeline Studio
+                                                    </div>
+
+                                                    <div className="bg-[#050D10] border border-teal-900/40 rounded-xl p-6 text-center">
+
+                                                        {/* Recording Controls */}
+                                                        <div className="flex flex-col items-center justify-center gap-4">
+                                                            {!isRecording && !audioPreviewUrl && !isTimelineRecording && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => startRecording()}
+                                                                    className="w-[60px] h-[60px] rounded-full bg-[#FF3B30] hover:bg-red-500 text-white flex items-center justify-center shadow-lg shadow-red-500/40 transition-all transform hover:scale-105"
+                                                                >
+                                                                    <Mic size={28} />
+                                                                </button>
+                                                            )}
+
+                                                            {isRecording && !isTimelineRecording && (
+                                                                <div className="flex items-center w-full max-w-[320px] mx-auto relative h-[60px]">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={isPaused ? resumeRecording : pauseRecording}
+                                                                        className="absolute left-0 z-10 w-[60px] h-[60px] bg-[#FF3B30] hover:bg-red-500 rounded-full flex items-center justify-center shadow-lg shadow-red-500/40 transition-colors cursor-pointer"
+                                                                        title={isPaused ? "Resume Recording" : "Pause Recording"}
+                                                                    >
+                                                                        {isPaused ? <Play className="text-white fill-current ml-1" size={24} /> : <Pause className="text-white fill-current" size={24} />}
+                                                                    </button>
+
+                                                                    <div className="ml-7 bg-[#FF3B30] h-[48px] w-full rounded-r-full flex items-center pl-10 pr-2 justify-between gap-[3px] shadow-sm overflow-hidden animate-fade-in-right">
+                                                                        <div className="flex items-center gap-1.5 text-white font-mono text-sm ml-1">
+                                                                            <span className={`w-2 h-2 rounded-full ${isPaused ? 'bg-amber-400' : 'bg-white animate-pulse'}`} />
+                                                                            {formatTimer(recordingTime)}
+                                                                        </div>
+
+                                                                        <div className="flex items-center justify-between gap-[3px] h-full flex-1 mx-2 overflow-hidden">
+                                                                            {visualizerData.map((h, i) => (
+                                                                                <div
+                                                                                    key={i}
+                                                                                    className={`w-[3px] rounded-full transition-all duration-150 ${isPaused ? 'bg-white/40' : 'bg-white'}`}
+                                                                                    style={{ height: `${isPaused ? 15 : h}%` }}
+                                                                                />
+                                                                            ))}
+                                                                        </div>
+
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={stopRecording}
+                                                                            className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center transition-colors flex-shrink-0 mr-1"
+                                                                            title="Finish Recording"
+                                                                        >
+                                                                            <Square className="text-white fill-current" size={12} />
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
+                                                            {/* Recorded Audio Studio Player & Timeline Punch-In Overwrite */}
+                                                            {audioPreviewUrl && (!isRecording || isTimelineRecording) && (
+                                                                <div className="w-full max-w-lg mx-auto space-y-4">
+                                                                    {/* Custom Red Pill Audio Player UI */}
+                                                                    <div
+                                                                        onClick={togglePlayPause}
+                                                                        className="flex items-center w-full max-w-[320px] mx-auto relative h-[60px] cursor-pointer hover:scale-[1.02] transition-transform"
+                                                                        title="Click to Play/Pause"
+                                                                    >
+                                                                        <audio
+                                                                            ref={audioElementRef}
+                                                                            src={audioPreviewUrl}
+                                                                            className="hidden"
+                                                                            onLoadedMetadata={() => {
+                                                                                if (audioElementRef.current) setAudioDuration(audioElementRef.current.duration || 0);
+                                                                            }}
+                                                                            onTimeUpdate={() => {
+                                                                                if (audioElementRef.current) setSeekTime(audioElementRef.current.currentTime || 0);
+                                                                            }}
+                                                                        />
+                                                                        <div className="absolute left-0 z-10 w-[60px] h-[60px] bg-[#FF3B30] rounded-full flex items-center justify-center shadow-lg shadow-red-500/40">
+                                                                            {isPlaying ? <Pause className="text-white fill-current" size={24} /> : <Play className="text-white fill-current ml-1" size={24} />}
+                                                                        </div>
+                                                                        <div className="ml-7 bg-[#FF3B30] h-[48px] w-full rounded-r-full flex items-center pl-10 pr-6 justify-between gap-[3px] shadow-sm overflow-hidden">
+                                                                            {new Array(35).fill(10).map((_, i) => {
+                                                                                const peakIdx = Math.floor((i / 35) * (waveformPeaks.length || 35));
+                                                                                const heightPercent = waveformPeaks.length > 0 ? waveformPeaks[peakIdx] : (Math.sin(i * 0.8) * 30 + 50);
+                                                                                const progressPercent = audioDuration > 0 ? seekTime / audioDuration : 0;
+                                                                                const isActive = (i / 35) <= progressPercent;
+                                                                                return (
+                                                                                    <div
+                                                                                        key={i}
+                                                                                        className={`w-[3px] rounded-full transition-all duration-150 ${isActive ? 'bg-white' : 'bg-white/40'}`}
+                                                                                        style={{ height: `${heightPercent}%` }}
+                                                                                    />
+                                                                                );
+                                                                            })}
+                                                                        </div>
                                                                     </div>
 
-                                                                    <div className="flex items-center justify-between gap-[3px] h-full flex-1 mx-2 overflow-hidden">
-                                                                        {visualizerData.map((h, i) => (
-                                                                            <div
-                                                                                key={i}
-                                                                                className={`w-[3px] rounded-full transition-all duration-150 ${isPaused ? 'bg-white/40' : 'bg-white'}`}
-                                                                                style={{ height: `${isPaused ? 15 : h}%` }}
-                                                                            />
-                                                                        ))}
-                                                                    </div>
+                                                                    {/* Toggle Button for CapCut Visual Editor */}
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => setShowTimelineEditor(!showTimelineEditor)}
+                                                                        className="w-full bg-[#0B1E26] hover:bg-teal-950 text-teal-300 border border-teal-800/40 py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow transition-all cursor-pointer"
+                                                                    >
+                                                                        {showTimelineEditor ? 'Hide Editor' : 'Edit or Voice over'}
+                                                                    </button>
+
+                                                                    {/* CapCut Visual Multi-Track Timeline Studio Drawer */}
+                                                                    {showTimelineEditor && (
+                                                                        <div className="bg-[#050D10] p-4.5 rounded-2xl border border-teal-500/40 shadow-2xl space-y-4 transition-all">
+                                                                            {/* Top Control Toolbar with Edit Icon */}
+                                                                            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-teal-900/40 pb-3">
+                                                                                <div className="flex items-center gap-2">
+                                                                                    <div className="w-7 h-7 rounded-lg bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400">
+                                                                                        <Edit3 size={15} />
+                                                                                    </div>
+                                                                                </div>
+
+                                                                                {/* Action Bar (Icons Only in One Line) */}
+                                                                                <div className="flex items-center gap-2">
+                                                                                    {/* PLAY / PAUSE BUTTON */}
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={togglePlayPause}
+                                                                                        className="bg-teal-600 hover:bg-teal-500 text-white w-8 h-8 rounded-lg flex items-center justify-center shadow transition-all cursor-pointer"
+                                                                                        title="Play or Pause audio (Shortcut: Spacebar)"
+                                                                                    >
+                                                                                        {isPlaying ? <Pause size={14} /> : <Play size={14} />}
+                                                                                    </button>
+
+                                                                                    {/* RECORD VOICE-OVER */}
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={startTimelineRecording}
+                                                                                        className={`${isTimelineRecording ? 'bg-red-500 animate-pulse' : 'bg-red-600 hover:bg-red-500'} text-white w-8 h-8 rounded-lg flex items-center justify-center shadow transition-all cursor-pointer`}
+                                                                                        title={isTimelineRecording ? "Stop Recording" : "Record Voice-Over at playhead"}
+                                                                                    >
+                                                                                        {isTimelineRecording ? <Square size={12} className="fill-current" /> : <Mic size={14} />}
+                                                                                    </button>
+
+                                                                                    {/* CUT / SPLIT AT PLAYHEAD */}
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={splitClipAtPlayhead}
+                                                                                        className="bg-teal-600 hover:bg-teal-500 text-white w-8 h-8 rounded-lg flex items-center justify-center shadow transition-all cursor-pointer"
+                                                                                        title="Cut clip at playhead"
+                                                                                    >
+                                                                                        <Scissors size={14} />
+                                                                                    </button>
+
+                                                                                    {/* ZOOM CONTROLS */}
+                                                                                    <div className="flex items-center gap-1 ml-2 border-l border-teal-900/40 pl-2">
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            onClick={() => setTimelineZoom(prev => Math.max(1, prev - 0.5))}
+                                                                                            className="bg-[#0B1E26] hover:bg-teal-900/50 text-teal-300 w-7 h-7 rounded-md flex items-center justify-center transition-all cursor-pointer border border-teal-900/40"
+                                                                                            title="Zoom Out (Ctrl -)"
+                                                                                        >
+                                                                                            <ZoomOut size={13} />
+                                                                                        </button>
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            onClick={() => setTimelineZoom(prev => Math.min(5, prev + 0.5))}
+                                                                                            className="bg-[#0B1E26] hover:bg-teal-900/50 text-teal-300 w-7 h-7 rounded-md flex items-center justify-center transition-all cursor-pointer border border-teal-900/40"
+                                                                                            title="Zoom In (Ctrl +)"
+                                                                                        >
+                                                                                            <ZoomIn size={13} />
+                                                                                        </button>
+                                                                                        {timelineZoom !== 1 && (
+                                                                                            <button
+                                                                                                type="button"
+                                                                                                onClick={() => setTimelineZoom(1)}
+                                                                                                className="bg-[#0B1E26] hover:bg-teal-900/50 text-teal-300 w-7 h-7 rounded-md flex items-center justify-center transition-all cursor-pointer border border-teal-900/40"
+                                                                                                title="Reset Zoom"
+                                                                                            >
+                                                                                                <Minimize2 size={13} />
+                                                                                            </button>
+                                                                                        )}
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            {/* Playhead Info Row */}
+                                                                            <div className="flex items-center justify-between px-1 mb-2">
+                                                                                <div className="text-[10px] font-mono text-teal-400">
+                                                                                    Playhead: {formatTimer(seekTime)} / {formatTimer(audioDuration)}
+                                                                                </div>
+                                                                            </div>
+
+                                                                            {/* Multi-Track Timeline Box */}
+
+                                                                            <div className="space-y-2 text-left">
+                                                                                {/* Scrollable Timeline Wrapper */}
+                                                                                <div
+                                                                                    ref={timelineScrollRef}
+                                                                                    className="overflow-x-auto overflow-y-hidden rounded-xl border border-teal-900/60 bg-[#08181F] shadow-inner custom-scrollbar"
+                                                                                    style={{ maxHeight: '160px' }}
+                                                                                >
+                                                                                    {/* Interactive Timeline Canvas spanning both tracks */}
+                                                                                    <div
+                                                                                        ref={timelineTrackRef}
+                                                                                        onMouseDown={handleTimelineMouseDown}
+                                                                                        className="relative cursor-pointer select-none group space-y-1 p-1"
+                                                                                        style={{ minWidth: `${timelineZoom * 100}%` }}
+                                                                                    >
+                                                                                        {/* TRACK 1: MAIN AUDIO TRACK */}
+                                                                                        <div className="relative h-14 bg-[#051116] rounded-lg border border-teal-900/40 overflow-hidden flex items-center px-2">
+                                                                                            {/* Render Main Audio Clips (Movable with internal waveform peaks & per-clip crop handles) */}
+                                                                                            {audioDuration > 0 && mainClips.map((clip, idx) => {
+                                                                                                if (clip.isDeleted) return null;
+                                                                                                const leftPercent = (clip.start / audioDuration) * 100;
+                                                                                                const widthPercent = ((clip.end - clip.start) / audioDuration) * 100;
+                                                                                                const isSelected = selectedClipId === clip.id;
+
+                                                                                                // Slice peak waveform for this clip's source PCM region so waveform moves WITH the clip box!
+                                                                                                const totalPeaks = waveformPeaks.length > 0 ? waveformPeaks.length : 72;
+                                                                                                const srcStart = clip.sourceStart !== undefined ? clip.sourceStart : clip.start;
+                                                                                                const srcEnd = srcStart + (clip.end - clip.start);
+                                                                                                const startIdx = Math.max(0, Math.floor((srcStart / audioDuration) * totalPeaks));
+                                                                                                const endIdx = Math.min(totalPeaks, Math.max(startIdx + 4, Math.ceil((srcEnd / audioDuration) * totalPeaks)));
+                                                                                                const clipPeaks = (waveformPeaks.length > 0 ? waveformPeaks : Array.from({ length: 72 }).map(() => 45)).slice(startIdx, endIdx);
+
+                                                                                                return (
+                                                                                                    <div
+                                                                                                        key={clip.id}
+                                                                                                        onMouseDown={(e) => handleClipMouseDown(e, clip)}
+                                                                                                        onClick={(e) => {
+                                                                                                            e.stopPropagation();
+                                                                                                            setSelectedClipId(clip.id);
+                                                                                                            setSelectedTrack('main');
+                                                                                                        }}
+                                                                                                        className={`absolute top-1 bottom-1 rounded-lg border-2 flex items-center justify-between px-2 transition-all cursor-grab active:cursor-grabbing z-10 overflow-hidden ${isSelected
+                                                                                                            ? 'bg-teal-500/50 border-teal-400 shadow-[0_0_14px_rgba(20,184,166,0.7)] text-white ring-2 ring-teal-300'
+                                                                                                            : 'bg-teal-950/90 border-teal-800/80 hover:border-teal-400 text-teal-200'
+                                                                                                            }`}
+                                                                                                        style={{ left: `${leftPercent}%`, width: `${widthPercent}%` }}
+                                                                                                        title="Drag clip to move. Drag left/right handle edges to crop/trim clip."
+                                                                                                    >
+                                                                                                        {/* Left Edge Crop Handle */}
+                                                                                                        <div
+                                                                                                            onMouseDown={(e) => handleClipTrimMouseDown(e, clip, 'start')}
+                                                                                                            onClick={(e) => e.stopPropagation()}
+                                                                                                            className="absolute left-0 top-0 bottom-0 w-2 bg-teal-400 hover:bg-white cursor-ew-resize z-30 flex items-center justify-center transition-colors group/leftTrim"
+                                                                                                            title="Drag left edge to crop/trim start"
+                                                                                                        >
+                                                                                                            <div className="w-0.5 h-3.5 bg-teal-950 rounded-full" />
+                                                                                                        </div>
+
+                                                                                                        {/* Waveform Peaks INSIDE the clip box so voice moves WITH the clip! */}
+                                                                                                        <div className="absolute inset-0 flex items-center justify-between px-2 opacity-40 pointer-events-none z-0">
+                                                                                                            {clipPeaks.map((height, i) => (
+                                                                                                                <div
+                                                                                                                    key={i}
+                                                                                                                    className="w-0.5 bg-teal-300 rounded-full"
+                                                                                                                    style={{ height: `${height}%` }}
+                                                                                                                />
+                                                                                                            ))}
+                                                                                                        </div>
+
+                                                                                                        <div className="flex items-center gap-1 text-[10px] font-bold truncate pointer-events-none z-10 pl-1.5">
+                                                                                                            <Move size={11} className="text-teal-400/90 flex-shrink-0" />
+                                                                                                            <span className="truncate">{clip.name || `Main Clip #${idx + 1}`} ({formatTimer(clip.start)} - {formatTimer(clip.end)})</span>
+                                                                                                        </div>
+                                                                                                        {isSelected && (
+                                                                                                            <div className="flex items-center gap-1 z-20 mr-1.5">
+                                                                                                                <button
+                                                                                                                    type="button"
+                                                                                                                    onClick={(e) => {
+                                                                                                                        e.stopPropagation();
+                                                                                                                        deleteSelectedClip();
+                                                                                                                    }}
+                                                                                                                    className="p-1 bg-red-600 hover:bg-red-500 text-white rounded cursor-pointer transition-colors shadow flex items-center justify-center"
+                                                                                                                    title="Delete this selected clip piece (Or press Delete / Backspace key)"
+                                                                                                                >
+                                                                                                                    <Trash2 size={10} />
+                                                                                                                </button>
+                                                                                                                <span className="text-[8px] bg-teal-600 px-1 py-0.5 rounded font-bold uppercase tracking-wider text-white pointer-events-none">
+                                                                                                                    Selected
+                                                                                                                </span>
+                                                                                                            </div>
+                                                                                                        )}
+
+                                                                                                        {/* Right Edge Crop Handle */}
+                                                                                                        <div
+                                                                                                            onMouseDown={(e) => handleClipTrimMouseDown(e, clip, 'end')}
+                                                                                                            onClick={(e) => e.stopPropagation()}
+                                                                                                            className="absolute right-0 top-0 bottom-0 w-2 bg-teal-400 hover:bg-white cursor-ew-resize z-30 flex items-center justify-center transition-colors group/rightTrim"
+                                                                                                            title="Drag right edge to crop/trim end"
+                                                                                                        >
+                                                                                                            <div className="w-0.5 h-3.5 bg-teal-950 rounded-full" />
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                );
+                                                                                            })}
+
+                                                                                            {/* Auto-Mute Red Indicator overlay on Track 1 where Voice-Over exists on Track 2 */}
+                                                                                            {audioDuration > 0 && voiceoverClips.map(vo => {
+                                                                                                if (vo.isDeleted) return null;
+                                                                                                const leftPercent = (vo.start / audioDuration) * 100;
+                                                                                                const widthPercent = ((vo.end - vo.start) / audioDuration) * 100;
+                                                                                                return (
+                                                                                                    <div
+                                                                                                        key={`silenced-${vo.id}`}
+                                                                                                        className="absolute top-0 bottom-0 bg-red-950/80 border-x-2 border-red-500/80 flex items-center justify-center pointer-events-none z-15 shadow-inner"
+                                                                                                        style={{ left: `${leftPercent}%`, width: `${widthPercent}%` }}
+                                                                                                    >
+                                                                                                        <span className="text-[9px] font-bold text-red-300 uppercase tracking-tight bg-black/80 px-1.5 py-0.5 rounded border border-red-800 truncate shadow">
+                                                                                                            Muted by Voice-Over
+                                                                                                        </span>
+                                                                                                    </div>
+                                                                                                );
+                                                                                            })}
+                                                                                        </div>
+
+                                                                                        {/* TRACK 2: VOICE-OVER TRACK */}
+                                                                                        <div className="relative h-14 bg-[#140F08] rounded-lg border border-amber-900/40 overflow-hidden flex items-center px-2">
+                                                                                            {/* Render Voice-Over Clips (Movable with internal waveform & per-clip crop handles) */}
+                                                                                            {audioDuration > 0 && voiceoverClips.map((vo, idx) => {
+                                                                                                if (vo.isDeleted) return null;
+                                                                                                const leftPercent = (vo.start / audioDuration) * 100;
+                                                                                                const widthPercent = ((vo.end - vo.start) / audioDuration) * 100;
+                                                                                                const isSelected = selectedClipId === vo.id;
+                                                                                                const voPeaks = Array.from({ length: 24 }).map((_, i) => Math.sin(i * 0.5) * 35 + 45);
+
+                                                                                                return (
+                                                                                                    <div
+                                                                                                        key={vo.id}
+                                                                                                        onMouseDown={(e) => handleClipMouseDown(e, vo)}
+                                                                                                        onClick={(e) => {
+                                                                                                            e.stopPropagation();
+                                                                                                            setSelectedClipId(vo.id);
+                                                                                                            setSelectedTrack('voiceover');
+                                                                                                        }}
+                                                                                                        className={`absolute top-1 bottom-1 rounded-lg border-2 flex items-center justify-between px-2 transition-all cursor-grab active:cursor-grabbing z-10 overflow-hidden ${isSelected
+                                                                                                            ? 'bg-amber-500/60 border-amber-400 shadow-[0_0_14px_rgba(245,158,11,0.8)] text-white ring-2 ring-amber-300'
+                                                                                                            : 'bg-amber-950/90 border-amber-600/80 hover:border-amber-400 text-amber-200'
+                                                                                                            }`}
+                                                                                                        style={{ left: `${leftPercent}%`, width: `${widthPercent}%` }}
+                                                                                                        title="Drag clip to move. Drag left/right handle edges to crop/trim clip."
+                                                                                                    >
+                                                                                                        {/* Left Edge Crop Handle */}
+                                                                                                        <div
+                                                                                                            onMouseDown={(e) => handleClipTrimMouseDown(e, vo, 'start')}
+                                                                                                            onClick={(e) => e.stopPropagation()}
+                                                                                                            className="absolute left-0 top-0 bottom-0 w-2 bg-amber-400 hover:bg-white cursor-ew-resize z-30 flex items-center justify-center transition-colors group/leftTrim"
+                                                                                                            title="Drag left edge to crop/trim start"
+                                                                                                        >
+                                                                                                            <div className="w-0.5 h-3.5 bg-amber-950 rounded-full" />
+                                                                                                        </div>
+
+                                                                                                        {/* Waveform Peaks INSIDE Voice-Over Clip Box */}
+                                                                                                        <div className="absolute inset-0 flex items-center justify-between px-2 opacity-40 pointer-events-none z-0">
+                                                                                                            {voPeaks.map((height, i) => (
+                                                                                                                <div
+                                                                                                                    key={i}
+                                                                                                                    className="w-0.5 bg-amber-400 rounded-full"
+                                                                                                                    style={{ height: `${height}%` }}
+                                                                                                                />
+                                                                                                            ))}
+                                                                                                        </div>
+
+                                                                                                        <div className="flex items-center gap-1 text-[10px] font-bold truncate pointer-events-none z-10 pl-1.5">
+                                                                                                            <Move size={11} className="text-amber-400/90 flex-shrink-0" />
+                                                                                                            <Mic size={11} className="text-amber-400 flex-shrink-0" />
+                                                                                                            <span className="truncate">{vo.name || `Voice-Over #${idx + 1}`} ({formatTimer(vo.start)} - {formatTimer(vo.end)})</span>
+                                                                                                        </div>
+                                                                                                        {isSelected && (
+                                                                                                            <div className="flex items-center gap-1 z-20 mr-1.5">
+                                                                                                                <button
+                                                                                                                    type="button"
+                                                                                                                    onClick={(e) => {
+                                                                                                                        e.stopPropagation();
+                                                                                                                        deleteSelectedClip();
+                                                                                                                    }}
+                                                                                                                    className="p-1 bg-red-600 hover:bg-red-500 text-white rounded cursor-pointer transition-colors shadow flex items-center justify-center"
+                                                                                                                    title="Delete this selected clip piece (Or press Delete / Backspace key)"
+                                                                                                                >
+                                                                                                                    <Trash2 size={10} />
+                                                                                                                </button>
+                                                                                                                <span className="text-[8px] bg-amber-600 px-1 py-0.5 rounded font-bold uppercase tracking-wider text-white pointer-events-none">
+                                                                                                                    Selected
+                                                                                                                </span>
+                                                                                                            </div>
+                                                                                                        )}
+
+                                                                                                        {/* Right Edge Crop Handle */}
+                                                                                                        <div
+                                                                                                            onMouseDown={(e) => handleClipTrimMouseDown(e, vo, 'end')}
+                                                                                                            onClick={(e) => e.stopPropagation()}
+                                                                                                            className="absolute right-0 top-0 bottom-0 w-2 bg-amber-400 hover:bg-white cursor-ew-resize z-30 flex items-center justify-center transition-colors group/rightTrim"
+                                                                                                            title="Drag right edge to crop/trim end"
+                                                                                                        >
+                                                                                                            <div className="w-0.5 h-3.5 bg-amber-950 rounded-full" />
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                );
+                                                                                            })}
+                                                                                        </div>
+
+                                                                                        {/* Red Playhead Vertical Indicator Across Both Tracks */}
+                                                                                        {audioDuration > 0 && (
+                                                                                            <div
+                                                                                                className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-20 pointer-events-none shadow-[0_0_10px_rgba(239,68,68,1)]"
+                                                                                                style={{ left: `${(seekTime / audioDuration) * 100}%` }}
+                                                                                            >
+                                                                                                <div className="w-2.5 h-2.5 bg-red-500 rounded-full -translate-x-[4px] -translate-y-1 border border-white" />
+                                                                                            </div>
+                                                                                        )}
+                                                                                    </div>
+                                                                                </div> {/* end scrollable wrapper */}
+                                                                            </div>
+
+                                                                            {/* Footer Save & Stitch Bar */}
+                                                                            <div className="pt-2 border-t border-teal-900/40 flex items-center justify-end">
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={applyStitchingAndSave}
+                                                                                    className="bg-teal-600 hover:bg-teal-500 text-white px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-teal-600/30 transition-all cursor-pointer"
+                                                                                >
+                                                                                    <Check size={15} /> Save
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
 
                                                                     <button
                                                                         type="button"
-                                                                        onClick={stopRecording}
-                                                                        className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center transition-colors flex-shrink-0 mr-1"
-                                                                        title="Finish Recording"
+                                                                        onClick={clearAudio}
+                                                                        className="text-xs text-red-400 hover:text-red-300 font-semibold flex items-center justify-center gap-1.5 mx-auto pt-1"
                                                                     >
-                                                                        <Square className="text-white fill-current" size={12} />
+                                                                        <RotateCcw size={14} /> Delete & Record New Audio
                                                                     </button>
                                                                 </div>
-                                                            </div>
-                                                        )}
+                                                            )}
+                                                        </div>
+                                                    </div>
 
-                                                        {/* Recorded Audio Studio Player & Timeline Punch-In Overwrite */}
-                                                        {audioPreviewUrl && (!isRecording || isTimelineRecording) && (
-                                                            <div className="w-full max-w-lg mx-auto space-y-4">
-                                                                {/* Custom Red Pill Audio Player UI */}
-                                                                <div 
-                                                                    onClick={togglePlayPause}
-                                                                    className="flex items-center w-full max-w-[320px] mx-auto relative h-[60px] cursor-pointer hover:scale-[1.02] transition-transform"
-                                                                    title="Click to Play/Pause"
-                                                                >
-                                                                    <audio
-                                                                        ref={audioElementRef}
-                                                                        src={audioPreviewUrl}
-                                                                        className="hidden"
-                                                                        onLoadedMetadata={() => {
-                                                                            if (audioElementRef.current) setAudioDuration(audioElementRef.current.duration || 0);
-                                                                        }}
-                                                                        onTimeUpdate={() => {
-                                                                            if (audioElementRef.current) setSeekTime(audioElementRef.current.currentTime || 0);
-                                                                        }}
-                                                                    />
-                                                                    <div className="absolute left-0 z-10 w-[60px] h-[60px] bg-[#FF3B30] rounded-full flex items-center justify-center shadow-lg shadow-red-500/40">
-                                                                        {isPlaying ? <Pause className="text-white fill-current" size={24} /> : <Play className="text-white fill-current ml-1" size={24} />}
-                                                                    </div>
-                                                                    <div className="ml-7 bg-[#FF3B30] h-[48px] w-full rounded-r-full flex items-center pl-10 pr-6 justify-between gap-[3px] shadow-sm overflow-hidden">
-                                                                        {new Array(35).fill(10).map((_, i) => {
-                                                                            const peakIdx = Math.floor((i / 35) * (waveformPeaks.length || 35));
-                                                                            const heightPercent = waveformPeaks.length > 0 ? waveformPeaks[peakIdx] : (Math.sin(i * 0.8) * 30 + 50);
-                                                                            const progressPercent = audioDuration > 0 ? seekTime / audioDuration : 0;
-                                                                            const isActive = (i / 35) <= progressPercent;
-                                                                            return (
-                                                                                <div
-                                                                                    key={i}
-                                                                                    className={`w-[3px] rounded-full transition-all duration-150 ${isActive ? 'bg-white' : 'bg-white/40'}`}
-                                                                                    style={{ height: `${heightPercent}%` }}
-                                                                                />
-                                                                            );
-                                                                        })}
-                                                                    </div>
-                                                                </div>
-
-                                                                {/* Toggle Button for CapCut Visual Editor */}
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => setShowTimelineEditor(!showTimelineEditor)}
-                                                                    className="w-full bg-[#0B1E26] hover:bg-teal-950 text-teal-300 border border-teal-800/40 py-2.5 px-4 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow transition-all cursor-pointer"
-                                                                >
-                                                                    {showTimelineEditor ? 'Hide Editor' : 'Edit or Voice over'}
-                                                                </button>
-
-                                                                {/* CapCut Visual Multi-Track Timeline Studio Drawer */}
-                                                                {showTimelineEditor && (
-                                                                    <div className="bg-[#050D10] p-4.5 rounded-2xl border border-teal-500/40 shadow-2xl space-y-4 transition-all">
-                                                                        {/* Top Control Toolbar with Edit Icon */}
-                                                                        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-teal-900/40 pb-3">
-                                                                            <div className="flex items-center gap-2">
-                                                                                <div className="w-7 h-7 rounded-lg bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400">
-                                                                                    <Edit3 size={15} />
-                                                                                </div>
-                                                                            </div>
-
-                                                                            {/* Action Bar (Icons Only in One Line) */}
-                                                                            <div className="flex items-center gap-2">
-                                                                                {/* PLAY / PAUSE BUTTON */}
-                                                                                <button
-                                                                                    type="button"
-                                                                                    onClick={togglePlayPause}
-                                                                                    className="bg-teal-600 hover:bg-teal-500 text-white w-8 h-8 rounded-lg flex items-center justify-center shadow transition-all cursor-pointer"
-                                                                                    title="Play or Pause audio (Shortcut: Spacebar)"
-                                                                                >
-                                                                                    {isPlaying ? <Pause size={14} /> : <Play size={14} />}
-                                                                                </button>
-
-                                                                                {/* RECORD VOICE-OVER */}
-                                                                                <button
-                                                                                    type="button"
-                                                                                    onClick={startTimelineRecording}
-                                                                                    className={`${isTimelineRecording ? 'bg-red-500 animate-pulse' : 'bg-red-600 hover:bg-red-500'} text-white w-8 h-8 rounded-lg flex items-center justify-center shadow transition-all cursor-pointer`}
-                                                                                    title={isTimelineRecording ? "Stop Recording" : "Record Voice-Over at playhead"}
-                                                                                >
-                                                                                    {isTimelineRecording ? <Square size={12} className="fill-current" /> : <Mic size={14} />}
-                                                                                </button>
-
-                                                                                {/* CUT / SPLIT AT PLAYHEAD */}
-                                                                                <button
-                                                                                    type="button"
-                                                                                    onClick={splitClipAtPlayhead}
-                                                                                    className="bg-teal-600 hover:bg-teal-500 text-white w-8 h-8 rounded-lg flex items-center justify-center shadow transition-all cursor-pointer"
-                                                                                    title="Cut clip at playhead"
-                                                                                >
-                                                                                    <Scissors size={14} />
-                                                                                </button>
-
-                                                                                {/* ZOOM CONTROLS */}
-                                                                                <div className="flex items-center gap-1 ml-2 border-l border-teal-900/40 pl-2">
-                                                                                    <button
-                                                                                        type="button"
-                                                                                        onClick={() => setTimelineZoom(prev => Math.max(1, prev - 0.5))}
-                                                                                        className="bg-[#0B1E26] hover:bg-teal-900/50 text-teal-300 w-7 h-7 rounded-md flex items-center justify-center transition-all cursor-pointer border border-teal-900/40"
-                                                                                        title="Zoom Out (Ctrl -)"
-                                                                                    >
-                                                                                        <ZoomOut size={13} />
-                                                                                    </button>
-                                                                                    <button
-                                                                                        type="button"
-                                                                                        onClick={() => setTimelineZoom(prev => Math.min(5, prev + 0.5))}
-                                                                                        className="bg-[#0B1E26] hover:bg-teal-900/50 text-teal-300 w-7 h-7 rounded-md flex items-center justify-center transition-all cursor-pointer border border-teal-900/40"
-                                                                                        title="Zoom In (Ctrl +)"
-                                                                                    >
-                                                                                        <ZoomIn size={13} />
-                                                                                    </button>
-                                                                                    {timelineZoom !== 1 && (
-                                                                                        <button
-                                                                                            type="button"
-                                                                                            onClick={() => setTimelineZoom(1)}
-                                                                                            className="bg-[#0B1E26] hover:bg-teal-900/50 text-teal-300 w-7 h-7 rounded-md flex items-center justify-center transition-all cursor-pointer border border-teal-900/40"
-                                                                                            title="Reset Zoom"
-                                                                                        >
-                                                                                            <Minimize2 size={13} />
-                                                                                        </button>
-                                                                                    )}
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        {/* Playhead Info Row */}
-                                                                        <div className="flex items-center justify-between px-1 mb-2">
-                                                                            <div className="text-[10px] font-mono text-teal-400">
-                                                                                Playhead: {formatTimer(seekTime)} / {formatTimer(audioDuration)}
-                                                                            </div>
-                                                                        </div>
-
-                                                                        {/* Multi-Track Timeline Box */}
-
-                                                                        <div className="space-y-2 text-left">
-                                                                            {/* Scrollable Timeline Wrapper */}
-                                                                            <div
-                                                                                ref={timelineScrollRef}
-                                                                                className="overflow-x-auto overflow-y-hidden rounded-xl border border-teal-900/60 bg-[#08181F] shadow-inner custom-scrollbar"
-                                                                                style={{ maxHeight: '160px' }}
-                                                                            >
-                                                                            {/* Interactive Timeline Canvas spanning both tracks */}
-                                                                            <div
-                                                                                ref={timelineTrackRef}
-                                                                                onMouseDown={handleTimelineMouseDown}
-                                                                                className="relative cursor-pointer select-none group space-y-1 p-1"
-                                                                                style={{ minWidth: `${timelineZoom * 100}%` }}
-                                                                            >
-                                                                                {/* TRACK 1: MAIN AUDIO TRACK */}
-                                                                                <div className="relative h-14 bg-[#051116] rounded-lg border border-teal-900/40 overflow-hidden flex items-center px-2">
-                                                                                    {/* Render Main Audio Clips (Movable with internal waveform peaks & per-clip crop handles) */}
-                                                                                    {audioDuration > 0 && mainClips.map((clip, idx) => {
-                                                                                        if (clip.isDeleted) return null;
-                                                                                        const leftPercent = (clip.start / audioDuration) * 100;
-                                                                                        const widthPercent = ((clip.end - clip.start) / audioDuration) * 100;
-                                                                                        const isSelected = selectedClipId === clip.id;
-
-                                                                                        // Slice peak waveform for this clip's source PCM region so waveform moves WITH the clip box!
-                                                                                        const totalPeaks = waveformPeaks.length > 0 ? waveformPeaks.length : 72;
-                                                                                        const srcStart = clip.sourceStart !== undefined ? clip.sourceStart : clip.start;
-                                                                                        const srcEnd = srcStart + (clip.end - clip.start);
-                                                                                        const startIdx = Math.max(0, Math.floor((srcStart / audioDuration) * totalPeaks));
-                                                                                        const endIdx = Math.min(totalPeaks, Math.max(startIdx + 4, Math.ceil((srcEnd / audioDuration) * totalPeaks)));
-                                                                                        const clipPeaks = (waveformPeaks.length > 0 ? waveformPeaks : Array.from({ length: 72 }).map(() => 45)).slice(startIdx, endIdx);
-
-                                                                                        return (
-                                                                                            <div
-                                                                                                key={clip.id}
-                                                                                                onMouseDown={(e) => handleClipMouseDown(e, clip)}
-                                                                                                onClick={(e) => {
-                                                                                                    e.stopPropagation();
-                                                                                                    setSelectedClipId(clip.id);
-                                                                                                    setSelectedTrack('main');
-                                                                                                }}
-                                                                                                className={`absolute top-1 bottom-1 rounded-lg border-2 flex items-center justify-between px-2 transition-all cursor-grab active:cursor-grabbing z-10 overflow-hidden ${isSelected
-                                                                                                    ? 'bg-teal-500/50 border-teal-400 shadow-[0_0_14px_rgba(20,184,166,0.7)] text-white ring-2 ring-teal-300'
-                                                                                                    : 'bg-teal-950/90 border-teal-800/80 hover:border-teal-400 text-teal-200'
-                                                                                                    }`}
-                                                                                                style={{ left: `${leftPercent}%`, width: `${widthPercent}%` }}
-                                                                                                title="Drag clip to move. Drag left/right handle edges to crop/trim clip."
-                                                                                            >
-                                                                                                {/* Left Edge Crop Handle */}
-                                                                                                <div
-                                                                                                    onMouseDown={(e) => handleClipTrimMouseDown(e, clip, 'start')}
-                                                                                                    onClick={(e) => e.stopPropagation()}
-                                                                                                    className="absolute left-0 top-0 bottom-0 w-2 bg-teal-400 hover:bg-white cursor-ew-resize z-30 flex items-center justify-center transition-colors group/leftTrim"
-                                                                                                    title="Drag left edge to crop/trim start"
-                                                                                                >
-                                                                                                    <div className="w-0.5 h-3.5 bg-teal-950 rounded-full" />
-                                                                                                </div>
-
-                                                                                                {/* Waveform Peaks INSIDE the clip box so voice moves WITH the clip! */}
-                                                                                                <div className="absolute inset-0 flex items-center justify-between px-2 opacity-40 pointer-events-none z-0">
-                                                                                                    {clipPeaks.map((height, i) => (
-                                                                                                        <div
-                                                                                                            key={i}
-                                                                                                            className="w-0.5 bg-teal-300 rounded-full"
-                                                                                                            style={{ height: `${height}%` }}
-                                                                                                        />
-                                                                                                    ))}
-                                                                                                </div>
-
-                                                                                                <div className="flex items-center gap-1 text-[10px] font-bold truncate pointer-events-none z-10 pl-1.5">
-                                                                                                    <Move size={11} className="text-teal-400/90 flex-shrink-0" />
-                                                                                                    <span className="truncate">{clip.name || `Main Clip #${idx + 1}`} ({formatTimer(clip.start)} - {formatTimer(clip.end)})</span>
-                                                                                                </div>
-                                                                                                {isSelected && (
-                                                                                                    <div className="flex items-center gap-1 z-20 mr-1.5">
-                                                                                                        <button
-                                                                                                            type="button"
-                                                                                                            onClick={(e) => {
-                                                                                                                e.stopPropagation();
-                                                                                                                deleteSelectedClip();
-                                                                                                            }}
-                                                                                                            className="p-1 bg-red-600 hover:bg-red-500 text-white rounded cursor-pointer transition-colors shadow flex items-center justify-center"
-                                                                                                            title="Delete this selected clip piece (Or press Delete / Backspace key)"
-                                                                                                        >
-                                                                                                            <Trash2 size={10} />
-                                                                                                        </button>
-                                                                                                        <span className="text-[8px] bg-teal-600 px-1 py-0.5 rounded font-bold uppercase tracking-wider text-white pointer-events-none">
-                                                                                                            Selected
-                                                                                                        </span>
-                                                                                                    </div>
-                                                                                                )}
-
-                                                                                                {/* Right Edge Crop Handle */}
-                                                                                                <div
-                                                                                                    onMouseDown={(e) => handleClipTrimMouseDown(e, clip, 'end')}
-                                                                                                    onClick={(e) => e.stopPropagation()}
-                                                                                                    className="absolute right-0 top-0 bottom-0 w-2 bg-teal-400 hover:bg-white cursor-ew-resize z-30 flex items-center justify-center transition-colors group/rightTrim"
-                                                                                                    title="Drag right edge to crop/trim end"
-                                                                                                >
-                                                                                                    <div className="w-0.5 h-3.5 bg-teal-950 rounded-full" />
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        );
-                                                                                    })}
-
-                                                                                    {/* Auto-Mute Red Indicator overlay on Track 1 where Voice-Over exists on Track 2 */}
-                                                                                    {audioDuration > 0 && voiceoverClips.map(vo => {
-                                                                                        if (vo.isDeleted) return null;
-                                                                                        const leftPercent = (vo.start / audioDuration) * 100;
-                                                                                        const widthPercent = ((vo.end - vo.start) / audioDuration) * 100;
-                                                                                        return (
-                                                                                            <div
-                                                                                                key={`silenced-${vo.id}`}
-                                                                                                className="absolute top-0 bottom-0 bg-red-950/80 border-x-2 border-red-500/80 flex items-center justify-center pointer-events-none z-15 shadow-inner"
-                                                                                                style={{ left: `${leftPercent}%`, width: `${widthPercent}%` }}
-                                                                                            >
-                                                                                                <span className="text-[9px] font-bold text-red-300 uppercase tracking-tight bg-black/80 px-1.5 py-0.5 rounded border border-red-800 truncate shadow">
-                                                                                                    Muted by Voice-Over
-                                                                                                </span>
-                                                                                            </div>
-                                                                                        );
-                                                                                    })}
-                                                                                </div>
-
-                                                                                {/* TRACK 2: VOICE-OVER TRACK */}
-                                                                                <div className="relative h-14 bg-[#140F08] rounded-lg border border-amber-900/40 overflow-hidden flex items-center px-2">
-                                                                                    {/* Render Voice-Over Clips (Movable with internal waveform & per-clip crop handles) */}
-                                                                                    {audioDuration > 0 && voiceoverClips.map((vo, idx) => {
-                                                                                        if (vo.isDeleted) return null;
-                                                                                        const leftPercent = (vo.start / audioDuration) * 100;
-                                                                                        const widthPercent = ((vo.end - vo.start) / audioDuration) * 100;
-                                                                                        const isSelected = selectedClipId === vo.id;
-                                                                                        const voPeaks = Array.from({ length: 24 }).map((_, i) => Math.sin(i * 0.5) * 35 + 45);
-
-                                                                                        return (
-                                                                                            <div
-                                                                                                key={vo.id}
-                                                                                                onMouseDown={(e) => handleClipMouseDown(e, vo)}
-                                                                                                onClick={(e) => {
-                                                                                                    e.stopPropagation();
-                                                                                                    setSelectedClipId(vo.id);
-                                                                                                    setSelectedTrack('voiceover');
-                                                                                                }}
-                                                                                                className={`absolute top-1 bottom-1 rounded-lg border-2 flex items-center justify-between px-2 transition-all cursor-grab active:cursor-grabbing z-10 overflow-hidden ${isSelected
-                                                                                                    ? 'bg-amber-500/60 border-amber-400 shadow-[0_0_14px_rgba(245,158,11,0.8)] text-white ring-2 ring-amber-300'
-                                                                                                    : 'bg-amber-950/90 border-amber-600/80 hover:border-amber-400 text-amber-200'
-                                                                                                    }`}
-                                                                                                style={{ left: `${leftPercent}%`, width: `${widthPercent}%` }}
-                                                                                                title="Drag clip to move. Drag left/right handle edges to crop/trim clip."
-                                                                                            >
-                                                                                                {/* Left Edge Crop Handle */}
-                                                                                                <div
-                                                                                                    onMouseDown={(e) => handleClipTrimMouseDown(e, vo, 'start')}
-                                                                                                    onClick={(e) => e.stopPropagation()}
-                                                                                                    className="absolute left-0 top-0 bottom-0 w-2 bg-amber-400 hover:bg-white cursor-ew-resize z-30 flex items-center justify-center transition-colors group/leftTrim"
-                                                                                                    title="Drag left edge to crop/trim start"
-                                                                                                >
-                                                                                                    <div className="w-0.5 h-3.5 bg-amber-950 rounded-full" />
-                                                                                                </div>
-
-                                                                                                {/* Waveform Peaks INSIDE Voice-Over Clip Box */}
-                                                                                                <div className="absolute inset-0 flex items-center justify-between px-2 opacity-40 pointer-events-none z-0">
-                                                                                                    {voPeaks.map((height, i) => (
-                                                                                                        <div
-                                                                                                            key={i}
-                                                                                                            className="w-0.5 bg-amber-400 rounded-full"
-                                                                                                            style={{ height: `${height}%` }}
-                                                                                                        />
-                                                                                                    ))}
-                                                                                                </div>
-
-                                                                                                <div className="flex items-center gap-1 text-[10px] font-bold truncate pointer-events-none z-10 pl-1.5">
-                                                                                                    <Move size={11} className="text-amber-400/90 flex-shrink-0" />
-                                                                                                    <Mic size={11} className="text-amber-400 flex-shrink-0" />
-                                                                                                    <span className="truncate">{vo.name || `Voice-Over #${idx + 1}`} ({formatTimer(vo.start)} - {formatTimer(vo.end)})</span>
-                                                                                                </div>
-                                                                                                {isSelected && (
-                                                                                                    <div className="flex items-center gap-1 z-20 mr-1.5">
-                                                                                                        <button
-                                                                                                            type="button"
-                                                                                                            onClick={(e) => {
-                                                                                                                e.stopPropagation();
-                                                                                                                deleteSelectedClip();
-                                                                                                            }}
-                                                                                                            className="p-1 bg-red-600 hover:bg-red-500 text-white rounded cursor-pointer transition-colors shadow flex items-center justify-center"
-                                                                                                            title="Delete this selected clip piece (Or press Delete / Backspace key)"
-                                                                                                        >
-                                                                                                            <Trash2 size={10} />
-                                                                                                        </button>
-                                                                                                        <span className="text-[8px] bg-amber-600 px-1 py-0.5 rounded font-bold uppercase tracking-wider text-white pointer-events-none">
-                                                                                                            Selected
-                                                                                                        </span>
-                                                                                                    </div>
-                                                                                                )}
-
-                                                                                                {/* Right Edge Crop Handle */}
-                                                                                                <div
-                                                                                                    onMouseDown={(e) => handleClipTrimMouseDown(e, vo, 'end')}
-                                                                                                    onClick={(e) => e.stopPropagation()}
-                                                                                                    className="absolute right-0 top-0 bottom-0 w-2 bg-amber-400 hover:bg-white cursor-ew-resize z-30 flex items-center justify-center transition-colors group/rightTrim"
-                                                                                                    title="Drag right edge to crop/trim end"
-                                                                                                >
-                                                                                                    <div className="w-0.5 h-3.5 bg-amber-950 rounded-full" />
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        );
-                                                                                    })}
-                                                                                </div>
-
-                                                                                {/* Red Playhead Vertical Indicator Across Both Tracks */}
-                                                                                {audioDuration > 0 && (
-                                                                                    <div
-                                                                                        className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-20 pointer-events-none shadow-[0_0_10px_rgba(239,68,68,1)]"
-                                                                                        style={{ left: `${(seekTime / audioDuration) * 100}%` }}
-                                                                                    >
-                                                                                        <div className="w-2.5 h-2.5 bg-red-500 rounded-full -translate-x-[4px] -translate-y-1 border border-white" />
-                                                                                    </div>
-                                                                                )}
-                                                                            </div>
-                                                                            </div> {/* end scrollable wrapper */}
-                                                                        </div>
-
-                                                                        {/* Footer Save & Stitch Bar */}
-                                                                        <div className="pt-2 border-t border-teal-900/40 flex items-center justify-end">
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={applyStitchingAndSave}
-                                                                                className="bg-teal-600 hover:bg-teal-500 text-white px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-teal-600/30 transition-all cursor-pointer"
-                                                                            >
-                                                                                <Check size={15} /> Save
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-                                                                )}
-
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={clearAudio}
-                                                                    className="text-xs text-red-400 hover:text-red-300 font-semibold flex items-center justify-center gap-1.5 mx-auto pt-1"
-                                                                >
-                                                                    <RotateCcw size={14} /> Delete & Record New Audio
-                                                                </button>
-                                                            </div>
-                                                        )}
+                                                    {/* Alternative Audio Upload */}
+                                                    <div className="pt-4 border-t border-teal-900/30 flex items-center justify-between">
+                                                        <span className="text-xs text-slate-400">Or select an existing audio file:</span>
+                                                        <label className="bg-[#0B1E26] hover:bg-teal-950/60 text-teal-300 border border-teal-800/40 text-xs px-3.5 py-2 rounded-lg font-semibold cursor-pointer transition-colors flex items-center gap-1.5">
+                                                            <Upload size={14} /> Choose Audio File
+                                                            <input type="file" accept="audio/*" onChange={handleAudioFileUpload} className="hidden" />
+                                                        </label>
                                                     </div>
                                                 </div>
-
-                                                {/* Alternative Audio Upload */}
-                                                <div className="pt-4 border-t border-teal-900/30 flex items-center justify-between">
-                                                    <span className="text-xs text-slate-400">Or select an existing audio file:</span>
-                                                    <label className="bg-[#0B1E26] hover:bg-teal-950/60 text-teal-300 border border-teal-800/40 text-xs px-3.5 py-2 rounded-lg font-semibold cursor-pointer transition-colors flex items-center gap-1.5">
-                                                        <Upload size={14} /> Choose Audio File
-                                                        <input type="file" accept="audio/*" onChange={handleAudioFileUpload} className="hidden" />
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Modal Footer Controls */}
-                                    <div className="px-6 py-4 bg-[#0B1D25] border-t border-teal-900/40 flex items-center justify-between">
-                                        <button
-                                            type="button"
-                                            onClick={() => setActivePhase(prev => (prev > 1 ? (prev - 1) as 1 | 2 | 3 : 1))}
-                                            disabled={activePhase === 1}
-                                            className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 disabled:opacity-30 disabled:hover:text-slate-400 flex items-center gap-1.5"
-                                        >
-                                            <ChevronLeft size={16} /> Back
-                                        </button>
-
-                                        <div className="flex items-center gap-3">
-                                            {activePhase < 3 ? (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setActivePhase(prev => (prev < 3 ? (prev + 1) as 1 | 2 | 3 : 3))}
-                                                    className="bg-teal-600 hover:bg-teal-500 text-white px-5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow"
-                                                >
-                                                    Next Phase <ChevronRight size={16} />
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    type="button"
-                                                    onClick={handleSubmit}
-                                                    className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 shadow-lg shadow-emerald-600/30"
-                                                >
-                                                    <Check size={16} /> {editingProduct ? 'Update Product' : 'Save & Publish Product'}
-                                                </button>
                                             )}
+                                        </div>
+
+                                        {/* Modal Footer Controls */}
+                                        <div className="px-6 py-4 bg-[#0B1D25] border-t border-teal-900/40 flex items-center justify-between">
+                                            <button
+                                                type="button"
+                                                onClick={() => setActivePhase(prev => (prev > 1 ? (prev - 1) as 1 | 2 | 3 : 1))}
+                                                disabled={activePhase === 1}
+                                                className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 disabled:opacity-30 disabled:hover:text-slate-400 flex items-center gap-1.5"
+                                            >
+                                                <ChevronLeft size={16} /> Back
+                                            </button>
+
+                                            <div className="flex items-center gap-3">
+                                                {activePhase < 3 ? (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setActivePhase(prev => (prev < 3 ? (prev + 1) as 1 | 2 | 3 : 3))}
+                                                        className="bg-teal-600 hover:bg-teal-500 text-white px-5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow"
+                                                    >
+                                                        Next Phase <ChevronRight size={16} />
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleSubmit}
+                                                        className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 shadow-lg shadow-emerald-600/30"
+                                                    >
+                                                        <Check size={16} /> {editingProduct ? 'Update Product' : 'Save & Publish Product'}
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {/* ===== PRODUCTS GRID ===== */}
-                        {loading ? (
-                            <div className="flex items-center justify-center h-64">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500"></div>
-                            </div>
-                        ) : products.length === 0 ? (
-                            <div className="border border-dashed border-teal-900/30 rounded-2xl h-64 flex flex-col items-center justify-center text-slate-500">
-                                <Package size={48} className="mb-3 text-teal-800" />
-                                <p className="font-semibold text-slate-300">No products listed yet</p>
-                                <p className="text-xs text-slate-500 mt-1">Click "Add New Product" to start building your catalog</p>
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {products.map(product => {
-                                    const allImages = getProductAllImages(product);
-                                    const activeImgIdx = cardActiveImageIndex[product.id] || 0;
-                                    const currentImgUrl = allImages[activeImgIdx] || product.main_image_url;
+                            {/* ===== PRODUCTS GRID ===== */}
+                            {loading ? (
+                                <div className="flex items-center justify-center h-64">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500"></div>
+                                </div>
+                            ) : products.length === 0 ? (
+                                <div className="border border-dashed border-teal-900/30 rounded-2xl h-64 flex flex-col items-center justify-center text-slate-500">
+                                    <Package size={48} className="mb-3 text-teal-800" />
+                                    <p className="font-semibold text-slate-300">No products listed yet</p>
+                                    <p className="text-xs text-slate-500 mt-1">Click "Add New Product" to start building your catalog</p>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {products.map(product => {
+                                        const allImages = getProductAllImages(product);
+                                        const activeImgIdx = cardActiveImageIndex[product.id] || 0;
+                                        const currentImgUrl = allImages[activeImgIdx] || product.main_image_url;
 
-                                    return (
-                                        <div key={product.id} className="bg-[#0B1B20] border border-teal-900/40 rounded-2xl overflow-hidden hover:border-teal-700/60 transition-all duration-200 flex flex-col group shadow-xl">
-                                            {/* Product Thumbnail & Badges */}
-                                            <div className="h-48 bg-[#050D10] relative overflow-hidden flex items-center justify-center">
-                                                {currentImgUrl ? (
-                                                    <img src={currentImgUrl} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                                ) : (
-                                                    <Camera size={40} className="text-teal-900/60" />
-                                                )}
+                                        return (
+                                            <div key={product.id} className="bg-[#0B1B20] border border-teal-900/40 rounded-2xl overflow-hidden hover:border-teal-700/60 transition-all duration-200 flex flex-col group shadow-xl">
+                                                {/* Product Thumbnail & Badges */}
+                                                <div className="h-48 bg-[#050D10] relative overflow-hidden flex items-center justify-center">
+                                                    {currentImgUrl ? (
+                                                        <img src={currentImgUrl} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                                    ) : (
+                                                        <Camera size={40} className="text-teal-900/60" />
+                                                    )}
 
-                                                {/* Status Badge & Uploading UI */}
-                                                {(product.status as any) === 'uploading' ? (
-                                                    <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
-                                                        <div className="bg-[#050D10]/90 backdrop-blur-md border border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.3)] rounded-full px-3 py-1.5 flex items-center gap-2">
-                                                            <div className="w-3 h-3 rounded-full border-[1.5px] border-amber-500/30 border-t-amber-500 animate-spin"></div>
-                                                            <span className="text-[10px] font-black text-amber-500 tracking-wider">UPLOADING</span>
+                                                    {/* Status Badge & Uploading UI */}
+                                                    {(product.status as any) === 'uploading' ? (
+                                                        <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
+                                                            <div className="bg-[#050D10]/90 backdrop-blur-md border border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.3)] rounded-full px-3 py-1.5 flex items-center gap-2">
+                                                                <div className="w-3 h-3 rounded-full border-[1.5px] border-amber-500/30 border-t-amber-500 animate-spin"></div>
+                                                                <span className="text-[10px] font-black text-amber-500 tracking-wider">UPLOADING</span>
+                                                            </div>
+                                                            {/* Fake continuous progress bar inside the badge area */}
+                                                            <div className="w-full bg-[#050D10]/80 rounded-full h-1 overflow-hidden backdrop-blur-sm">
+                                                                <div className="bg-gradient-to-r from-amber-600 to-amber-400 h-full w-[40%] rounded-full animate-[shimmer_1.5s_infinite]"></div>
+                                                            </div>
                                                         </div>
-                                                        {/* Fake continuous progress bar inside the badge area */}
-                                                        <div className="w-full bg-[#050D10]/80 rounded-full h-1 overflow-hidden backdrop-blur-sm">
-                                                            <div className="bg-gradient-to-r from-amber-600 to-amber-400 h-full w-[40%] rounded-full animate-[shimmer_1.5s_infinite]"></div>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <span className={`absolute top-3 right-3 text-[10px] font-bold px-2.5 py-1 rounded-full border shadow-lg ${product.status === 'available'
-                                                        ? 'bg-emerald-950/80 text-emerald-400 border-emerald-800'
-                                                        : 'bg-rose-950/80 text-rose-400 border-rose-800'
-                                                        }`}>
-                                                        {product.status.toUpperCase()}
-                                                    </span>
-                                                )}
+                                                    ) : (
+                                                        <span className={`absolute top-3 right-3 text-[10px] font-bold px-2.5 py-1 rounded-full border shadow-lg ${product.status === 'available'
+                                                            ? 'bg-emerald-950/80 text-emerald-400 border-emerald-800'
+                                                            : 'bg-rose-950/80 text-rose-400 border-rose-800'
+                                                            }`}>
+                                                            {product.status.toUpperCase()}
+                                                        </span>
+                                                    )}
 
-                                                {/* Multi-Image Dots / Selector */}
-                                                {allImages.length > 1 && (
-                                                    <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded-full border border-teal-800/40 flex items-center gap-1">
-                                                        {allImages.map((_, idx) => (
+                                                    {/* Multi-Image Dots / Selector */}
+                                                    {allImages.length > 1 && (
+                                                        <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded-full border border-teal-800/40 flex items-center gap-1">
+                                                            {allImages.map((_, idx) => (
+                                                                <button
+                                                                    key={idx}
+                                                                    onClick={() => setCardActiveImageIndex(prev => ({ ...prev, [product.id]: idx }))}
+                                                                    className={`w-2 h-2 rounded-full transition-all ${activeImgIdx === idx ? 'bg-teal-400 w-4' : 'bg-slate-500 hover:bg-slate-300'
+                                                                        }`}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    )}
+
+                                                    {/* Media Indicators Bar */}
+                                                    <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1.5">
+                                                        {product.video_url && (
                                                             <button
-                                                                key={idx}
-                                                                onClick={() => setCardActiveImageIndex(prev => ({ ...prev, [product.id]: idx }))}
-                                                                className={`w-2 h-2 rounded-full transition-all ${activeImgIdx === idx ? 'bg-teal-400 w-4' : 'bg-slate-500 hover:bg-slate-300'
-                                                                    }`}
-                                                            />
-                                                        ))}
+                                                                onClick={() => setActiveMediaPreview({ type: 'video', url: product.video_url!, title: product.title })}
+                                                                className="bg-[#071317]/90 hover:bg-teal-600 text-teal-300 hover:text-white text-[10px] font-semibold px-2 py-1 rounded-md border border-teal-800/40 flex items-center gap-1 transition-colors"
+                                                            >
+                                                                <Video size={12} /> Video Attached
+                                                            </button>
+                                                        )}
+                                                        {product.voice_note_url && (
+                                                            <button
+                                                                onClick={() => setActiveMediaPreview({ type: 'audio', url: product.voice_note_url!, title: product.title })}
+                                                                className="bg-[#071317]/90 hover:bg-emerald-600 text-emerald-300 hover:text-white text-[10px] font-semibold px-2 py-1 rounded-md border border-teal-800/40 flex items-center gap-1 transition-colors"
+                                                            >
+                                                                <Volume2 size={12} /> Voice Pitch Note
+                                                            </button>
+                                                        )}
                                                     </div>
-                                                )}
-
-                                                {/* Media Indicators Bar */}
-                                                <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1.5">
-                                                    {product.video_url && (
-                                                        <button
-                                                            onClick={() => setActiveMediaPreview({ type: 'video', url: product.video_url!, title: product.title })}
-                                                            className="bg-[#071317]/90 hover:bg-teal-600 text-teal-300 hover:text-white text-[10px] font-semibold px-2 py-1 rounded-md border border-teal-800/40 flex items-center gap-1 transition-colors"
-                                                        >
-                                                            <Video size={12} /> Video Attached
-                                                        </button>
-                                                    )}
-                                                    {product.voice_note_url && (
-                                                        <button
-                                                            onClick={() => setActiveMediaPreview({ type: 'audio', url: product.voice_note_url!, title: product.title })}
-                                                            className="bg-[#071317]/90 hover:bg-emerald-600 text-emerald-300 hover:text-white text-[10px] font-semibold px-2 py-1 rounded-md border border-teal-800/40 flex items-center gap-1 transition-colors"
-                                                        >
-                                                            <Volume2 size={12} /> Voice Pitch Note
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* Product Details Info */}
-                                            <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                                                <div>
-                                                    <h4 className="font-bold text-slate-100 text-base leading-snug line-clamp-1 mb-1">{product.title}</h4>
-                                                    <p className="text-xs text-slate-400 font-medium">
-                                                        {product.brand && `${product.brand} · `}{product.gender} · Size: {product.size_original || 'N/A'}
-                                                        {product.color && ` · ${product.color}`}
-                                                    </p>
                                                 </div>
 
-                                                <div className="flex items-baseline justify-between pt-2 border-t border-teal-900/30">
+                                                {/* Product Details Info */}
+                                                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                                                     <div>
-                                                        <p className="text-[10px] text-teal-400/70 font-semibold uppercase">Asking Price</p>
-                                                        <p className="text-lg font-bold text-slate-100">Rs {product.starting_price}</p>
+                                                        <h4 className="font-bold text-slate-100 text-base leading-snug line-clamp-1 mb-1">{product.title}</h4>
+                                                        <p className="text-xs text-slate-400 font-medium">
+                                                            {product.brand && `${product.brand} · `}{product.gender} · Size: {product.size_original || 'N/A'}
+                                                            {product.color && ` · ${product.color}`}
+                                                        </p>
                                                     </div>
-                                                    <div className="text-right">
-                                                        <p className="text-[10px] text-slate-500 font-semibold uppercase">Min Negotiable</p>
-                                                        <p className="text-xs font-semibold text-slate-400">Rs {product.minimum_price}</p>
+
+                                                    <div className="flex items-baseline justify-between pt-2 border-t border-teal-900/30">
+                                                        <div>
+                                                            <p className="text-[10px] text-teal-400/70 font-semibold uppercase">Asking Price</p>
+                                                            <p className="text-lg font-bold text-slate-100">Rs {product.starting_price}</p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="text-[10px] text-slate-500 font-semibold uppercase">Min Negotiable</p>
+                                                            <p className="text-xs font-semibold text-slate-400">Rs {product.minimum_price}</p>
+                                                        </div>
                                                     </div>
-                                                </div>
 
-                                                {/* Action Buttons */}
-                                                <div className="flex items-center gap-2 pt-1">
-                                                    <button
-                                                        onClick={() => toggleStatus(product)}
-                                                        disabled={(product.status as any) === 'uploading'}
-                                                        className={`flex-1 text-xs py-2 rounded-xl font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${product.status === 'available'
-                                                            ? 'bg-amber-950/40 text-amber-400 hover:bg-amber-900/50 border border-amber-900/40'
-                                                            : 'bg-emerald-950/40 text-emerald-400 hover:bg-emerald-900/50 border border-emerald-900/40'
-                                                            }`}
-                                                    >
-                                                        {product.status === 'available' ? 'Mark Sold' : 'Mark Available'}
-                                                    </button>
+                                                    {/* Action Buttons */}
+                                                    <div className="flex items-center gap-2 pt-1">
+                                                        <button
+                                                            onClick={() => toggleStatus(product)}
+                                                            disabled={(product.status as any) === 'uploading'}
+                                                            className={`flex-1 text-xs py-2 rounded-xl font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${product.status === 'available'
+                                                                ? 'bg-amber-950/40 text-amber-400 hover:bg-amber-900/50 border border-amber-900/40'
+                                                                : 'bg-emerald-950/40 text-emerald-400 hover:bg-emerald-900/50 border border-emerald-900/40'
+                                                                }`}
+                                                        >
+                                                            {product.status === 'available' ? 'Mark Sold' : 'Mark Available'}
+                                                        </button>
 
-                                                    <button
-                                                        onClick={() => handleEdit(product)}
-                                                        disabled={(product.status as any) === 'uploading'}
-                                                        className="p-2.5 rounded-xl bg-[#071317] text-slate-300 hover:bg-teal-950/60 border border-teal-900/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                                        title="Edit Product"
-                                                    >
-                                                        <Edit3 size={15} />
-                                                    </button>
+                                                        <button
+                                                            onClick={() => handleEdit(product)}
+                                                            disabled={(product.status as any) === 'uploading'}
+                                                            className="p-2.5 rounded-xl bg-[#071317] text-slate-300 hover:bg-teal-950/60 border border-teal-900/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            title="Edit Product"
+                                                        >
+                                                            <Edit3 size={15} />
+                                                        </button>
 
-                                                    <button
-                                                        onClick={() => handleDelete(product.id)}
-                                                        disabled={(product.status as any) === 'uploading'}
-                                                        className="p-2.5 rounded-xl bg-red-950/30 text-red-400 hover:bg-red-900/40 border border-red-900/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                                        title="Delete Product"
-                                                    >
-                                                        <Trash2 size={15} />
-                                                    </button>
+                                                        <button
+                                                            onClick={() => handleDelete(product.id)}
+                                                            disabled={(product.status as any) === 'uploading'}
+                                                            className="p-2.5 rounded-xl bg-red-950/30 text-red-400 hover:bg-red-900/40 border border-red-900/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            title="Delete Product"
+                                                        >
+                                                            <Trash2 size={15} />
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* ===== MEDIA PREVIEW MODAL ===== */}
+                    {activeMediaPreview && (
+                        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+                            <div className="bg-[#09181E] border border-teal-800/40 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
+                                <div className="px-5 py-4 bg-[#0B1D25] border-b border-teal-900/40 flex items-center justify-between">
+                                    <h5 className="text-xs font-bold text-slate-200">
+                                        {activeMediaPreview.type === 'video' ? 'Product Video Showcase' : 'Product Voice Pitch Note'} — {activeMediaPreview.title}
+                                    </h5>
+                                    <button onClick={() => setActiveMediaPreview(null)} className="text-slate-400 hover:text-white p-1 rounded-lg">
+                                        <X size={18} />
+                                    </button>
+                                </div>
+                                <div className="p-6 text-center">
+                                    {activeMediaPreview.type === 'video' ? (
+                                        <video src={activeMediaPreview.url} controls autoPlay className="w-full rounded-xl bg-black max-h-80" />
+                                    ) : (
+                                        <div className="space-y-4">
+                                            <Volume2 size={40} className="text-teal-400 mx-auto" />
+                                            <audio src={activeMediaPreview.url} controls autoPlay className="w-full" />
                                         </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* ===== MEDIA PREVIEW MODAL ===== */}
-                {activeMediaPreview && (
-                    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-                        <div className="bg-[#09181E] border border-teal-800/40 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
-                            <div className="px-5 py-4 bg-[#0B1D25] border-b border-teal-900/40 flex items-center justify-between">
-                                <h5 className="text-xs font-bold text-slate-200">
-                                    {activeMediaPreview.type === 'video' ? 'Product Video Showcase' : 'Product Voice Pitch Note'} — {activeMediaPreview.title}
-                                </h5>
-                                <button onClick={() => setActiveMediaPreview(null)} className="text-slate-400 hover:text-white p-1 rounded-lg">
-                                    <X size={18} />
-                                </button>
-                            </div>
-                            <div className="p-6 text-center">
-                                {activeMediaPreview.type === 'video' ? (
-                                    <video src={activeMediaPreview.url} controls autoPlay className="w-full rounded-xl bg-black max-h-80" />
-                                ) : (
-                                    <div className="space-y-4">
-                                        <Volume2 size={40} className="text-teal-400 mx-auto" />
-                                        <audio src={activeMediaPreview.url} controls autoPlay className="w-full" />
-                                    </div>
-                                )}
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {/* ===== GUIDANCE MODAL OVERLAY ===== */}
-                {activeGuidance && (
-                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                        <div className="bg-[#09181E] border border-teal-800/40 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
-                            <div className="bg-[#0B1D25] px-6 py-4 border-b border-teal-900/40 flex justify-between items-center">
-                                <h3 className="font-bold text-sm text-slate-100">{apiGuidanceData[activeGuidance].title}</h3>
-                                <button onClick={() => setActiveGuidance(null)} className="text-slate-400 hover:text-slate-200 font-bold text-lg">&times;</button>
-                            </div>
-                            <div className="p-6">
-                                <p className="text-xs text-slate-300 whitespace-pre-line leading-relaxed">{apiGuidanceData[activeGuidance].content}</p>
-                            </div>
-                            <div className="bg-[#050D10] px-6 py-3 border-t border-teal-900/40 flex justify-end">
-                                <button onClick={() => setActiveGuidance(null)} className="bg-teal-600 text-white px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-teal-500">Got it</button>
+                    {/* ===== GUIDANCE MODAL OVERLAY ===== */}
+                    {activeGuidance && (
+                        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                            <div className="bg-[#09181E] border border-teal-800/40 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+                                <div className="bg-[#0B1D25] px-6 py-4 border-b border-teal-900/40 flex justify-between items-center">
+                                    <h3 className="font-bold text-sm text-slate-100">{apiGuidanceData[activeGuidance].title}</h3>
+                                    <button onClick={() => setActiveGuidance(null)} className="text-slate-400 hover:text-slate-200 font-bold text-lg">&times;</button>
+                                </div>
+                                <div className="p-6">
+                                    <p className="text-xs text-slate-300 whitespace-pre-line leading-relaxed">{apiGuidanceData[activeGuidance].content}</p>
+                                </div>
+                                <div className="bg-[#050D10] px-6 py-3 border-t border-teal-900/40 flex justify-end">
+                                    <button onClick={() => setActiveGuidance(null)} className="bg-teal-600 text-white px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-teal-500">Got it</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {/* ===== CONVERSATIONS TAB ===== */}
-                {subTab === 'conversations' && (
-                    <div>
-                        <h3 className="text-2xl font-bold text-slate-100 mb-2">Live Conversations</h3>
-                        <p className="text-slate-400 text-xs mb-6">Monitor real-time WhatsApp incoming chats and take over AI responses anytime.</p>
-                        <div className="border border-dashed border-teal-900/30 rounded-2xl h-72 flex flex-col items-center justify-center text-slate-500">
-                            <MessageSquare size={48} className="mb-3 text-teal-800" />
-                            <p className="font-semibold text-slate-300">No active customer chats yet</p>
-                            <p className="text-xs text-slate-500 mt-1">Live customer messages on WhatsApp will appear here</p>
+                    {/* ===== CONVERSATIONS TAB ===== */}
+                    {subTab === 'conversations' && (
+                        <div>
+                            <h3 className="text-2xl font-bold text-slate-100 mb-2">Live Conversations</h3>
+                            <p className="text-slate-400 text-xs mb-6">Monitor real-time WhatsApp incoming chats and take over AI responses anytime.</p>
+                            <div className="border border-dashed border-teal-900/30 rounded-2xl h-72 flex flex-col items-center justify-center text-slate-500">
+                                <MessageSquare size={48} className="mb-3 text-teal-800" />
+                                <p className="font-semibold text-slate-300">No active customer chats yet</p>
+                                <p className="text-xs text-slate-500 mt-1">Live customer messages on WhatsApp will appear here</p>
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
+                    {/* ===== POLICY VOICES TAB ===== */}
+                    {subTab === 'policy' && (
+                        <VoiceAssetsTab
+                            category="policy"
+                            title="Policy Voices"
+                            description="Manage standard policy audio clips (e.g., Shipping Policy, Return Policy) for AI Agent use."
+                        />
+                    )}
+
+                    {/* ===== PRERECORDED VOICES TAB ===== */}
+                    {subTab === 'prerecorded' && (
+                        <VoiceAssetsTab
+                            category="prerecorded"
+                            title="Pre recorded voices"
+                            description="Manage casual pre recorded voice notes for common FAQs and greetings."
+                        />
+                    )}
+                </div>
             </div>
-                {/* ===== POLICY VOICES TAB ===== */}
-                {subTab === 'policy' && (
-                    <VoiceAssetsTab 
-                        category="policy" 
-                        title="Policy Voices" 
-                        description="Manage standard policy audio clips (e.g., Shipping Policy, Return Policy) for AI Agent use." 
-                    />
-                )}
-
-                {/* ===== PRERECORDED VOICES TAB ===== */}
-                {subTab === 'prerecorded' && (
-                    <VoiceAssetsTab 
-                        category="prerecorded" 
-                        title="Pre-recorded Voices" 
-                        description="Manage casual pre-recorded voice notes for common FAQs and greetings." 
-                    />
-                )}
         </div>
     );
 };
