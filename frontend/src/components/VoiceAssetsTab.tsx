@@ -1213,23 +1213,30 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
         setShowAddModal(false);
     };
 
-    const transcribeAudio = async () => {
-        if (!audioBlob) return alert('Record or save audio first.');
+    const transcribeAudio = () => {
+        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        if (!SpeechRecognition) return alert("Your browser doesn't support free Speech-to-Text. Please use Chrome.");
+        
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        
         setIsTranscribing(true);
-        try {
-            const fd = new FormData();
-            fd.append('audio', audioBlob, 'voice.wav');
-            const res = await fetch('/api/voices/transcribe', { method: 'POST', body: fd });
-            const data = await res.json();
-            if (data.success) {
-                setFormData(prev => ({ ...prev, transcription: data.transcription }));
-            } else {
-                alert('Transcription failed: ' + data.error);
+        
+        recognition.onresult = (event: any) => {
+            let finalTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
             }
-        } catch (err) {
-            alert('Transcription error');
-        }
-        setIsTranscribing(false);
+            if (finalTranscript) {
+                setFormData(prev => ({ ...prev, transcription: prev.transcription + " " + finalTranscript.trim() }));
+            }
+        };
+        
+        recognition.onend = () => setIsTranscribing(false);
+        recognition.onerror = () => setIsTranscribing(false);
+        
+        recognition.start();
     };
 
     const submitVoice = () => {
@@ -1332,14 +1339,6 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
                                     When to Use
                                 </h5>
                                 <p className="text-slate-300 text-xs line-clamp-3 leading-relaxed">{voice.usage_instructions || 'None'}</p>
-                            </div>
-
-                            <div className="mt-auto relative z-10">
-                                <h5 className="text-amber-500 text-[10px] uppercase font-bold tracking-widest mb-1.5 flex items-center gap-1.5">
-                                    <div className="w-1 h-1 bg-amber-500 rounded-full"></div>
-                                    Transcription
-                                </h5>
-                                <p className="text-slate-400 text-[11px] italic line-clamp-4 leading-relaxed bg-black/10 rounded-xl p-3 border border-white/5">{voice.transcription || 'Not transcribed yet.'}</p>
                             </div>
                         </div>
                     ))}
@@ -1827,9 +1826,9 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
                                         <h4 className="text-amber-500 font-semibold text-xs uppercase tracking-wider flex items-center gap-2">
                                             <FileText size={16} /> Speech-to-Text Transcription
                                         </h4>
-                                        <button onClick={transcribeAudio} disabled={isTranscribing} className="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition shadow-lg flex items-center gap-2 disabled:opacity-50">
-                                            {isTranscribing ? <RefreshCw className="animate-spin" size={14} /> : <Edit3 size={14} />}
-                                            {isTranscribing ? 'Transcribing...' : 'Convert to Text'}
+                                        <button onClick={transcribeAudio} disabled={isTranscribing} className={`px-4 py-2 rounded-lg text-xs font-bold transition shadow-lg flex items-center gap-2 ${isTranscribing ? 'bg-red-600 hover:bg-red-500 text-white animate-pulse' : 'bg-amber-600 hover:bg-amber-500 text-white'}`}>
+                                            {isTranscribing ? <Mic className="animate-pulse" size={14} /> : <Edit3 size={14} />}
+                                            {isTranscribing ? 'Listening... Speak now!' : 'Live Dictate (Free)'}
                                         </button>
                                     </div>
                                     <p className="text-[11px] text-slate-400">Convert the recorded audio to text so the AI Agent can understand exactly what you are saying.</p>
