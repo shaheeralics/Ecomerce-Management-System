@@ -1336,6 +1336,7 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
                                         onClick={() => {
                                             setFormData({ title: voice.title, usage_instructions: voice.usage_instructions || '', transcription: voice.transcription || '' });
                                             setEditId(voice.id);
+                                            setAudioPreviewUrl(voice.voice_url || null);
                                             setShowAddModal(true);
                                         }} 
                                         className="text-slate-500 hover:text-amber-400 p-2 bg-slate-900/50 hover:bg-amber-950/30 border border-transparent hover:border-amber-900/50 rounded-xl transition-all cursor-pointer"
