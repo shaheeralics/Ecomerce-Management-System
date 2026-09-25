@@ -547,7 +547,8 @@ const WhatsAppDashboard = () => {
             };
 
             mediaRecorderRef.current.onstop = async () => {
-                const recordedNewBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                const mimeType = mediaRecorderRef.current ? mediaRecorderRef.current.mimeType : 'audio/webm';
+                const recordedNewBlob = new Blob(audioChunksRef.current, { type: mimeType });
                 const cutTime = overwriteSeekRef.current;
 
                 try {
