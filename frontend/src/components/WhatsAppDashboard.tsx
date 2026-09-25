@@ -1,6 +1,9 @@
+import VoiceAssetsTab from './VoiceAssetsTab';
 import React, { useState, useEffect, useRef } from 'react';
 import {
     Package,
+    ShieldAlert,
+    Mic2,
     MessageSquare,
     Settings,
     Plus,
@@ -160,7 +163,7 @@ function audioBufferToWavBlob(buffer: AudioBuffer): Blob {
 }
 
 const WhatsAppDashboard = () => {
-    const [subTab, setSubTab] = useState<'products' | 'conversations' | 'settings'>('products');
+    const [subTab, setSubTab] = useState<'products' | 'conversations' | 'policy' | 'prerecorded'>('products');
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);

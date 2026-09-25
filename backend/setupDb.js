@@ -100,6 +100,21 @@ async function setupDatabase() {
             VALUES (1, 'You are a helpful AI assistant for Pawanda e-commerce.')
         `);
 
+        // 6. Voice Assets
+        await connection.execute(`
+            CREATE TABLE IF NOT EXISTS voice_assets (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                category ENUM('policy', 'prerecorded') NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                usage_instructions TEXT,
+                transcription TEXT,
+                voice_url VARCHAR(1024),
+                status VARCHAR(50) DEFAULT 'available',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )
+        `);
+
         console.log('All tables created successfully.');
         await connection.end();
     } catch (e) {

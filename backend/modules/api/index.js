@@ -54,4 +54,9 @@ router.post('/agent-config', async (req, res) => {
     }
 });
 
+const voiceRoutes = require('./voices');
+
+// Mount voice routes
+router.use('/voices', voiceRoutes);
+
 module.exports = router;
