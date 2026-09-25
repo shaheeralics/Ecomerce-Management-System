@@ -14,8 +14,8 @@ router.post('/transcribe', upload.single('audio'), async (req, res) => {
         if (!req.file) return res.status(400).json({ success: false, error: 'No audio file provided' });
 
         const [settingsRows] = await db.execute('SELECT llm_api_key FROM api_settings WHERE id = 1');
-        const apiKey = settingsRows[0]?.llm_api_key;
-        if (!apiKey) return res.status(400).json({ success: false, error: 'LLM API Key not configured in DB' });
+        const apiKey = settingsRows[0]?.llm_api_key || process.env.LLM_API_KEY;
+        if (!apiKey) return res.status(400).json({ success: false, error: 'LLM API Key not configured. Please go to Settings and add your Gemini API Key.' });
 
         const ai = new GoogleGenAI({ apiKey });
         const response = await ai.models.generateContent({

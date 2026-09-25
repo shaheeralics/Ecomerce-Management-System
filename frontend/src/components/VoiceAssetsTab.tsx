@@ -1215,30 +1215,27 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
         setEditId(null);
     };
 
-    const transcribeAudio = () => {
-        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-        if (!SpeechRecognition) return alert("Your browser doesn't support free Speech-to-Text. Please use Chrome.");
+    const transcribeAudio = async () => {
+        if (!audioBlob && !editId) return alert('Record or save audio first.');
         
-        const recognition = new SpeechRecognition();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        
+        // If editing and no new audio is recorded, we can't transcribe what we don't have as a blob easily
+        if (!audioBlob && editId) return alert('Please record a new audio clip first to transcribe it.');
+
         setIsTranscribing(true);
-        
-        recognition.onresult = (event: any) => {
-            let finalTranscript = '';
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
+        try {
+            const fd = new FormData();
+            fd.append('audio', audioBlob!, 'voice.wav');
+            const res = await fetch('/api/voices/transcribe', { method: 'POST', body: fd });
+            const data = await res.json();
+            if (data.success) {
+                setFormData(prev => ({ ...prev, transcription: data.transcription }));
+            } else {
+                alert('Transcription failed: ' + data.error);
             }
-            if (finalTranscript) {
-                setFormData(prev => ({ ...prev, transcription: prev.transcription + " " + finalTranscript.trim() }));
-            }
-        };
-        
-        recognition.onend = () => setIsTranscribing(false);
-        recognition.onerror = () => setIsTranscribing(false);
-        
-        recognition.start();
+        } catch (err) {
+            alert('Transcription error');
+        }
+        setIsTranscribing(false);
     };
 
     const submitVoice = () => {
@@ -1850,9 +1847,9 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
                                         <h4 className="text-amber-500 font-semibold text-xs uppercase tracking-wider flex items-center gap-2">
                                             <FileText size={16} /> Speech-to-Text Transcription
                                         </h4>
-                                        <button onClick={transcribeAudio} disabled={isTranscribing} className={`px-4 py-2 rounded-lg text-xs font-bold transition shadow-lg flex items-center gap-2 ${isTranscribing ? 'bg-red-600 hover:bg-red-500 text-white animate-pulse' : 'bg-amber-600 hover:bg-amber-500 text-white'}`}>
-                                            {isTranscribing ? <Mic className="animate-pulse" size={14} /> : <Edit3 size={14} />}
-                                            {isTranscribing ? 'Listening... Speak now!' : 'Live Dictate (Free)'}
+                                        <button onClick={transcribeAudio} disabled={isTranscribing} className="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition shadow-lg flex items-center gap-2 disabled:opacity-50">
+                                            {isTranscribing ? <RefreshCw className="animate-spin" size={14} /> : <Edit3 size={14} />}
+                                            {isTranscribing ? 'Transcribing...' : 'Auto-Transcribe Audio'}
                                         </button>
                                     </div>
                                     <p className="text-[11px] text-slate-400">Convert the recorded audio to text so the AI Agent can understand exactly what you are saying.</p>
