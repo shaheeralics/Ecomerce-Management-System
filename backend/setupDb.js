@@ -115,6 +115,50 @@ async function setupDatabase() {
             )
         `);
 
+        // 7. Orders
+        await connection.execute(`
+            CREATE TABLE IF NOT EXISTS orders (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                customer_name VARCHAR(255),
+                customer_phone VARCHAR(50) NOT NULL,
+                address TEXT,
+                city VARCHAR(100),
+                zip_code VARCHAR(50),
+                status VARCHAR(50) DEFAULT 'Pending',
+                price DECIMAL(10, 2) NOT NULL,
+                delivery_fee DECIMAL(10, 2) DEFAULT 0,
+                payment_method VARCHAR(50),
+                items JSON,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )
+        `);
+
+        // 8. Order Notes
+        await connection.execute(`
+            CREATE TABLE IF NOT EXISTS order_notes (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                order_id INT NOT NULL,
+                note TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+            )
+        `);
+
+        // 9. Order Attachments
+        await connection.execute(`
+            CREATE TABLE IF NOT EXISTS order_attachments (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                order_id INT NOT NULL,
+                type VARCHAR(50),
+                file_url VARCHAR(1024) NOT NULL,
+                file_name VARCHAR(255),
+                file_type VARCHAR(100),
+                uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+            )
+        `);
+
         console.log('All tables created successfully.');
         await connection.end();
     } catch (e) {

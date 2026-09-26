@@ -1,4 +1,7 @@
 import VoiceAssetsTab from './VoiceAssetsTab';
+import AnalyticsPage from './AnalyticsPage';
+import LiveConversations from './LiveConversations';
+import OrdersPage from './OrdersPage';
 import React, { useState, useEffect, useRef } from 'react';
 import {
     Package,
@@ -12,6 +15,8 @@ import {
     Camera,
     Video,
     Mic,
+    ShoppingCart,
+    BarChart,
     Square,
     Play,
     Pause,
@@ -164,7 +169,7 @@ function audioBufferToWavBlob(buffer: AudioBuffer): Blob {
 }
 
 const WhatsAppDashboard = () => {
-    const [subTab, setSubTab] = useState<'products' | 'conversations' | 'policy' | 'prerecorded'>('products');
+    const [subTab, setSubTab] = useState<'products' | 'conversations' | 'policy' | 'prerecorded' | 'orders' | 'analytics'>('products');
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(false);
@@ -1711,6 +1716,22 @@ const WhatsAppDashboard = () => {
                         Live Conversations
                     </button>
                     <button
+                        onClick={() => setSubTab('orders')}
+                        className={`text-left px-4 py-3 rounded-xl font-medium text-xs transition-all flex items-center gap-3 ${subTab === 'orders' ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/30 font-semibold' : 'text-slate-400 hover:bg-teal-950/40 hover:text-slate-200'
+                            }`}
+                    >
+                        <ShoppingCart size={17} />
+                        Orders Manager
+                    </button>
+                    <button
+                        onClick={() => setSubTab('analytics')}
+                        className={`text-left px-4 py-3 rounded-xl font-medium text-xs transition-all flex items-center gap-3 ${subTab === 'analytics' ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/30 font-semibold' : 'text-slate-400 hover:bg-teal-950/40 hover:text-slate-200'
+                            }`}
+                    >
+                        <BarChart size={17} />
+                        Analytics
+                    </button>
+                    <button
                         onClick={() => setSubTab('policy')}
                         className={`text-left px-4 py-3 rounded-xl font-medium text-xs transition-all flex items-center gap-3 ${subTab === 'policy' ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/30 font-semibold' : 'text-slate-400 hover:bg-teal-950/40 hover:text-slate-200'}`}
                     >
@@ -2761,15 +2782,17 @@ const WhatsAppDashboard = () => {
 
                     {/* ===== CONVERSATIONS TAB ===== */}
                     {subTab === 'conversations' && (
-                        <div>
-                            <h3 className="text-2xl font-bold text-slate-100 mb-2">Live Conversations</h3>
-                            <p className="text-slate-400 text-xs mb-6">Monitor real-time WhatsApp incoming chats and take over AI responses anytime.</p>
-                            <div className="border border-dashed border-teal-900/30 rounded-2xl h-72 flex flex-col items-center justify-center text-slate-500">
-                                <MessageSquare size={48} className="mb-3 text-teal-800" />
-                                <p className="font-semibold text-slate-300">No active customer chats yet</p>
-                                <p className="text-xs text-slate-500 mt-1">Live customer messages on WhatsApp will appear here</p>
-                            </div>
-                        </div>
+                        <LiveConversations />
+                    )}
+
+                    {/* ===== ORDERS TAB ===== */}
+                    {subTab === 'orders' && (
+                        <OrdersPage />
+                    )}
+
+                    {/* ===== ANALYTICS TAB ===== */}
+                    {subTab === 'analytics' && (
+                        <AnalyticsPage />
                     )}
 
                     {/* ===== POLICY VOICES TAB ===== */}
