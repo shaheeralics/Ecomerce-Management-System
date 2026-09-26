@@ -1,4 +1,14 @@
-require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
+const dotenv = require('dotenv');
+
+// Load environment variables from the root .env file if it exists
+const rootEnvPath = path.join(__dirname, '../.env');
+if (fs.existsSync(rootEnvPath)) {
+    dotenv.config({ path: rootEnvPath });
+} else {
+    dotenv.config(); // fallback
+}
 const express = require('express');
 const cors = require('cors');
 
