@@ -84,23 +84,10 @@ ${conversationHistory}`
 
         const response = await openai.chat.completions.create({
             model: 'gpt-4o-mini',
-            messages: [systemMessage, userMessage],
-            tools: tools.getAgentTools(),
-            tool_choice: 'auto'
+            messages: [systemMessage, userMessage]
         });
 
         let replyText = response.choices[0].message.content || '';
-        const toolCalls = response.choices[0].message.tool_calls;
-
-        if (toolCalls && toolCalls.length > 0) {
-            for (const toolCall of toolCalls) {
-                const args = JSON.parse(toolCall.function.arguments);
-                if (toolCall.function.name === 'create_order') {
-                    const result = await tools.createOrder(args.customerName, phone, args.address, args.productId);
-                    replyText = `Your order has been placed successfully! Order ID: ${result.orderId}`;
-                }
-            }
-        }
 
         // Guardrail check
         if (!guardrailCheck(replyText)) {
