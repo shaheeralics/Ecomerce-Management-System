@@ -68,7 +68,7 @@ IMPORTANT RULES:
 - Be friendly and helpful in Urdu/English mixed style
 - Keep responses concise (max 2-3 sentences)
 - If customer wants to see a product image, mention you can show it
-- Advance payment required for orders: Rs ${advanceAmount}`;
+- Advance payment required for orders: Rs ${advanceAmount}
 
 CONVERSATION SO FAR:
 ${conversationHistory}
