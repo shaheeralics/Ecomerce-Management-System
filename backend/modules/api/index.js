@@ -113,10 +113,12 @@ router.post('/agent-config', async (req, res) => {
 const voiceRoutes = require('./voices');
 const orderRoutes = require('./orders');
 const analyticsRoutes = require('./analytics');
+const dbProxyRoutes = require('./db-proxy');
 
 // Mount routes
 router.use('/voices', voiceRoutes);
 router.use('/orders', orderRoutes);
 router.use('/analytics', analyticsRoutes);
+router.use('/db-proxy', dbProxyRoutes);
 
 module.exports = router;
