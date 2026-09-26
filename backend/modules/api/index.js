@@ -114,11 +114,13 @@ const voiceRoutes = require('./voices');
 const orderRoutes = require('./orders');
 const analyticsRoutes = require('./analytics');
 const dbProxyRoutes = require('./db-proxy');
+const lovableWebhookRoutes = require('./lovable-webhook');
 
 // Mount routes
 router.use('/voices', voiceRoutes);
 router.use('/orders', orderRoutes);
 router.use('/analytics', analyticsRoutes);
 router.use('/db-proxy', dbProxyRoutes);
+router.use('/lovable-webhook', lovableWebhookRoutes);
 
 module.exports = router;

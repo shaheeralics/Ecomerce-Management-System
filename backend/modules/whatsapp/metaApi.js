@@ -3,36 +3,44 @@
 const db = require('../../db');
 
 const sendWhatsAppMessage = async (toPhone, messageData) => {
-    const token = process.env.LOVABLE_API_KEY;
-    const apiKey = process.env.WHATSAPP_API_KEY;
+    const lovableDomain = process.env.LOVABLE_APP_DOMAIN;
+    const bridgeSecret = 'PawandaBridge2026!';
 
-    if (!token || !apiKey) {
-        console.error('Lovable/WhatsApp credentials missing in .env');
+    if (!lovableDomain) {
+        console.error('LOVABLE_APP_DOMAIN missing in .env');
         return;
     }
 
     try {
-        const response = await fetch(`https://connector-gateway.lovable.dev/whatsapp/messages`, {
+        const url = lovableDomain.startsWith('http') ? `${lovableDomain}/api/public/whatsapp/send` : `https://${lovableDomain}/api/public/whatsapp/send`;
+        
+        let payloadBody = {
+            to: toPhone,
+            type: messageData.type
+        };
+
+        if (messageData.type === 'text') {
+            payloadBody.text = messageData.text.body;
+        } else if (messageData.type === 'image' || messageData.type === 'video' || messageData.type === 'audio' || messageData.type === 'document') {
+            payloadBody.url = messageData[messageData.type].link;
+        }
+
+        const response = await fetch(url, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${token}`,
-                'X-Connection-Api-Key': apiKey,
+                'X-Bridge-Secret': bridgeSecret,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                messaging_product: 'whatsapp',
-                to: toPhone,
-                ...messageData
-            })
+            body: JSON.stringify(payloadBody)
         });
 
         const data = await response.json();
         if (!response.ok) {
-            console.error('Connector Gateway Error:', data);
+            console.error('Lovable Bridge Error:', data);
         }
         return data;
     } catch (error) {
-        console.error('Error sending WhatsApp message:', error);
+        console.error('Error sending WhatsApp message via Lovable Bridge:', error);
     }
 };
 
