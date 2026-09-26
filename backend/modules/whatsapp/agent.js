@@ -20,14 +20,24 @@ const processMessage = async (phone, incomingText, dbContext) => {
         // 1. Fetch LLM API Key
         const [settingsRows] = await db.execute('SELECT llm_api_key FROM api_settings WHERE id = 1');
         const apiKey = settingsRows[0]?.llm_api_key;
+
+        // 2. Fetch config from agent_config
+        const [configRows] = await db.execute('SELECT * FROM agent_config WHERE id = 1');
+        const config = configRows[0] || {};
+        
+        if (config.agent_enabled === 0 || config.agent_enabled === false) {
+            console.log(`Agent is disabled. Ignoring message from ${phone}`);
+            return;
+        }
+
         if (!apiKey) {
             await sendTextMessage(phone, "Hello! Our system is being configured. Please try again shortly.");
             return;
         }
 
-        // 2. Fetch system prompt from agent_config
-        const [configRows] = await db.execute('SELECT system_prompt FROM agent_config WHERE id = 1');
-        const systemPrompt = configRows[0]?.system_prompt || 'You are a helpful e-commerce sales assistant for Pawanda.';
+        const systemPrompt = config.system_prompt || 'You are a helpful e-commerce sales assistant for Pawanda.';
+        const advanceAmount = config.advance_amount || 0;
+        const delaySeconds = config.short_delay_seconds || 5;
 
         // 3. Fetch available products for context
         const availableProducts = await tools.searchAvailableProducts();
@@ -58,6 +68,7 @@ IMPORTANT RULES:
 - Be friendly and helpful in Urdu/English mixed style
 - Keep responses concise (max 2-3 sentences)
 - If customer wants to see a product image, mention you can show it
+- Advance payment required for orders: Rs ${advanceAmount}`;
 
 CONVERSATION SO FAR:
 ${conversationHistory}
@@ -76,6 +87,11 @@ Your response:`;
         // Guardrail check
         if (!guardrailCheck(replyText)) {
             replyText = "Let me check on that and get back to you.";
+        }
+
+        // Apply delay
+        if (delaySeconds > 0) {
+            await new Promise(resolve => setTimeout(resolve, delaySeconds * 1000));
         }
 
         await sendTextMessage(phone, replyText);

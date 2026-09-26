@@ -87,7 +87,7 @@ router.get('/agent-config', async (req, res) => {
         if (rows.length > 0) {
             res.json({ success: true, data: rows[0] });
         } else {
-            res.json({ success: true, data: { system_prompt: '' } });
+            res.json({ success: true, data: { system_prompt: '', short_delay_seconds: 5, long_delay_seconds: 30, advance_amount: 0, agent_enabled: 1 } });
         }
     } catch (e) {
         console.error(e);
@@ -98,11 +98,24 @@ router.get('/agent-config', async (req, res) => {
 // Save agent config
 router.post('/agent-config', async (req, res) => {
     try {
-        const { system_prompt } = req.body;
+        const { system_prompt, short_delay_seconds, long_delay_seconds, advance_amount, agent_enabled } = req.body;
+        
         await db.execute(`
-            INSERT INTO agent_config (id, system_prompt) VALUES (1, ?)
-            ON DUPLICATE KEY UPDATE system_prompt = VALUES(system_prompt)
-        `, [system_prompt || '']);
+            INSERT INTO agent_config (id, system_prompt, short_delay_seconds, long_delay_seconds, advance_amount, agent_enabled) 
+            VALUES (1, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE 
+                system_prompt = VALUES(system_prompt),
+                short_delay_seconds = VALUES(short_delay_seconds),
+                long_delay_seconds = VALUES(long_delay_seconds),
+                advance_amount = VALUES(advance_amount),
+                agent_enabled = VALUES(agent_enabled)
+        `, [
+            system_prompt || '', 
+            short_delay_seconds ?? 5, 
+            long_delay_seconds ?? 30, 
+            advance_amount ?? 0, 
+            agent_enabled === false || agent_enabled === 0 ? 0 : 1
+        ]);
         res.json({ success: true, message: 'Agent config saved' });
     } catch (e) {
         console.error(e);

@@ -2,6 +2,7 @@ import VoiceAssetsTab from './VoiceAssetsTab';
 import AnalyticsPage from './AnalyticsPage';
 import LiveConversations from './LiveConversations';
 import OrdersPage from './OrdersPage';
+import Configuration from './Configuration';
 import React, { useState, useEffect, useRef } from 'react';
 import {
     Package,
@@ -1745,6 +1746,13 @@ const WhatsAppDashboard = () => {
                         <Mic2 size={17} />
                         Voice Assets
                     </button>
+                    <button
+                        onClick={() => setSubTab('configuration')}
+                        className={`text-left px-4 py-3 rounded-xl font-medium text-xs transition-all flex items-center gap-3 ${subTab === 'configuration' ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/30 font-semibold' : 'text-slate-400 hover:bg-teal-950/40 hover:text-slate-200'}`}
+                    >
+                        <Settings size={17} />
+                        Configuration
+                    </button>
                 </nav>
 
                 {/* Dashboard Stats */}
@@ -2811,6 +2819,13 @@ const WhatsAppDashboard = () => {
                             title="Pre recorded voices"
                             description="Manage casual pre recorded voice notes for common FAQs and greetings."
                         />
+                    )}
+
+                    {/* ===== CONFIGURATION TAB ===== */}
+                    {subTab === 'configuration' && (
+                        <div className="h-full w-full overflow-y-auto p-8 custom-scrollbar">
+                            <Configuration />
+                        </div>
                     )}
                 </div>
             </div>
