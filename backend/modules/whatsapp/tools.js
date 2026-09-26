@@ -77,9 +77,53 @@ const markProductSold = async (productId) => {
     }
 };
 
+// Save customer info (Name, Address) to known_slots in database
+const saveCustomerInfo = async (phone, name, address) => {
+    try {
+        const [rows] = await db.execute('SELECT known_slots FROM conversations WHERE customer_phone = ?', [phone]);
+        if (rows.length === 0) return { success: false, message: 'Conversation not found' };
+
+        let known_slots = rows[0].known_slots || {};
+        if (typeof known_slots === 'string') {
+            try { known_slots = JSON.parse(known_slots); } catch (e) { known_slots = {}; }
+        }
+
+        if (name) known_slots.name = name;
+        if (address) known_slots.address = address;
+
+        await db.execute('UPDATE conversations SET known_slots = ? WHERE customer_phone = ?', [JSON.stringify(known_slots), phone]);
+        return { success: true, message: `Saved customer info: ${name || ''} ${address || ''}` };
+    } catch (err) {
+        console.error('Failed to save customer info:', err);
+        return { success: false, message: 'Database error' };
+    }
+};
+
+const getAgentTools = () => {
+    return [
+        {
+            type: "function",
+            function: {
+                name: "save_customer_info",
+                description: "Saves the customer's name and/or delivery address to the database. Call this as soon as the customer provides their name or address.",
+                parameters: {
+                    type: "object",
+                    properties: {
+                        name: { type: "string", description: "The customer's full name" },
+                        address: { type: "string", description: "The customer's delivery address" }
+                    },
+                    required: []
+                }
+            }
+        }
+    ];
+};
+
 module.exports = {
     searchAvailableProducts,
     getProductMedia,
     proposePrice,
-    markProductSold
+    markProductSold,
+    saveCustomerInfo,
+    getAgentTools
 };

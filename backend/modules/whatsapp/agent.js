@@ -72,6 +72,7 @@ IMPORTANT RULES:
 - Keep responses concise (max 2-3 sentences)
 - If customer wants to see a product image, mention you can show it
 - Advance payment required for orders: Rs ${advanceAmount}
+- If you don't know the customer's name, politely ask for their name early in the conversation and use the save_customer_info tool to save it.
 
 CONVERSATION SO FAR:
 ${conversationHistory}`
@@ -84,10 +85,28 @@ ${conversationHistory}`
 
         const response = await openai.chat.completions.create({
             model: 'gpt-4o-mini',
-            messages: [systemMessage, userMessage]
+            messages: [systemMessage, userMessage],
+            tools: tools.getAgentTools(),
+            tool_choice: 'auto'
         });
 
         let replyText = response.choices[0].message.content || '';
+        const toolCalls = response.choices[0].message.tool_calls;
+
+        if (toolCalls && toolCalls.length > 0) {
+            for (const toolCall of toolCalls) {
+                const args = JSON.parse(toolCall.function.arguments);
+                if (toolCall.function.name === 'save_customer_info') {
+                    await tools.saveCustomerInfo(phone, args.name, args.address);
+                }
+            }
+            
+            // If the AI only called a tool and returned no text, we might want to generate a follow up text,
+            // but for simplicity, let's just make sure we send a friendly acknowledgment if replyText is empty.
+            if (!replyText) {
+                replyText = "Thanks for the info! How can I help you further today?";
+            }
+        }
 
         // Guardrail check
         if (!guardrailCheck(replyText)) {
