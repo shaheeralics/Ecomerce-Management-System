@@ -30,6 +30,22 @@ router.get('/', async (req, res) => {
     }
 });
 
+// GET search products
+router.get('/search/query', async (req, res) => {
+    try {
+        const search = req.query.q || '';
+        const [rows] = await db.query(`
+            SELECT * FROM products 
+            WHERE title LIKE ? OR brand LIKE ?
+            LIMIT 20
+        `, [`%${search}%`, `%${search}%`]);
+        res.json({ success: true, data: rows });
+    } catch (err) {
+        console.error('Product search error:', err);
+        res.status(500).json({ success: false });
+    }
+});
+
 // GET single product
 router.get('/:id', async (req, res) => {
     try {

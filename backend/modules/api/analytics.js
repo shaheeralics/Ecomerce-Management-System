@@ -248,8 +248,8 @@ router.get('/', async (req, res) => {
                     totalRevenue: parseFloat(total_revenue || 0),
                     totalOrders: total_orders || 0,
                     activeCustomers: active_customers || 0,
-                    aov: parseFloat(aov.toFixed(2)),
-                    conversionRate: parseFloat(conversion_rate.toFixed(1)),
+                    aov: parseFloat((aov || 0).toFixed(2)),
+                    conversionRate: parseFloat((conversion_rate || 0).toFixed(1)),
                     changes
                 },
                 statusDistribution: statusData,
