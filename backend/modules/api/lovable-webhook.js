@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../../db');
 const agent = require('../whatsapp/agent');
+const { GoogleGenAI } = require('@google/genai');
 
 router.post('/', async (req, res) => {
     const body = req.body;
@@ -36,8 +37,47 @@ router.post('/', async (req, res) => {
 
         const dbContext = { conversationId: dbConversationId }; 
 
+        // Transcribe voice messages using Gemini
+        let transcribedText = content || '';
+        
+        if (messageType === 'audio' && mediaUrl) {
+            try {
+                const fetchRes = await fetch(mediaUrl);
+                if (fetchRes.ok) {
+                    const arrayBuffer = await fetchRes.arrayBuffer();
+                    const audioBuffer = Buffer.from(arrayBuffer);
+                    const mimeType = fetchRes.headers.get('content-type') || 'audio/ogg';
+
+                    const [settingsRows] = await db.execute('SELECT llm_api_key FROM api_settings WHERE id = 1');
+                    const geminiKey = settingsRows[0]?.llm_api_key || process.env.LLM_API_KEY;
+
+                    if (geminiKey) {
+                        const ai = new GoogleGenAI({ apiKey: geminiKey });
+                        const response = await ai.models.generateContent({
+                            model: 'gemini-2.5-flash',
+                            contents: [
+                                {
+                                    inlineData: {
+                                        data: audioBuffer.toString("base64"),
+                                        mimeType: mimeType
+                                    }
+                                },
+                                "You are an expert transcriptionist. Please transcribe exactly what is being said in this audio message from a customer. Do not add any conversational filler, markdown formatting, or introductory text. If the audio is in Urdu/Hindi, transcribe it accurately using roman script (Roman Urdu) or english based on the context. Only output the transcription text."
+                            ]
+                        });
+                        transcribedText = response.text.trim();
+                        console.log(`Transcribed voice message from ${customerPhone}: ${transcribedText}`);
+                    } else {
+                        console.error('Gemini API Key missing for STT');
+                    }
+                }
+            } catch (sttErr) {
+                console.error('Failed to transcribe audio message:', sttErr);
+            }
+        }
+
         // Fire and forget agent processing
-        agent.processMessage(customerPhone, content || '', dbContext);
+        agent.processMessage(customerPhone, transcribedText, dbContext);
 
         res.json({ success: true, message: 'Message received and processing started' });
     } catch (err) {
