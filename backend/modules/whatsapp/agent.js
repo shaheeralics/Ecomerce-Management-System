@@ -1,7 +1,7 @@
 const { sendTextMessage, sendMediaMessage } = require('./metaApi');
 const db = require('../../db');
 const tools = require('./tools');
-const { GoogleGenAI } = require('@google/genai');
+const { OpenAI } = require('openai');
 
 const guardrailCheck = (text) => {
     const forbiddenPhrases = ['minimum_price', 'lowest I can go', 'cost price', 'minimum price'];
@@ -17,23 +17,24 @@ const processMessage = async (phone, incomingText, dbContext) => {
     console.log(`Processing message from ${phone}: ${incomingText}`);
 
     try {
-        // 1. Fetch LLM API Key
-        const [settingsRows] = await db.execute('SELECT llm_api_key FROM api_settings WHERE id = 1');
-        const apiKey = settingsRows[0]?.llm_api_key;
+        // 1. Fetch LLM API Key (Strictly OpenAI for WhatsApp Agent)
+        const apiKey = process.env.OPENAI_API_KEY;
+        if (!apiKey) {
+            console.error('OPENAI_API_KEY is missing in .env');
+            await sendTextMessage(phone, "Hello! Our system is being configured (OpenAI Key missing). Please try again shortly.");
+            return;
+        }
 
         // 2. Fetch config from agent_config
         const [configRows] = await db.execute('SELECT * FROM agent_config WHERE id = 1');
         const config = configRows[0] || {};
-        
+
         if (config.agent_enabled === 0 || config.agent_enabled === false) {
             console.log(`Agent is disabled. Ignoring message from ${phone}`);
             return;
         }
 
-        if (!apiKey) {
-            await sendTextMessage(phone, "Hello! Our system is being configured. Please try again shortly.");
-            return;
-        }
+
 
         const systemPrompt = config.system_prompt || 'You are a helpful e-commerce sales assistant for Pawanda.';
         const advanceAmount = config.advance_amount || 0;
@@ -56,8 +57,10 @@ const processMessage = async (phone, incomingText, dbContext) => {
         }
 
         // 5. Build full prompt
-        const ai = new GoogleGenAI({ apiKey });
-        const fullPrompt = `${systemPrompt}
+        const openai = new OpenAI({ apiKey });
+        const systemMessage = {
+            role: 'system',
+            content: `${systemPrompt}
 
 AVAILABLE PRODUCTS:
 ${productContext}
@@ -71,18 +74,33 @@ IMPORTANT RULES:
 - Advance payment required for orders: Rs ${advanceAmount}
 
 CONVERSATION SO FAR:
-${conversationHistory}
+${conversationHistory}`
+        };
 
-Customer says: ${incomingText}
+        const userMessage = {
+            role: 'user',
+            content: incomingText
+        };
 
-Your response:`;
-
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: fullPrompt,
+        const response = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: [systemMessage, userMessage],
+            tools: tools.getAgentTools(),
+            tool_choice: 'auto'
         });
 
-        let replyText = response.text;
+        let replyText = response.choices[0].message.content || '';
+        const toolCalls = response.choices[0].message.tool_calls;
+
+        if (toolCalls && toolCalls.length > 0) {
+            for (const toolCall of toolCalls) {
+                const args = JSON.parse(toolCall.function.arguments);
+                if (toolCall.function.name === 'create_order') {
+                    const result = await tools.createOrder(args.customerName, phone, args.address, args.productId);
+                    replyText = `Your order has been placed successfully! Order ID: ${result.orderId}`;
+                }
+            }
+        }
 
         // Guardrail check
         if (!guardrailCheck(replyText)) {
