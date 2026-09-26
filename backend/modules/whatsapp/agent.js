@@ -1,7 +1,7 @@
 const { sendTextMessage, sendMediaMessage } = require('./metaApi');
 const db = require('../../db');
 const tools = require('./tools');
-const { GoogleGenAI } = require('@google/genai');
+const { OpenAI } = require('openai');
 
 const guardrailCheck = (text) => {
     const forbiddenPhrases = ['minimum_price', 'lowest I can go', 'cost price', 'minimum price'];
@@ -19,7 +19,7 @@ const processMessage = async (phone, incomingText, dbContext) => {
     try {
         // 1. Fetch LLM API Key
         const [settingsRows] = await db.execute('SELECT llm_api_key FROM api_settings WHERE id = 1');
-        const apiKey = settingsRows[0]?.llm_api_key;
+        const apiKey = settingsRows[0]?.llm_api_key || process.env.LLM_API_KEY;
         if (!apiKey) {
             await sendTextMessage(phone, "Hello! Our system is being configured. Please try again shortly.");
             return;
@@ -35,19 +35,10 @@ const processMessage = async (phone, incomingText, dbContext) => {
             ? availableProducts.map(p => `- ID:${p.id} | ${p.title} | ${p.brand || 'N/A'} | ${p.gender} | Size:${p.size_original || 'N/A'} | Color:${p.color || 'N/A'} | Price: Rs ${p.starting_price}`).join('\n')
             : 'No products currently available.';
 
-        // 4. Fetch conversation history for context
-        let conversationHistory = '';
-        if (dbContext?.conversationId) {
-            const [msgRows] = await db.execute(
-                'SELECT sender, text_content FROM messages WHERE conversation_id = ? ORDER BY created_at DESC LIMIT 10',
-                [dbContext.conversationId]
-            );
-            conversationHistory = msgRows.reverse().map(m => `${m.sender === 'customer' ? 'Customer' : 'You'}: ${m.text_content}`).join('\n');
-        }
-
-        // 5. Build full prompt
-        const ai = new GoogleGenAI({ apiKey });
-        const fullPrompt = `${systemPrompt}
+        // 4. History + Build Prompt
+        const openai = new OpenAI({ apiKey });
+        
+        const systemMessage = `${systemPrompt}
 
 AVAILABLE PRODUCTS:
 ${productContext}
@@ -57,21 +48,30 @@ IMPORTANT RULES:
 - If customer asks for a lower price, negotiate but stay above minimum
 - Be friendly and helpful in Urdu/English mixed style
 - Keep responses concise (max 2-3 sentences)
-- If customer wants to see a product image, mention you can show it
+- If customer wants to see a product image, mention you can show it`;
 
-CONVERSATION SO FAR:
-${conversationHistory}
+        const messages = [{ role: 'system', content: systemMessage }];
 
-Customer says: ${incomingText}
+        if (dbContext?.conversationId) {
+            const [msgRows] = await db.execute(
+                'SELECT sender, text_content FROM messages WHERE conversation_id = ? ORDER BY created_at DESC LIMIT 10',
+                [dbContext.conversationId]
+            );
+            const history = msgRows.reverse().map(m => ({
+                role: m.sender === 'customer' ? 'user' : 'assistant',
+                content: m.text_content || ''
+            }));
+            messages.push(...history);
+        }
 
-Your response:`;
+        messages.push({ role: 'user', content: incomingText });
 
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: fullPrompt,
+        const response = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: messages,
         });
 
-        let replyText = response.text;
+        let replyText = response.choices[0].message.content;
 
         // Guardrail check
         if (!guardrailCheck(replyText)) {

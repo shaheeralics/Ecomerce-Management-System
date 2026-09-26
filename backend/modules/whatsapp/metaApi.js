@@ -3,27 +3,20 @@
 const db = require('../../db');
 
 const sendWhatsAppMessage = async (toPhone, messageData) => {
-    let token, phoneId;
-    try {
-        const [rows] = await db.execute('SELECT meta_token, meta_phone_id FROM api_settings WHERE id = 1');
-        if (rows.length > 0) {
-            token = rows[0].meta_token;
-            phoneId = rows[0].meta_phone_id;
-        }
-    } catch (err) {
-        console.error('Failed to fetch Meta API settings from DB:', err);
-    }
+    const token = process.env.LOVABLE_API_KEY;
+    const apiKey = process.env.WHATSAPP_API_KEY;
 
-    if (!token || !phoneId) {
-        console.error('Meta WhatsApp credentials missing in database');
+    if (!token || !apiKey) {
+        console.error('Lovable/WhatsApp credentials missing in .env');
         return;
     }
 
     try {
-        const response = await fetch(`https://graph.facebook.com/v19.0/${phoneId}/messages`, {
+        const response = await fetch(`https://connector-gateway.lovable.dev/whatsapp/messages`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
+                'X-Connection-Api-Key': apiKey,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
@@ -35,7 +28,7 @@ const sendWhatsAppMessage = async (toPhone, messageData) => {
 
         const data = await response.json();
         if (!response.ok) {
-            console.error('Meta API Error:', data);
+            console.error('Connector Gateway Error:', data);
         }
         return data;
     } catch (error) {
