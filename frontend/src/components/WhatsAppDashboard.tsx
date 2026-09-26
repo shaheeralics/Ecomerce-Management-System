@@ -170,7 +170,7 @@ function audioBufferToWavBlob(buffer: AudioBuffer): Blob {
 }
 
 const WhatsAppDashboard = () => {
-    const [subTab, setSubTab] = useState<'products' | 'conversations' | 'policy' | 'prerecorded' | 'orders' | 'analytics'>('products');
+    const [subTab, setSubTab] = useState<'products' | 'conversations' | 'policy' | 'prerecorded' | 'orders' | 'analytics' | 'configuration'>('products');
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(false);
