@@ -21,6 +21,8 @@ export default function AddOrderModal({ isOpen, onClose, onSuccess, editOrder }:
     // Product State
     const [productSearch, setProductSearch] = useState('');
     const [productResults, setProductResults] = useState<any[]>([]);
+    const [availableProducts, setAvailableProducts] = useState<any[]>([]);
+    const [visibleCount, setVisibleCount] = useState(5);
     
     // Items State
     const [items, setItems] = useState<any[]>([]);
@@ -34,6 +36,16 @@ export default function AddOrderModal({ isOpen, onClose, onSuccess, editOrder }:
 
     useEffect(() => {
         if (isOpen) {
+            // Fetch initial products
+            fetch('/api/products')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        setAvailableProducts(data.data);
+                        setProductResults(data.data);
+                    }
+                }).catch(err => console.error('Failed to fetch initial products', err));
+
             if (editOrder) {
                 setCustomerName(editOrder.customer_name || '');
                 setCustomerPhone(editOrder.customer_phone || '');
@@ -90,7 +102,7 @@ export default function AddOrderModal({ isOpen, onClose, onSuccess, editOrder }:
     // Searching Products
     useEffect(() => {
         if (!productSearch) {
-            setProductResults([]);
+            setProductResults(availableProducts);
             return;
         }
         const delay = setTimeout(async () => {
@@ -101,7 +113,7 @@ export default function AddOrderModal({ isOpen, onClose, onSuccess, editOrder }:
             } catch (err) { }
         }, 300);
         return () => clearTimeout(delay);
-    }, [productSearch]);
+    }, [productSearch, availableProducts]);
 
     const selectCustomer = (cust: any) => {
         setSelectedCustomer(cust);
@@ -266,22 +278,36 @@ export default function AddOrderModal({ isOpen, onClose, onSuccess, editOrder }:
                                 onChange={(e) => setProductSearch(e.target.value)}
                                 className="w-full bg-[#09181E] border border-teal-900/50 rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-100 outline-none focus:border-teal-500"
                             />
-                            {productResults.length > 0 && (
-                                <div className="absolute top-full left-0 right-0 mt-1 bg-[#09181E] border border-teal-900/50 rounded-xl shadow-xl z-10 max-h-48 overflow-y-auto">
-                                    {productResults.map((p, i) => (
-                                        <div key={i} onClick={() => addProduct(p)} className="flex items-center gap-3 px-4 py-3 hover:bg-teal-900/30 cursor-pointer border-b border-teal-900/20 last:border-0">
+                        </div>
+                        
+                        {productResults.length > 0 && (
+                            <div className="mb-6 bg-[#050D10] border border-teal-900/50 rounded-xl overflow-hidden shadow-inner">
+                                <div className="max-h-56 overflow-y-auto">
+                                    {productResults.slice(0, visibleCount).map((p, i) => (
+                                        <div key={i} onClick={() => addProduct(p)} className="flex items-center gap-3 px-4 py-3 hover:bg-teal-900/30 cursor-pointer border-b border-teal-900/20 last:border-0 transition-colors">
                                             {p.main_image_url ? (
-                                                <img src={p.main_image_url} alt="" className="w-8 h-8 rounded object-cover" />
-                                            ) : <div className="w-8 h-8 rounded bg-teal-900/50"></div>}
-                                            <div>
+                                                <img src={p.main_image_url} alt="" className="w-10 h-10 rounded-lg object-cover border border-teal-900/30" />
+                                            ) : <div className="w-10 h-10 rounded-lg bg-teal-900/50 border border-teal-900/30 flex items-center justify-center text-teal-700"><Box size={16}/></div>}
+                                            <div className="flex-1">
                                                 <p className="text-sm font-bold text-slate-200">{p.title}</p>
                                                 <p className="text-xs text-teal-400">Rs {p.starting_price}</p>
                                             </div>
+                                            <div className="bg-teal-900/40 text-teal-400 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-teal-800/60 transition-colors">Add Item +</div>
                                         </div>
                                     ))}
                                 </div>
-                            )}
-                        </div>
+                                {visibleCount < productResults.length && (
+                                    <div className="border-t border-teal-900/30 bg-[#09181E]">
+                                        <button 
+                                            onClick={() => setVisibleCount(prev => prev + 5)}
+                                            className="w-full py-2.5 text-xs font-semibold text-teal-400 hover:text-teal-300 hover:bg-teal-900/20 transition-colors"
+                                        >
+                                            Load More ({productResults.length - visibleCount} items left)
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
                         {items.length > 0 && (
                             <div className="border border-teal-900/40 rounded-xl overflow-hidden bg-[#09181E]">
