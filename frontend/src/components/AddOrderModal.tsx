@@ -36,13 +36,13 @@ export default function AddOrderModal({ isOpen, onClose, onSuccess, editOrder }:
 
     useEffect(() => {
         if (isOpen) {
-            // Fetch initial products
             fetch('/api/products')
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-                        setAvailableProducts(data.data);
-                        setProductResults(data.data);
+                        const available = data.data.filter((p: any) => p.status === 'available');
+                        setAvailableProducts(available);
+                        setProductResults(available);
                     }
                 }).catch(err => console.error('Failed to fetch initial products', err));
 
@@ -109,7 +109,10 @@ export default function AddOrderModal({ isOpen, onClose, onSuccess, editOrder }:
             try {
                 const res = await fetch(`/api/products/search/query?q=${encodeURIComponent(productSearch)}`);
                 const data = await res.json();
-                if (data.success) setProductResults(data.data);
+                if (data.success) {
+                    const available = data.data.filter((p: any) => p.status === 'available');
+                    setProductResults(available);
+                }
             } catch (err) { }
         }, 300);
         return () => clearTimeout(delay);
