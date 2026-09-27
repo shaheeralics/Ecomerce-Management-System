@@ -34,15 +34,22 @@ router.post('/', async (req, res) => {
         // Decode and save base64 media if provided
         if (mediaBase64) {
             try {
-                const ext = mediaMimeType ? mediaMimeType.split('/')[1].split(';')[0] : (messageType === 'audio' ? 'ogg' : 'jpg');
-                const filename = `media_${Date.now()}.${ext}`;
-                const uploadsDir = path.join(__dirname, '../../../uploads');
-                if (!fs.existsSync(uploadsDir)) {
-                    fs.mkdirSync(uploadsDir, { recursive: true });
+                // If the mime type is JSON, it means Lovable forwarded an error response from the gateway instead of audio
+                if (mediaMimeType && mediaMimeType.includes('json')) {
+                    const decodedError = Buffer.from(mediaBase64, 'base64').toString('utf8');
+                    console.error('Lovable forwarded a JSON error instead of media:', decodedError);
+                    content = `[Error from Lovable Gateway]: ${decodedError}`;
+                } else {
+                    const ext = mediaMimeType ? mediaMimeType.split('/')[1].split(';')[0] : (messageType === 'audio' ? 'ogg' : 'jpg');
+                    const filename = `media_${Date.now()}.${ext}`;
+                    const uploadsDir = path.join(__dirname, '../../uploads'); // backend/uploads
+                    if (!fs.existsSync(uploadsDir)) {
+                        fs.mkdirSync(uploadsDir, { recursive: true });
+                    }
+                    const filepath = path.join(uploadsDir, filename);
+                    fs.writeFileSync(filepath, Buffer.from(mediaBase64, 'base64'));
+                    finalMediaUrl = `/uploads/${filename}`;
                 }
-                const filepath = path.join(uploadsDir, filename);
-                fs.writeFileSync(filepath, Buffer.from(mediaBase64, 'base64'));
-                finalMediaUrl = `/uploads/${filename}`;
             } catch (err) {
                 console.error('Error saving base64 media:', err);
             }
@@ -61,7 +68,8 @@ router.post('/', async (req, res) => {
         // Transcribe voice messages using Gemini
         let transcribedText = content || '';
         
-        if (messageType === 'audio' && (mediaUrl || mediaBase64)) {
+        // Only attempt STT if it's audio and NOT a JSON error message
+        if (messageType === 'audio' && (mediaUrl || mediaBase64) && !(mediaMimeType && mediaMimeType.includes('json'))) {
             try {
                 let base64Data = mediaBase64;
                 let mimeType = mediaMimeType || 'audio/ogg';
