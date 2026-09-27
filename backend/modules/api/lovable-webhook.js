@@ -56,11 +56,13 @@ router.post('/', async (req, res) => {
         }
 
         // Save incoming message
+        let dbMessageId = null;
         if (content || finalMediaUrl) {
-            await db.execute(
+            const [insertMsg] = await db.execute(
                 'INSERT INTO messages (conversation_id, sender, type, text_content, media_url) VALUES (?, ?, ?, ?, ?)',
                 [dbConversationId, 'customer', messageType || 'text', content || '', finalMediaUrl]
             );
+            dbMessageId = insertMsg.insertId;
         }
 
         const dbContext = { conversationId: dbConversationId }; 
@@ -93,17 +95,29 @@ router.post('/', async (req, res) => {
                             model: 'gemini-2.5-flash',
                             contents: [
                                 {
-                                    inlineData: {
-                                        data: base64Data,
-                                        mimeType: mimeType
-                                    }
-                                },
-                                "You are an expert transcriptionist. Please transcribe exactly what is being said in this audio message from a customer. Do not add any conversational filler, markdown formatting, or introductory text. If the audio is in Urdu/Hindi, transcribe it accurately using roman script (Roman Urdu) or english based on the context. Only output the transcription text."
+                                    role: 'user',
+                                    parts: [
+                                        {
+                                            inlineData: {
+                                                data: base64Data,
+                                                mimeType: mimeType
+                                            }
+                                        },
+                                        {
+                                            text: "You are an expert transcriptionist. Please transcribe exactly what is being said in this audio message from a customer. Do not add any conversational filler, markdown formatting, or introductory text. If the audio is in Urdu/Hindi, transcribe it accurately using roman script (Roman Urdu) or english based on the context. Only output the transcription text."
+                                        }
+                                    ]
+                                }
                             ]
                         });
                         const rawTranscription = response.text.trim();
                         transcribedText = `[Voice Message Transcribed]: ${rawTranscription}`;
                         console.log(`Transcribed voice message from ${customerPhone}: ${transcribedText}`);
+                        
+                        // Update the database with the transcription so the UI sees it
+                        if (dbMessageId) {
+                            await db.execute('UPDATE messages SET text_content = ? WHERE id = ?', [transcribedText, dbMessageId]);
+                        }
                     } else {
                         console.error('Gemini API Key missing for STT');
                     }
