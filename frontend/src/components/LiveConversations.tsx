@@ -405,7 +405,14 @@ export default function LiveConversations() {
                                                 {msg.media_url && (
                                                     <div className="mt-2 rounded-lg overflow-hidden border border-white/10">
                                                         {msg.type === 'image' ? <img src={msg.media_url} className="w-full h-auto max-h-48 object-cover" /> 
-                                                        : (msg.type === 'audio' || msg.media_url.endsWith('.ogg') || msg.media_url.endsWith('.mp3')) ? <audio controls src={msg.media_url} className="w-full max-w-[250px] h-10 outline-none" />
+                                                        : (msg.type === 'audio' || msg.media_url.includes('.ogg') || msg.media_url.includes('.mp3')) ? (
+                                                            <div className="bg-[#050D10] rounded-xl p-2 border border-teal-900/50 shadow-inner">
+                                                                <audio controls preload="metadata" className="w-full max-w-[250px] h-10 outline-none">
+                                                                    <source src={msg.media_url} />
+                                                                    <a href={msg.media_url} target="_blank" rel="noopener noreferrer" className="text-blue-300 underline text-xs break-all">Download Audio</a>
+                                                                </audio>
+                                                            </div>
+                                                        )
                                                         : <a href={msg.media_url} target="_blank" rel="noopener noreferrer" className="text-blue-300 underline text-xs break-all">{msg.media_url}</a>}
                                                     </div>
                                                 )}
