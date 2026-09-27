@@ -91,8 +91,15 @@ router.post('/', async (req, res) => {
                         base64Data = base64Data.split('base64,')[1];
                     }
 
-                    const [settingsRows] = await db.execute('SELECT llm_api_key FROM api_settings WHERE id = 1');
-                    const geminiKey = settingsRows[0]?.llm_api_key || process.env.LLM_API_KEY;
+                    const [settingsRows] = await db.execute('SELECT llm_api_key, gemini_api_key FROM api_settings WHERE id = 1');
+                    
+                    let geminiKey = process.env.GEMINI_API_KEY || process.env.GEMINI_API || settingsRows[0]?.gemini_api_key;
+                    if (!geminiKey) {
+                        const fallback = settingsRows[0]?.llm_api_key || process.env.LLM_API_KEY;
+                        if (fallback && !fallback.startsWith('sk-')) {
+                            geminiKey = fallback;
+                        }
+                    }
 
                     if (geminiKey) {
                         const ai = new GoogleGenAI({ apiKey: geminiKey });
