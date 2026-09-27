@@ -86,6 +86,11 @@ router.post('/', async (req, res) => {
                 }
 
                 if (base64Data) {
+                    // Strip data URI prefix if it exists
+                    if (base64Data.includes('base64,')) {
+                        base64Data = base64Data.split('base64,')[1];
+                    }
+
                     const [settingsRows] = await db.execute('SELECT llm_api_key FROM api_settings WHERE id = 1');
                     const geminiKey = settingsRows[0]?.llm_api_key || process.env.LLM_API_KEY;
 
@@ -120,10 +125,15 @@ router.post('/', async (req, res) => {
                         }
                     } else {
                         console.error('Gemini API Key missing for STT');
+                        if (dbMessageId) await db.execute('UPDATE messages SET text_content = ? WHERE id = ?', ['[STT Error]: Gemini API Key missing', dbMessageId]);
                     }
                 }
             } catch (sttErr) {
                 console.error('Failed to transcribe audio message:', sttErr);
+                const errorStr = sttErr ? sttErr.toString() : 'Unknown STT Error';
+                if (dbMessageId) {
+                    await db.execute('UPDATE messages SET text_content = ? WHERE id = ?', [`[STT Error]: ${errorStr}`, dbMessageId]);
+                }
             }
         }
 
