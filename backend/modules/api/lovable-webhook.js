@@ -3,12 +3,14 @@ const router = express.Router();
 const db = require('../../db');
 const agent = require('../whatsapp/agent');
 const { GoogleGenAI } = require('@google/genai');
+const fs = require('fs');
+const path = require('path');
 
 router.post('/', async (req, res) => {
     const body = req.body;
     console.log('Received Lovable Webhook:', JSON.stringify(body, null, 2));
 
-    const { conversationId, customerPhone, messageType, content, mediaUrl } = body;
+    const { conversationId, customerPhone, messageType, content, mediaUrl, mediaBase64, mediaMimeType } = body;
 
     if (!customerPhone) {
         return res.status(400).json({ error: 'Missing customerPhone' });
@@ -27,11 +29,30 @@ router.post('/', async (req, res) => {
             }
         }
 
+        let finalMediaUrl = mediaUrl || null;
+
+        // Decode and save base64 media if provided
+        if (mediaBase64) {
+            try {
+                const ext = mediaMimeType ? mediaMimeType.split('/')[1].split(';')[0] : (messageType === 'audio' ? 'ogg' : 'jpg');
+                const filename = `media_${Date.now()}.${ext}`;
+                const uploadsDir = path.join(__dirname, '../../../uploads');
+                if (!fs.existsSync(uploadsDir)) {
+                    fs.mkdirSync(uploadsDir, { recursive: true });
+                }
+                const filepath = path.join(uploadsDir, filename);
+                fs.writeFileSync(filepath, Buffer.from(mediaBase64, 'base64'));
+                finalMediaUrl = `/uploads/${filename}`;
+            } catch (err) {
+                console.error('Error saving base64 media:', err);
+            }
+        }
+
         // Save incoming message
-        if (content || mediaUrl) {
+        if (content || finalMediaUrl) {
             await db.execute(
                 'INSERT INTO messages (conversation_id, sender, type, text_content, media_url) VALUES (?, ?, ?, ?, ?)',
-                [dbConversationId, 'customer', messageType || 'text', content || '', mediaUrl || null]
+                [dbConversationId, 'customer', messageType || 'text', content || '', finalMediaUrl]
             );
         }
 
@@ -40,14 +61,21 @@ router.post('/', async (req, res) => {
         // Transcribe voice messages using Gemini
         let transcribedText = content || '';
         
-        if (messageType === 'audio' && mediaUrl) {
+        if (messageType === 'audio' && (mediaUrl || mediaBase64)) {
             try {
-                const fetchRes = await fetch(mediaUrl);
-                if (fetchRes.ok) {
-                    const arrayBuffer = await fetchRes.arrayBuffer();
-                    const audioBuffer = Buffer.from(arrayBuffer);
-                    const mimeType = fetchRes.headers.get('content-type') || 'audio/ogg';
+                let base64Data = mediaBase64;
+                let mimeType = mediaMimeType || 'audio/ogg';
 
+                if (!base64Data && mediaUrl) {
+                    const fetchRes = await fetch(mediaUrl);
+                    if (fetchRes.ok) {
+                        const arrayBuffer = await fetchRes.arrayBuffer();
+                        base64Data = Buffer.from(arrayBuffer).toString('base64');
+                        mimeType = fetchRes.headers.get('content-type') || mimeType;
+                    }
+                }
+
+                if (base64Data) {
                     const [settingsRows] = await db.execute('SELECT llm_api_key FROM api_settings WHERE id = 1');
                     const geminiKey = settingsRows[0]?.llm_api_key || process.env.LLM_API_KEY;
 
@@ -58,14 +86,15 @@ router.post('/', async (req, res) => {
                             contents: [
                                 {
                                     inlineData: {
-                                        data: audioBuffer.toString("base64"),
+                                        data: base64Data,
                                         mimeType: mimeType
                                     }
                                 },
                                 "You are an expert transcriptionist. Please transcribe exactly what is being said in this audio message from a customer. Do not add any conversational filler, markdown formatting, or introductory text. If the audio is in Urdu/Hindi, transcribe it accurately using roman script (Roman Urdu) or english based on the context. Only output the transcription text."
                             ]
                         });
-                        transcribedText = response.text.trim();
+                        const rawTranscription = response.text.trim();
+                        transcribedText = `[Voice Message Transcribed]: ${rawTranscription}`;
                         console.log(`Transcribed voice message from ${customerPhone}: ${transcribedText}`);
                     } else {
                         console.error('Gemini API Key missing for STT');
