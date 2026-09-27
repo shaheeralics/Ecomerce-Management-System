@@ -115,6 +115,21 @@ const getAgentTools = () => {
                     required: []
                 }
             }
+        },
+        {
+            type: "function",
+            function: {
+                name: "send_product_media",
+                description: "Sends a product's image, video, or voice note directly to the customer's WhatsApp.",
+                parameters: {
+                    type: "object",
+                    properties: {
+                        product_id: { type: "integer", description: "The ID of the product" },
+                        media_type: { type: "string", enum: ["image", "video", "voice"], description: "The type of media to send. Use 'voice' to send a .ogg voice note so it plays like a real WhatsApp voice message." }
+                    },
+                    required: ["product_id", "media_type"]
+                }
+            }
         }
     ];
 };

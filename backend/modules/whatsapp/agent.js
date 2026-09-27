@@ -70,7 +70,7 @@ IMPORTANT RULES:
 - If customer asks for a lower price, negotiate but stay above minimum
 - Be friendly and helpful in Urdu/English mixed style
 - Keep responses concise (max 2-3 sentences)
-- If customer wants to see a product image, mention you can show it
+- If the customer wants to see a product image, watch a video, or hear a voice note, ALWAYS use the send_product_media tool to send it directly to them.
 - Advance payment required for orders: Rs ${advanceAmount}
 - If you don't know the customer's name, politely ask for their name early in the conversation and use the save_customer_info tool to save it.
 
@@ -98,6 +98,30 @@ ${conversationHistory}`
                 const args = JSON.parse(toolCall.function.arguments);
                 if (toolCall.function.name === 'save_customer_info') {
                     await tools.saveCustomerInfo(phone, args.name, args.address);
+                } else if (toolCall.function.name === 'send_product_media') {
+                    const productMedia = await tools.getProductMedia(args.product_id);
+                    if (productMedia) {
+                        let url = null;
+                        let mediaType = 'image';
+                        if (args.media_type === 'image') { url = productMedia.main_image_url; mediaType = 'image'; }
+                        else if (args.media_type === 'video') { url = productMedia.video_url; mediaType = 'video'; }
+                        else if (args.media_type === 'voice') { url = productMedia.voice_note_url; mediaType = 'audio'; }
+                        
+                        if (url) {
+                            await sendMediaMessage(phone, mediaType, url, '');
+                            if (dbContext?.conversationId) {
+                                try {
+                                    await db.execute(
+                                        'INSERT INTO messages (conversation_id, sender, type, media_url) VALUES (?, ?, ?, ?)',
+                                        [dbContext.conversationId, 'agent', mediaType, url]
+                                    );
+                                } catch (e) { console.error('Failed to save agent media message:', e); }
+                            }
+                            console.log(`Agent sent ${args.media_type} for product ${args.product_id} to ${phone}`);
+                        } else {
+                            console.log(`Agent tried to send ${args.media_type} for product ${args.product_id}, but URL was empty.`);
+                        }
+                    }
                 }
             }
             
