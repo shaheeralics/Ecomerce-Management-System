@@ -2,7 +2,7 @@ const db = require('../../db');
 
 // Search available products from real database
 const searchAvailableProducts = async (gender, size, color) => {
-    let query = 'SELECT id, title, brand, gender, size_original, color, starting_price, main_image_url FROM products WHERE status = ?';
+    let query = 'SELECT id, title, brand, gender, size_original, color, starting_price, minimum_price, main_image_url, video_url, voice_note_url FROM products WHERE status = ?';
     const params = ['available'];
 
     if (gender) {
@@ -18,7 +18,7 @@ const searchAvailableProducts = async (gender, size, color) => {
         params.push(`%${color}%`);
     }
 
-    query += ' ORDER BY created_at DESC LIMIT 5';
+    query += ' ORDER BY created_at DESC';
 
     try {
         const [rows] = await db.execute(query, params);

@@ -43,7 +43,7 @@ const processMessage = async (phone, incomingText, dbContext) => {
         // 3. Fetch available products for context
         const availableProducts = await tools.searchAvailableProducts();
         const productContext = availableProducts.length > 0
-            ? availableProducts.map(p => `- ID:${p.id} | ${p.title} | ${p.brand || 'N/A'} | ${p.gender} | Size:${p.size_original || 'N/A'} | Color:${p.color || 'N/A'} | Price: Rs ${p.starting_price}`).join('\n')
+            ? availableProducts.map(p => `- ID:${p.id} | ${p.title} | ${p.gender} | Size:${p.size_original || 'N/A'} | Color:${p.color || 'N/A'} | Price: Rs ${p.starting_price} (Minimum Acceptable Price: Rs ${p.minimum_price}) | Media Available: Image, ${p.video_url ? 'Video, ' : ''}${p.voice_note_url ? 'Voice Note' : ''}`).join('\n')
             : 'No products currently available.';
 
         // 4. Fetch conversation history for context

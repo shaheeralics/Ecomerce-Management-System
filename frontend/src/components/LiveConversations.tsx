@@ -68,14 +68,22 @@ export default function LiveConversations() {
     // Fetch messages & orders for active conversation
     useEffect(() => {
         if (!activeConvId) return;
+        let isFirstLoad = true;
         const loadActiveData = async () => {
             try {
                 // Fetch Messages
                 const res = await fetch(`/api/conversations/${activeConvId}/messages`);
                 const data = await res.json();
                 if (data.data) {
-                    setMessages(data.data);
-                    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+                    setMessages(prev => {
+                        if (isFirstLoad || prev.length !== data.data.length) {
+                            setTimeout(() => {
+                                messagesEndRef.current?.scrollIntoView({ behavior: isFirstLoad ? 'auto' : 'smooth' });
+                            }, 50);
+                        }
+                        return data.data;
+                    });
+                    isFirstLoad = false;
                 }
             } catch (e) { console.error(e); }
         };
