@@ -1,24 +1,72 @@
 const db = require('../../db');
 
-// Execute read-only SQL query on the database
-const queryDatabase = async (sqlQuery) => {
+// Execute read-only SELECT query strictly on the 'products' catalog table
+const queryProductCatalog = async (sqlQuery) => {
     try {
-        // Basic security check: ONLY allow SELECT queries
-        if (!sqlQuery.trim().toUpperCase().startsWith('SELECT')) {
-            return { error: 'Only SELECT queries are allowed.' };
+        if (!sqlQuery || typeof sqlQuery !== 'string') {
+            return { error: 'Invalid SQL query provided.' };
         }
-        
-        console.log(`[Query Database] Executing: ${sqlQuery}`);
-        const [rows] = await db.execute(sqlQuery);
-        console.log(`[Query Database] Found: ${rows.length} results`);
-        return rows;
+
+        const cleanQuery = sqlQuery.trim();
+
+        // 1. Security check: ONLY allow SELECT queries
+        if (!cleanQuery.toUpperCase().startsWith('SELECT')) {
+            return { error: 'Permission denied: Only SELECT queries are permitted on the product catalog.' };
+        }
+
+        // 2. Disallow multiple statements (semicolons) or file operations
+        if (cleanQuery.includes(';') || /into\s+outfile/i.test(cleanQuery) || /load_file/i.test(cleanQuery)) {
+            return { error: 'Permission denied: Multiple queries or file operations are strictly prohibited.' };
+        }
+
+        // 3. Security check: Must only query the 'products' table
+        const fromMatch = cleanQuery.match(/\bFROM\s+([a-zA-Z0-9_`"']+)/i);
+        if (!fromMatch) {
+            return { error: 'Invalid query: Query must specify FROM products.' };
+        }
+
+        const tableName = fromMatch[1].replace(/[`"']/g, '').toLowerCase();
+        if (tableName !== 'products') {
+            return { error: `Permission denied: Access to table '${tableName}' is forbidden. You only have read access to the 'products' catalog.` };
+        }
+
+        // 4. Disallow any JOIN or subquery referencing other tables
+        const forbiddenTables = ['users', 'api_settings', 'agent_config', 'conversations', 'messages', 'orders', 'voice_assets'];
+        for (const tbl of forbiddenTables) {
+            const regex = new RegExp(`\\b${tbl}\\b`, 'i');
+            if (regex.test(cleanQuery)) {
+                return { error: `Permission denied: Access to table '${tbl}' is strictly prohibited.` };
+            }
+        }
+
+        // 5. Disallow data modification keywords
+        const forbiddenKeywords = ['INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'TRUNCATE', 'RENAME', 'GRANT', 'REVOKE'];
+        for (const kw of forbiddenKeywords) {
+            const regex = new RegExp(`\\b${kw}\\b`, 'i');
+            if (regex.test(cleanQuery)) {
+                return { error: `Security violation: Keyword '${kw}' is not permitted.` };
+            }
+        }
+
+        console.log(`[Product Catalog Query] Executing: ${cleanQuery}`);
+        const [rows] = await db.execute(cleanQuery);
+        console.log(`[Product Catalog Query] Found: ${rows.length} results`);
+
+        // Sanitize rows: strip minimum_price so secret base price is never exposed
+        const sanitized = rows.map(r => {
+            const safe = { ...r };
+            delete safe.minimum_price;
+            return safe;
+        });
+
+        return sanitized;
     } catch (err) {
-        console.error('Failed to query database:', err);
+        console.error('Failed to query product catalog:', err);
         return { error: err.message || 'Database query failed' };
     }
 };
 
-// Get product media from real database
+// Get product media from database
 const getProductMedia = async (productId) => {
     try {
         const [rows] = await db.execute(
@@ -30,39 +78,6 @@ const getProductMedia = async (productId) => {
     } catch (err) {
         console.error('Failed to get product media:', err);
         return null;
-    }
-};
-
-// Propose price against real minimum price in database
-const proposePrice = async (productId, offer) => {
-    try {
-        const [rows] = await db.execute(
-            'SELECT minimum_price, starting_price FROM products WHERE id = ?',
-            [productId]
-        );
-        if (rows.length === 0) return { accepted: false, message: 'Product not found' };
-
-        const product = rows[0];
-        if (offer >= product.minimum_price) {
-            return { accepted: true, message: `Offer of Rs ${offer} is acceptable.` };
-        } else {
-            // Don't reveal the minimum price!
-            return { accepted: false, message: `Offer of Rs ${offer} is too low. Please make a better offer.` };
-        }
-    } catch (err) {
-        console.error('Failed to check price:', err);
-        return { accepted: false, message: 'Error checking price.' };
-    }
-};
-
-// Mark product as sold in real database
-const markProductSold = async (productId) => {
-    try {
-        await db.execute('UPDATE products SET status = ? WHERE id = ?', ['sold', productId]);
-        return { success: true };
-    } catch (err) {
-        console.error('Failed to mark product sold:', err);
-        return { success: false };
     }
 };
 
@@ -93,12 +108,15 @@ const getAgentTools = () => {
         {
             type: "function",
             function: {
-                name: "query_database",
-                description: "Execute a read-only SELECT SQL query to search the product catalog. The database structure is provided in your system prompt. Use this to perform complex searches across size, gender, color, brand, or availability.",
+                name: "query_product_catalog",
+                description: "Execute a read-only SELECT SQL query strictly on the 'products' table. Search by size, gender, brand, color, or price. Only 'products' table can be queried. If searching for men or women, always include unisex.",
                 parameters: {
                     type: "object",
                     properties: {
-                        sql_query: { type: "string", description: "The raw SELECT SQL query to execute. Example: SELECT id, title, size_original, color, starting_price FROM products WHERE status='available' AND size_original LIKE '%43%' AND gender LIKE '%men%'" }
+                        sql_query: {
+                            type: "string",
+                            description: "The SELECT query strictly on the products table. Example: SELECT id, title, size_original, color, starting_price FROM products WHERE status = 'available' AND (gender LIKE '%men%' OR gender = 'unisex') AND size_original LIKE '%43%'"
+                        }
                     },
                     required: ["sql_query"]
                 }
@@ -107,8 +125,24 @@ const getAgentTools = () => {
         {
             type: "function",
             function: {
+                name: "send_product_media",
+                description: "Sends a product's photo, video, or recorded voice note directly to the customer's WhatsApp. When sending an image or video, ALWAYS include a descriptive caption with the product name, size, color, and price.",
+                parameters: {
+                    type: "object",
+                    properties: {
+                        product_id: { type: "integer", description: "The ID of the product from search results" },
+                        media_type: { type: "string", enum: ["image", "video", "voice"], description: "Type of media: 'image' for photo, 'video' for video, 'voice' for voice note" },
+                        caption: { type: "string", description: "Caption text to send with photo/video. Include product name, size, color, price. Leave empty for voice." }
+                    },
+                    required: ["product_id", "media_type"]
+                }
+            }
+        },
+        {
+            type: "function",
+            function: {
                 name: "save_customer_info",
-                description: "Saves the customer's name and/or delivery address. ONLY call this when customer explicitly tells their name or address. Do NOT call this for product inquiries like size numbers.",
+                description: "Saves the customer's name and/or delivery address for order placement. ONLY call this when customer explicitly provides their name or address.",
                 parameters: {
                     type: "object",
                     properties: {
@@ -118,31 +152,13 @@ const getAgentTools = () => {
                     required: []
                 }
             }
-        },
-        {
-            type: "function",
-            function: {
-                name: "send_product_media",
-                description: "Sends a product's image, video, or voice note directly to the customer's WhatsApp. When sending an image, ALWAYS include a caption with the product details (title, size, color, price). You can call this multiple times to send multiple media types for the same product.",
-                parameters: {
-                    type: "object",
-                    properties: {
-                        product_id: { type: "integer", description: "The ID of the product from search results" },
-                        media_type: { type: "string", enum: ["image", "video", "voice"], description: "Type of media: 'image' for product photo, 'video' for product video, 'voice' for .ogg voice note" },
-                        caption: { type: "string", description: "Caption text to send with image/video. Include product name, size, color, price. Leave empty for voice." }
-                    },
-                    required: ["product_id", "media_type"]
-                }
-            }
         }
     ];
 };
 
 module.exports = {
-    queryDatabase,
+    queryProductCatalog,
     getProductMedia,
-    proposePrice,
-    markProductSold,
     saveCustomerInfo,
     getAgentTools
 };

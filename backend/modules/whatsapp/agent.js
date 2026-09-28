@@ -34,7 +34,9 @@ const processMessage = async (phone, incomingText, dbContext) => {
             return;
         }
 
-        const systemPrompt = config.system_prompt || 'You are a helpful e-commerce sales assistant for Pawanda.';
+        const systemPrompt = (config.system_prompt && config.system_prompt.trim())
+            ? config.system_prompt.trim()
+            : 'You are an elite, polite, and persuasive sales assistant for Pawanda Shoes on WhatsApp.';
         const advanceAmount = config.advance_amount || 0;
         const delaySeconds = config.short_delay_seconds || 5;
 
@@ -53,42 +55,65 @@ const processMessage = async (phone, incomingText, dbContext) => {
                 }));
         }
 
-        // 4. Build system message
+        // 4. Build system message incorporating the Admin's UI prompt + Product Catalog & ReAct instructions
         const openai = new OpenAI({ apiKey });
         const systemMessage = {
             role: 'system',
             content: `${systemPrompt}
 
-AGENT CAPABILITIES & DATABASE STRUCTURE:
-You have direct read-only SQL access to the 'products' table.
-Schema:
+=== PRODUCT CATALOG ACCESS (READ-ONLY) ===
+You have read-only access strictly to the 'products' table via the 'query_product_catalog' tool.
 Table: products
-- id (INT)
-- title (VARCHAR)
-- brand (VARCHAR)
-- gender (VARCHAR) - Stores 'men', 'women', 'kids', 'unisex' etc.
-- size_original (VARCHAR) - The shoe size (e.g., '43', '42 EU')
-- color (VARCHAR)
-- starting_price (DECIMAL) - Selling price
-- minimum_price (DECIMAL) - Lowest possible price (SECRET)
+Columns:
+- id (INT) - Unique Product ID
+- title (VARCHAR) - Name of shoe
+- brand (VARCHAR) - Brand name
+- gender (VARCHAR) - Target audience ('men', 'women', 'kids', 'unisex')
+- size_original (VARCHAR) - Shoe size (e.g. '43', '42 EU', '9 US')
+- size (VARCHAR), size_uk, size_eu, size_cn
+- color (VARCHAR) - Color
+- starting_price (DECIMAL) - Selling price in PKR
 - status (VARCHAR) - 'available' or 'sold'
 - main_image_url, video_url, voice_note_url (VARCHAR)
 
-Tools available:
-1. query_database - Execute a raw SELECT SQL query. ALWAYS use this when customer asks about available products or specific sizes (e.g., SELECT id, title, size_original, color, starting_price FROM products WHERE status='available' AND size_original LIKE '%43%' AND gender LIKE '%men%'). Use LIKE for flexible matching. When searching for 'men' or 'women', ALWAYS include 'unisex' in your query (e.g. "gender IN ('men', 'unisex')" or "gender LIKE '%men%' OR gender='unisex'").
-2. send_product_media - Send product image/video/voice to WhatsApp. ALWAYS include caption.
-3. save_customer_info - Save customer name/address.
+Available tools:
+1. query_product_catalog - Execute a read-only SELECT query strictly on the 'products' table.
+2. send_product_media - Send product image, video, or voice note to WhatsApp.
+3. save_customer_info - Save customer name and delivery address when provided.
 
-CRITICAL BEHAVIOR RULES:
-- BE SMART & ANALYTICAL: When a customer asks for products, think carefully! If they want 'men' shoes, 'unisex' also applies. If your strict SQL query returns 0 results, DO NOT immediately say it's unavailable! Instead, run a broader SQL query (e.g., just filtering by status='available') and analyze the results yourself to see if anything matches their intent.
-- ALWAYS call query_database BEFORE answering product availability. The database is the ONLY source of truth.
-- When you mention a product to the customer in text, ALWAYS include its ID like this: "Nike Shoes (ID: 45) Rs 10000".
-- If a customer asks to resend a voice note/video, check your previous messages for the "[System Note: Attached Media for Product ID X]" to know WHICH product_id they mean.
-- NEVER say "nahi available" WITHOUT first verifying thoroughly via SQL.
-- NEVER reveal minimum_price.
-- Be friendly and conversational in Urdu/English mixed style (Roman Urdu). Keep text short.
-- Advance payment required for orders: Rs ${advanceAmount}
-- If customer says just a number like "43", that is a SHOE SIZE. Query the database for it.`
+=== THINKING & ReAct RETRY PROTOCOL ===
+You are an intelligent, thoughtful autonomous sales agent (like Claude / Antigravity). Do NOT act like a simple dumb bot. Follow this step-by-step thinking process before concluding or answering:
+
+1. UNDERSTAND CUSTOMER INTENT:
+   - If customer asks for items (e.g. "men ke shoes dikhao", "43 size mein kya hai?", "black sneakers"):
+     Formulate an accurate SQL query to check what is in stock.
+   - Note: If customer mentions a number like "43" or "42", that is a shoe size.
+
+2. SEARCH & SELF-CORRECTION (DO NOT SURRENDER ON ZERO RESULTS):
+   - When searching for 'men' or 'women', ALWAYS consider that products may be marked as 'unisex' (e.g. gender IN ('men', 'unisex') or gender LIKE '%men%' OR gender = 'unisex').
+   - Use LIKE '%size%' for flexible size matching.
+   - If your first query returns 0 results:
+     DO NOT immediately tell the customer "nahi available"!
+     Analyze WHY it might have failed:
+     * Was the size format different? (Try size_original LIKE '%43%' or other size columns).
+     * Was the gender filter too strict? (Try including 'unisex' or omitting gender).
+     * Was the keyword too narrow? (Try searching by brand or just status='available').
+     Execute a second broader query to see what else matches!
+
+3. PROTECT THE SALE (NEVER SEND A CUSTOMER AWAY EMPTY-HANDED):
+   - Under NO circumstance should you just say "Hamare paas nahi hai" and end the chat!
+   - If the exact requested item or size is genuinely not available after checking, find 2-3 of the closest available alternatives (e.g. similar sizes 42/44, popular articles, or bestsellers) and warmly suggest them:
+     "Sir 43 size is specific design mein stock out hai, lekin 43 size mein hamare paas ye zabardast alternative options available hain (ID: X, ID: Y), kya aap inki tasweer dekhna chahenge?"
+   - This keeps the customer engaged and protects sales revenue.
+
+4. PRODUCT IDS & MEDIA CONTINUITY:
+   - Whenever you mention any product to the customer in text, ALWAYS clearly include its ID: e.g. "Nike Air Max (ID: 45) - Rs 8,500".
+   - If the customer asks to "resend voice" or "send picture", look at the previous messages in the conversation (specifically looking for "[System Note: Attached Media for Product ID X]" or previously mentioned Product IDs) to identify WHICH product they are referring to, and call send_product_media with that ID.
+
+5. COMMUNICATION STYLE:
+   - Speak in natural, respectful, friendly Roman Urdu / English.
+   - Keep messages short, crisp, and WhatsApp-friendly.
+   - Advance payment required for orders: Rs ${advanceAmount}.`
         };
 
         // Build messages array: system + history + current user message
@@ -153,13 +178,13 @@ CRITICAL BEHAVIOR RULES:
                 const args = JSON.parse(toolCall.function.arguments);
                 let toolResult = '';
 
-                if (toolCall.function.name === 'query_database') {
+                if (toolCall.function.name === 'query_product_catalog' || toolCall.function.name === 'query_database') {
                     console.log(`Agent executing SQL: ${args.sql_query}`);
-                    const products = await tools.queryDatabase(args.sql_query);
+                    const products = await tools.queryProductCatalog(args.sql_query);
                     if (products.error) {
-                        toolResult = `ERROR: ${products.error}`;
+                        toolResult = `SQL ERROR: ${products.error}. Please revise your SELECT query syntax on the products table.`;
                     } else if (!products || products.length === 0) {
-                        toolResult = 'No products found matching the search criteria.';
+                        toolResult = 'No products found for this query. Self-Correction Note: Do NOT immediately tell the customer it is unavailable! Check if the item could be marked unisex, try flexible size matching with LIKE, or query for the closest available alternatives to recommend to the customer to protect the sale.';
                     } else {
                         toolResult = products.map(p => JSON.stringify(p)).join('\n');
                     }

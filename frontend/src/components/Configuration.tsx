@@ -101,14 +101,21 @@ export default function Configuration() {
                 
                 <div className="mt-5 space-y-5">
                     <div>
-                        <label className="block text-xs font-medium text-slate-300 mb-1.5">System Prompt</label>
-                        <p className="text-[10px] text-slate-500 mb-2">Instructions defining how the AI agent communicates with customers.</p>
+                        <div className="flex items-center justify-between mb-1.5">
+                            <label className="block text-xs font-medium text-slate-300">System Prompt</label>
+                            <span className="text-[10px] text-teal-400 bg-teal-950/60 border border-teal-800/40 px-2 py-0.5 rounded-md font-mono">
+                                Read-Only Products Catalog & ReAct Reasoning Active
+                            </span>
+                        </div>
+                        <p className="text-[10px] text-slate-500 mb-2">
+                            Instructions defining your AI agent's personality, store rules, tone, and policies. The agent follows this prompt directly while using autonomous thinking, product catalog search, and sales protection.
+                        </p>
                         <textarea
                             value={form.system_prompt}
                             onChange={(e) => setForm({ ...form, system_prompt: e.target.value })}
-                            rows={8}
-                            className="w-full bg-[#050D10] border border-teal-900/50 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-teal-500 outline-none resize-none custom-scrollbar"
-                            placeholder="You are a helpful assistant for Pawanda Shoes..."
+                            rows={10}
+                            className="w-full bg-[#050D10] border border-teal-900/50 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-teal-500 outline-none resize-y custom-scrollbar"
+                            placeholder="You are an elite sales assistant for Pawanda Shoes. Greet customers politely in Roman Urdu, showcase available shoes, and assist them..."
                         />
                     </div>
 
