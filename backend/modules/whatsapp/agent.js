@@ -125,35 +125,40 @@ ${conversationHistory}`
                 }
             }
             
-            // If the AI only called a tool and returned no text, we might want to generate a follow up text,
-            // but for simplicity, let's just make sure we send a friendly acknowledgment if replyText is empty.
+            // If the AI only called save_customer_info and returned no text, we might want to generate a follow up text.
+            // But if it sent media, it doesn't need to send text.
             if (!replyText) {
-                replyText = "Thanks for the info! How can I help you further today?";
+                const sentMedia = toolCalls.some(t => t.function.name === 'send_product_media');
+                if (!sentMedia) {
+                    replyText = "Thanks for the info! How can I help you further today?";
+                }
             }
         }
 
-        // Guardrail check
-        if (!guardrailCheck(replyText)) {
-            replyText = "Let me check on that and get back to you.";
-        }
+        if (replyText) {
+            // Guardrail check
+            if (!guardrailCheck(replyText)) {
+                replyText = "Let me check on that and get back to you.";
+            }
 
-        // Apply delay
-        if (delaySeconds > 0) {
-            await new Promise(resolve => setTimeout(resolve, delaySeconds * 1000));
-        }
+            // Apply delay
+            if (delaySeconds > 0) {
+                await new Promise(resolve => setTimeout(resolve, delaySeconds * 1000));
+            }
 
-        await sendTextMessage(phone, replyText);
-        console.log(`Sent AI reply to ${phone}: ${replyText.substring(0, 50)}...`);
+            await sendTextMessage(phone, replyText);
+            console.log(`Sent AI reply to ${phone}: ${replyText.substring(0, 50)}...`);
 
-        // Save outgoing message to DB
-        if (dbContext?.conversationId) {
-            try {
-                await db.execute(
-                    'INSERT INTO messages (conversation_id, sender, type, text_content) VALUES (?, ?, ?, ?)',
-                    [dbContext.conversationId, 'agent', 'text', replyText]
-                );
-            } catch (dbErr) {
-                console.error('Failed to save agent message to DB:', dbErr);
+            // Save outgoing message to DB
+            if (dbContext?.conversationId) {
+                try {
+                    await db.execute(
+                        'INSERT INTO messages (conversation_id, sender, type, text_content) VALUES (?, ?, ?, ?)',
+                        [dbContext.conversationId, 'agent', 'text', replyText]
+                    );
+                } catch (dbErr) {
+                    console.error('Failed to save agent message to DB:', dbErr);
+                }
             }
         }
     } catch (err) {
