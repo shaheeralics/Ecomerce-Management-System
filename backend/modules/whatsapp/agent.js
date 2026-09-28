@@ -87,7 +87,7 @@ CRITICAL BEHAVIOR RULES:
 - NEVER reveal minimum_price.
 - Be friendly and conversational in Urdu/English mixed style (Roman Urdu). Keep text short.
 - Advance payment required for orders: Rs ${advanceAmount}
-- If customer says just a number like "43", that is a SHOE SIZE. Query the database for it.
+- If customer says just a number like "43", that is a SHOE SIZE. Query the database for it.\``
         };
 
         // Build messages array: system + history + current user message
