@@ -1,40 +1,20 @@
 const db = require('../../db');
 
-// Search available products from real database
-const searchAvailableProducts = async (gender, size, color) => {
-    let query = 'SELECT id, title, brand, gender, size_original, color, starting_price, minimum_price, main_image_url, video_url, voice_note_url FROM products WHERE status = ?';
-    const params = ['available'];
-
-    if (gender) {
-        let g = gender.toLowerCase();
-        if (g === 'male' || g === 'boys') g = 'men';
-        if (g === 'female' || g === 'girls') g = 'women';
-        
-        query += ' AND gender LIKE ?';
-        params.push(`%${g}%`);
-    }
-    if (size) {
-        // Use LIKE for flexible size matching (handles "43", "43 EU", "Size 43", etc.)
-        query += ' AND size_original LIKE ?';
-        params.push(`%${size}%`);
-    }
-    if (color) {
-        query += ' AND color LIKE ?';
-        params.push(`%${color}%`);
-    }
-
-    query += ' ORDER BY created_at DESC';
-
+// Execute read-only SQL query on the database
+const queryDatabase = async (sqlQuery) => {
     try {
-        const [rows] = await db.execute(query, params);
-        console.log(`[Search Products] Query: ${query} | Params: ${JSON.stringify(params)} | Found: ${rows.length} products`);
-        if (rows.length > 0) {
-            console.log(`[Search Products] Results: ${rows.map(r => `ID:${r.id} "${r.title}" Size:${r.size_original} Gender:${r.gender}`).join(', ')}`);
+        // Basic security check: ONLY allow SELECT queries
+        if (!sqlQuery.trim().toUpperCase().startsWith('SELECT')) {
+            return { error: 'Only SELECT queries are allowed.' };
         }
+        
+        console.log(`[Query Database] Executing: ${sqlQuery}`);
+        const [rows] = await db.execute(sqlQuery);
+        console.log(`[Query Database] Found: ${rows.length} results`);
         return rows;
     } catch (err) {
-        console.error('Failed to search products:', err);
-        return [];
+        console.error('Failed to query database:', err);
+        return { error: err.message || 'Database query failed' };
     }
 };
 
@@ -113,16 +93,14 @@ const getAgentTools = () => {
         {
             type: "function",
             function: {
-                name: "search_products",
-                description: "Search the product catalog by size, gender, or color. Use this to find what products are available for the customer. ALWAYS call this when customer asks about available products or a specific size/color/gender.",
+                name: "query_database",
+                description: "Execute a read-only SELECT SQL query to search the product catalog. The database structure is provided in your system prompt. Use this to perform complex searches across size, gender, color, brand, or availability.",
                 parameters: {
                     type: "object",
                     properties: {
-                        size: { type: "string", description: "Shoe size number, e.g. '43', '42', '39'" },
-                        gender: { type: "string", description: "Gender filter, e.g. 'men', 'women', 'kids', 'unisex'" },
-                        color: { type: "string", description: "Color filter, e.g. 'black', 'white', 'red'" }
+                        sql_query: { type: "string", description: "The raw SELECT SQL query to execute. Example: SELECT id, title, size_original, color, starting_price FROM products WHERE status='available' AND size_original LIKE '%43%' AND gender LIKE '%men%'" }
                     },
-                    required: []
+                    required: ["sql_query"]
                 }
             }
         },
@@ -161,7 +139,7 @@ const getAgentTools = () => {
 };
 
 module.exports = {
-    searchAvailableProducts,
+    queryDatabase,
     getProductMedia,
     proposePrice,
     markProductSold,

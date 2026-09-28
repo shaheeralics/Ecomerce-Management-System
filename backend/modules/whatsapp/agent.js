@@ -59,29 +59,35 @@ const processMessage = async (phone, incomingText, dbContext) => {
             role: 'system',
             content: `${systemPrompt}
 
-AGENT CAPABILITIES:
-You have the following tools available:
-1. search_products - Search the product catalog by size, gender, color. ALWAYS use this when customer asks about products.
-2. send_product_media - Send product image/video/voice note to customer's WhatsApp. When sending image, ALWAYS include caption with product details.
-3. save_customer_info - Save customer name/address. ONLY use when customer explicitly shares their name or address.
+AGENT CAPABILITIES & DATABASE STRUCTURE:
+You have direct read-only SQL access to the 'products' table.
+Schema:
+Table: products
+- id (INT)
+- title (VARCHAR)
+- brand (VARCHAR)
+- gender (VARCHAR) - Stores 'men', 'women', 'kids', 'unisex' etc.
+- size_original (VARCHAR) - The shoe size (e.g., '43', '42 EU')
+- color (VARCHAR)
+- starting_price (DECIMAL) - Selling price
+- minimum_price (DECIMAL) - Lowest possible price (SECRET)
+- status (VARCHAR) - 'available' or 'sold'
+- main_image_url, video_url, voice_note_url (VARCHAR)
+
+Tools available:
+1. query_database - Execute a raw SELECT SQL query. ALWAYS use this when customer asks about available products or specific sizes (e.g., SELECT id, title, size_original, color, starting_price FROM products WHERE status='available' AND size_original LIKE '%43%' AND gender LIKE '%men%'). Use LIKE for flexible matching.
+2. send_product_media - Send product image/video/voice to WhatsApp. ALWAYS include caption.
+3. save_customer_info - Save customer name/address.
 
 CRITICAL BEHAVIOR RULES:
-- ALWAYS call search_products tool BEFORE answering any question about product availability. NEVER assume or guess from memory or conversation history. The database is the ONLY source of truth.
-- When customer asks "kon kon sei shoes/sizes available hai?" or "men ke shoes dikhao" → Call search_products tool (with appropriate filters or no filters) to get products from the database, then list ALL results to the customer.
-- When customer asks for a specific size (e.g. "43 no shoes") → Call search_products with size="43". Show ALL matching results.
-- When showing products, send their image using send_product_media with a caption that includes: Title, Size, Color, Price.
-- If a product has video available, ALSO send the video after sending the image.
-- If a product has voice note available, ALSO send the voice note.
+- ALWAYS call query_database BEFORE answering product availability. NEVER assume from memory. The database is the ONLY source of truth.
+- When you mention a product to the customer in text, ALWAYS include its ID like this: "Nike Shoes (ID: 45) Rs 10000". This ensures the customer knows the ID.
 - If a customer asks to resend a voice note/video or asks a follow-up about a product, check your previous messages for the "[System Note: Attached Media for Product ID X]" to know WHICH product_id they are talking about.
-- NEVER say "nahi available" or "out of stock" WITHOUT first calling search_products to check the database.
-- NEVER reveal the minimum_price to the customer. Keep it secret.
-- If customer offers a price, negotiate but never go below minimum_price.
-- Be friendly and conversational in Urdu/English mixed style (Roman Urdu).
-- Keep text responses concise (max 2-3 sentences).
+- NEVER say "nahi available" WITHOUT first executing a SQL query to check.
+- NEVER reveal minimum_price.
+- Be friendly and conversational in Urdu/English mixed style (Roman Urdu). Keep text short.
 - Advance payment required for orders: Rs ${advanceAmount}
-- If you don't know the customer's name, ask early and save it with save_customer_info.
-- When customer says just a number like "43", that is a SHOE SIZE, not their name. Search for that size.
-- Do NOT send media for products that don't match the customer's request.`
+- If customer says just a number like "43", that is a SHOE SIZE. Query the database for it.
         };
 
         // Build messages array: system + history + current user message
@@ -146,15 +152,15 @@ CRITICAL BEHAVIOR RULES:
                 const args = JSON.parse(toolCall.function.arguments);
                 let toolResult = '';
 
-                if (toolCall.function.name === 'search_products') {
-                    console.log(`Agent searching products: size=${args.size}, gender=${args.gender}, color=${args.color}`);
-                    const products = await tools.searchAvailableProducts(args.gender, args.size, args.color);
-                    if (products.length === 0) {
+                if (toolCall.function.name === 'query_database') {
+                    console.log(`Agent executing SQL: ${args.sql_query}`);
+                    const products = await tools.queryDatabase(args.sql_query);
+                    if (products.error) {
+                        toolResult = `ERROR: ${products.error}`;
+                    } else if (!products || products.length === 0) {
                         toolResult = 'No products found matching the search criteria.';
                     } else {
-                        toolResult = products.map(p => 
-                            `ID:${p.id} | ${p.title} | Size:${p.size_original || 'N/A'} | Color:${p.color || 'N/A'} | Gender:${p.gender} | Price: Rs ${p.starting_price} | Has Image: ${p.main_image_url ? 'Yes' : 'No'} | Has Video: ${p.video_url ? 'Yes' : 'No'} | Has Voice: ${p.voice_note_url ? 'Yes' : 'No'}`
-                        ).join('\n');
+                        toolResult = products.map(p => JSON.stringify(p)).join('\n');
                     }
                 } else if (toolCall.function.name === 'save_customer_info') {
                     const result = await tools.saveCustomerInfo(phone, args.name, args.address);
