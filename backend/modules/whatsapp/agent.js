@@ -34,6 +34,27 @@ const processMessage = async (phone, incomingText, dbContext) => {
             return;
         }
 
+        // Check if human has taken over this conversation or if it is closed
+        if (dbContext?.conversationId) {
+            const [convRows] = await db.execute('SELECT status FROM conversations WHERE id = ?', [dbContext.conversationId]);
+            if (convRows.length > 0) {
+                const convStatus = convRows[0].status;
+                if (convStatus === 'human_takeover' || convStatus === 'closed') {
+                    console.log(`Conversation ${dbContext.conversationId} is currently '${convStatus}'. AI agent will not intervene.`);
+                    return;
+                }
+            }
+        } else {
+            const [convRows] = await db.execute('SELECT id, status FROM conversations WHERE customer_phone = ?', [phone]);
+            if (convRows.length > 0) {
+                const convStatus = convRows[0].status;
+                if (convStatus === 'human_takeover' || convStatus === 'closed') {
+                    console.log(`Conversation for ${phone} is currently '${convStatus}'. AI agent will not intervene.`);
+                    return;
+                }
+            }
+        }
+
         const systemPrompt = (config.system_prompt && config.system_prompt.trim())
             ? config.system_prompt.trim()
             : 'You are an elite, polite, and persuasive sales assistant for Pawanda Shoes on WhatsApp.';

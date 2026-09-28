@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, MoreVertical, Paperclip, Image as ImageIcon, FileText, Smile, Mic, Send, MapPin, Phone, Mail, ShoppingBag, User, XCircle } from 'lucide-react';
+import { Search, MoreVertical, Paperclip, Image as ImageIcon, FileText, Smile, Mic, Send, MapPin, Phone, Mail, ShoppingBag, User, XCircle, Bot, UserCheck } from 'lucide-react';
 import OrderDetailPage from './OrderDetailPage'; // Assuming this exists for modal
 import AddOrderModal from './AddOrderModal';
 
@@ -138,17 +138,25 @@ export default function LiveConversations() {
         }
     };
 
-    const handleTakeover = async () => {
+    const handleToggleTakeover = async () => {
         if (!activeConvId) return;
+        const currentConv = conversations.find(c => c.id === activeConvId);
+        const isCurrentlyTakeover = currentConv?.status === 'human_takeover';
+        const newStatus = isCurrentlyTakeover ? 'agent_active' : 'human_takeover';
+
         try {
+            // Optimistically update conversation state immediately
+            setConversations(prev => prev.map(c => c.id === activeConvId ? { ...c, status: newStatus } : c));
+
             await fetch(`/api/conversations/${activeConvId}/status`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'human_takeover' })
+                body: JSON.stringify({ status: newStatus })
             });
             loadConversations();
         } catch (e) {
-            console.error(e);
+            console.error('Failed to update conversation status:', e);
+            loadConversations();
         }
     };
 
@@ -233,8 +241,14 @@ export default function LiveConversations() {
                                                 <span className="text-[10px] text-teal-500 font-semibold">{new Date(conv.updated_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                {conv.status === 'agent_active' && <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0"></div>}
+                                                {conv.status === 'agent_active' && <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0" title="AI Agent Active"></div>}
+                                                {conv.status === 'human_takeover' && <div className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0 animate-pulse" title="Human Takeover Active"></div>}
                                                 <p className="text-xs text-slate-400 truncate">{conv.customer_phone}</p>
+                                                {conv.status === 'human_takeover' && (
+                                                    <span className="ml-auto text-[9px] bg-amber-950/60 text-amber-300 border border-amber-800/40 px-1.5 py-0.5 rounded font-mono">
+                                                        Manual
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -258,16 +272,41 @@ export default function LiveConversations() {
                                     </div>
                                     <div>
                                         <h4 className="font-bold text-slate-100">{customerName}</h4>
-                                        <div className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div> 
-                                            {activeConv?.status === 'agent_active' ? 'Agent Active' : 'Human Overridden'}
+                                        <div className="text-[10px] font-semibold flex items-center gap-1.5 mt-0.5">
+                                            {activeConv?.status === 'human_takeover' ? (
+                                                <span className="flex items-center gap-1 text-amber-300 bg-amber-950/50 border border-amber-800/40 px-2 py-0.5 rounded-full">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+                                                    Human Takeover (AI Paused)
+                                                </span>
+                                            ) : (
+                                                <span className="flex items-center gap-1 text-emerald-400 bg-emerald-950/50 border border-emerald-800/40 px-2 py-0.5 rounded-full">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                                    AI Agent Active
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex gap-2" onClick={e => e.stopPropagation()}>
-                                    <button onClick={handleTakeover} className="bg-[#071317] border border-teal-800/40 text-teal-400 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-teal-900/30 transition-all shadow-md">
-                                        Takeover Chat
-                                    </button>
+                                <div className="flex gap-2 items-center" onClick={e => e.stopPropagation()}>
+                                    {activeConv?.status === 'human_takeover' ? (
+                                        <button 
+                                            onClick={handleToggleTakeover} 
+                                            className="bg-emerald-950/80 border border-emerald-700/60 text-emerald-300 hover:bg-emerald-900 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-md flex items-center gap-1.5"
+                                            title="Resume automated AI responses for this conversation"
+                                        >
+                                            <Bot size={14} />
+                                            Resume AI Agent
+                                        </button>
+                                    ) : (
+                                        <button 
+                                            onClick={handleToggleTakeover} 
+                                            className="bg-amber-950/80 border border-amber-700/60 text-amber-300 hover:bg-amber-900 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-md flex items-center gap-1.5"
+                                            title="Pause AI agent and take over chatting manually"
+                                        >
+                                            <UserCheck size={14} />
+                                            Takeover Chat
+                                        </button>
+                                    )}
                                     <button className="text-slate-400 hover:text-slate-300 p-1.5 rounded-lg hover:bg-[#071317]">
                                         <MoreVertical size={16} />
                                     </button>

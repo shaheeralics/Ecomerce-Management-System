@@ -53,10 +53,12 @@ router.post('/', async (req, res) => {
             // Fetch or create conversation
             const db = require('../../db');
             let conversationId;
+            let convStatus = 'agent_active';
             try {
                 const [rows] = await db.execute('SELECT id, status FROM conversations WHERE customer_phone = ?', [phone]);
                 if (rows.length > 0) {
                     conversationId = rows[0].id;
+                    convStatus = rows[0].status || 'agent_active';
                 } else {
                     const [insertResult] = await db.execute('INSERT INTO conversations (customer_phone, status) VALUES (?, ?)', [phone, 'agent_active']);
                     conversationId = insertResult.insertId;
@@ -73,10 +75,14 @@ router.post('/', async (req, res) => {
                 console.error('Database error in WhatsApp webhook:', err);
             }
 
-            const dbContext = { conversationId }; 
-
-            // Fire and forget agent processing (delay handled inside)
-            agent.processMessage(phone, incomingText, dbContext);
+            // Only trigger AI Agent if conversation is NOT taken over by human or closed!
+            if (convStatus === 'human_takeover' || convStatus === 'closed') {
+                console.log(`[WhatsApp Webhook] Conversation ${conversationId} is in '${convStatus}'. Skipping AI Agent.`);
+            } else {
+                const dbContext = { conversationId }; 
+                // Fire and forget agent processing (delay handled inside)
+                agent.processMessage(phone, incomingText, dbContext);
+            }
         }
     }
 

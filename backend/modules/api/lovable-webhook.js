@@ -18,10 +18,12 @@ router.post('/', async (req, res) => {
     try {
         let dbConversationId = conversationId;
 
+        let convStatus = 'agent_active';
         if (!dbConversationId) {
-            const [rows] = await db.execute('SELECT id, customer_name FROM conversations WHERE customer_phone = ?', [customerPhone]);
+            const [rows] = await db.execute('SELECT id, customer_name, status FROM conversations WHERE customer_phone = ?', [customerPhone]);
             if (rows.length > 0) {
                 dbConversationId = rows[0].id;
+                convStatus = rows[0].status || 'agent_active';
                 // Update customer_name from WhatsApp profile if we don't have it yet
                 if (customerName && !rows[0].customer_name) {
                     await db.execute('UPDATE conversations SET customer_name = ? WHERE id = ?', [customerName, dbConversationId]);
@@ -29,6 +31,11 @@ router.post('/', async (req, res) => {
             } else {
                 const [insertResult] = await db.execute('INSERT INTO conversations (customer_phone, customer_name, status) VALUES (?, ?, ?)', [customerPhone, customerName || null, 'agent_active']);
                 dbConversationId = insertResult.insertId;
+            }
+        } else {
+            const [rows] = await db.execute('SELECT status FROM conversations WHERE id = ?', [dbConversationId]);
+            if (rows.length > 0) {
+                convStatus = rows[0].status || 'agent_active';
             }
         }
 
@@ -115,8 +122,13 @@ router.post('/', async (req, res) => {
                 }
             }
 
-            // Fire and forget agent processing
-            agent.processMessage(customerPhone, transcribedText, dbContext);
+            // Only trigger AI Agent if conversation is NOT taken over by human or closed!
+            if (convStatus === 'human_takeover' || convStatus === 'closed') {
+                console.log(`[Lovable Webhook] Conversation ${dbConversationId} is in '${convStatus}'. Skipping AI Agent.`);
+            } else {
+                // Fire and forget agent processing
+                agent.processMessage(customerPhone, transcribedText, dbContext);
+            }
         })();
     } catch (err) {
         console.error('Error in Lovable webhook:', err);
