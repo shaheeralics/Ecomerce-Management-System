@@ -118,7 +118,7 @@ export default function LiveConversations() {
     if (typeof knownSlots === 'string') {
         try { knownSlots = JSON.parse(knownSlots); } catch (e) {}
     }
-    const customerName = knownSlots?.name || `Customer ${activeConv?.id || ''}`;
+    const customerName = activeConv?.customer_name || knownSlots?.name || `Customer ${activeConv?.id || ''}`;
     
     const handleSend = async () => {
         if (!composeText.trim() || !activeConvId) return;

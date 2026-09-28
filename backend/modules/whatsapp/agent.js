@@ -72,6 +72,7 @@ CRITICAL BEHAVIOR RULES:
 - When showing products, send their image using send_product_media with a caption that includes: Title, Size, Color, Price.
 - If a product has video available, ALSO send the video after sending the image.
 - If a product has voice note available, ALSO send the voice note.
+- If a customer asks to resend a voice note/video or asks a follow-up about a product, check your previous messages for the "[System Note: Attached Media for Product ID X]" to know WHICH product_id they are talking about.
 - NEVER say "nahi available" or "out of stock" WITHOUT first calling search_products to check the database.
 - NEVER reveal the minimum_price to the customer. Keep it secret.
 - If customer offers a price, negotiate but never go below minimum_price.
@@ -198,9 +199,11 @@ CRITICAL BEHAVIOR RULES:
                                 toolResult = `Successfully sent ${args.media_type} for product ${args.product_id} to customer.`;
                                 if (dbContext?.conversationId) {
                                     try {
+                                        // Append system note for LLM memory (not sent to WhatsApp)
+                                        const dbTextContent = caption ? `${caption}\n[System Note: Attached Media for Product ID ${args.product_id}]` : `[System Note: Attached Media for Product ID ${args.product_id}]`;
                                         await db.execute(
                                             'INSERT INTO messages (conversation_id, sender, type, media_url, text_content) VALUES (?, ?, ?, ?, ?)',
-                                            [dbContext.conversationId, 'agent', mediaType, url, caption]
+                                            [dbContext.conversationId, 'agent', mediaType, url, dbTextContent]
                                         );
                                     } catch (e) { console.error('Failed to save agent media message:', e); }
                                 }
