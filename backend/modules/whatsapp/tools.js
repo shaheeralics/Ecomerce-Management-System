@@ -33,7 +33,7 @@ const searchAvailableProducts = async (gender, size, color) => {
 const getProductMedia = async (productId) => {
     try {
         const [rows] = await db.execute(
-            'SELECT main_image_url, extra_image_urls, video_url, voice_note_url FROM products WHERE id = ?',
+            'SELECT id, title, brand, gender, size_original, color, starting_price, main_image_url, extra_image_urls, video_url, voice_note_url FROM products WHERE id = ?',
             [productId]
         );
         if (rows.length === 0) return null;
@@ -104,8 +104,24 @@ const getAgentTools = () => {
         {
             type: "function",
             function: {
+                name: "search_products",
+                description: "Search the product catalog by size, gender, or color. Use this to find what products are available for the customer. ALWAYS call this when customer asks about available products or a specific size/color/gender.",
+                parameters: {
+                    type: "object",
+                    properties: {
+                        size: { type: "string", description: "Shoe size number, e.g. '43', '42', '39'" },
+                        gender: { type: "string", enum: ["male", "female", "unisex"], description: "Gender filter" },
+                        color: { type: "string", description: "Color filter, e.g. 'black', 'white', 'red'" }
+                    },
+                    required: []
+                }
+            }
+        },
+        {
+            type: "function",
+            function: {
                 name: "save_customer_info",
-                description: "Saves the customer's name and/or delivery address to the database. Call this as soon as the customer provides their name or address.",
+                description: "Saves the customer's name and/or delivery address. ONLY call this when customer explicitly tells their name or address. Do NOT call this for product inquiries like size numbers.",
                 parameters: {
                     type: "object",
                     properties: {
@@ -120,12 +136,13 @@ const getAgentTools = () => {
             type: "function",
             function: {
                 name: "send_product_media",
-                description: "Sends a product's image, video, or voice note directly to the customer's WhatsApp.",
+                description: "Sends a product's image, video, or voice note directly to the customer's WhatsApp. When sending an image, ALWAYS include a caption with the product details (title, size, color, price). You can call this multiple times to send multiple media types for the same product.",
                 parameters: {
                     type: "object",
                     properties: {
-                        product_id: { type: "integer", description: "The ID of the product" },
-                        media_type: { type: "string", enum: ["image", "video", "voice"], description: "The type of media to send. Use 'voice' to send a .ogg voice note so it plays like a real WhatsApp voice message." }
+                        product_id: { type: "integer", description: "The ID of the product from search results" },
+                        media_type: { type: "string", enum: ["image", "video", "voice"], description: "Type of media: 'image' for product photo, 'video' for product video, 'voice' for .ogg voice note" },
+                        caption: { type: "string", description: "Caption text to send with image/video. Include product name, size, color, price. Leave empty for voice." }
                     },
                     required: ["product_id", "media_type"]
                 }
