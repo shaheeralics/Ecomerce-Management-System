@@ -6,8 +6,12 @@ const searchAvailableProducts = async (gender, size, color) => {
     const params = ['available'];
 
     if (gender) {
-        query += ' AND gender = ?';
-        params.push(gender);
+        let g = gender.toLowerCase();
+        if (g === 'male' || g === 'boys') g = 'men';
+        if (g === 'female' || g === 'girls') g = 'women';
+        
+        query += ' AND gender LIKE ?';
+        params.push(`%${g}%`);
     }
     if (size) {
         // Use LIKE for flexible size matching (handles "43", "43 EU", "Size 43", etc.)
@@ -25,7 +29,7 @@ const searchAvailableProducts = async (gender, size, color) => {
         const [rows] = await db.execute(query, params);
         console.log(`[Search Products] Query: ${query} | Params: ${JSON.stringify(params)} | Found: ${rows.length} products`);
         if (rows.length > 0) {
-            console.log(`[Search Products] Results: ${rows.map(r => `ID:${r.id} "${r.title}" Size:${r.size_original}`).join(', ')}`);
+            console.log(`[Search Products] Results: ${rows.map(r => `ID:${r.id} "${r.title}" Size:${r.size_original} Gender:${r.gender}`).join(', ')}`);
         }
         return rows;
     } catch (err) {
@@ -115,7 +119,7 @@ const getAgentTools = () => {
                     type: "object",
                     properties: {
                         size: { type: "string", description: "Shoe size number, e.g. '43', '42', '39'" },
-                        gender: { type: "string", enum: ["male", "female", "unisex"], description: "Gender filter" },
+                        gender: { type: "string", description: "Gender filter, e.g. 'men', 'women', 'kids', 'unisex'" },
                         color: { type: "string", description: "Color filter, e.g. 'black', 'white', 'red'" }
                     },
                     required: []
