@@ -484,7 +484,10 @@ const WhatsAppDashboard = () => {
                 }
             });
             // Let the browser choose its best default codec/bitrate to avoid distortion
-            mediaRecorderRef.current = new MediaRecorder(stream);
+            const mimeType = MediaRecorder.isTypeSupported('audio/ogg; codecs=opus') ? 'audio/ogg; codecs=opus' : 
+                             MediaRecorder.isTypeSupported('audio/webm; codecs=opus') ? 'audio/webm; codecs=opus' : 
+                             '';
+            mediaRecorderRef.current = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
             audioChunksRef.current = [];
 
             // Save prior audio blob and seek timestamp into REFS to avoid stale state closures
