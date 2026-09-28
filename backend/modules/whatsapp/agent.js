@@ -75,7 +75,7 @@ Table: products
 - main_image_url, video_url, voice_note_url (VARCHAR)
 
 Tools available:
-1. query_database - Execute a raw SELECT SQL query. ALWAYS use this when customer asks about available products or specific sizes (e.g., SELECT id, title, size_original, color, starting_price FROM products WHERE status='available' AND size_original LIKE '%43%' AND gender LIKE '%men%'). Use LIKE for flexible matching.
+1. query_database - Execute a raw SELECT SQL query. ALWAYS use this when customer asks about available products or specific sizes (e.g., SELECT id, title, size_original, color, starting_price FROM products WHERE status='available' AND size_original LIKE '%43%' AND gender LIKE '%men%'). Use LIKE for flexible matching. When searching for 'men' or 'women', ALWAYS include 'unisex' in your query (e.g. `gender IN ('men', 'unisex')` or `gender LIKE '%men%' OR gender='unisex'`).
 2. send_product_media - Send product image/video/voice to WhatsApp. ALWAYS include caption.
 3. save_customer_info - Save customer name/address.
 
