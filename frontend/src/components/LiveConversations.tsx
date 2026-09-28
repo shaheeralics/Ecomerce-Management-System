@@ -6,6 +6,7 @@ import AddOrderModal from './AddOrderModal';
 interface Conversation {
     id: number;
     customer_phone: string;
+    customer_name?: string;
     status: string;
     known_slots?: any;
     updated_at: string;
@@ -157,7 +158,7 @@ export default function LiveConversations() {
         // Search
         if (search) {
             const s = search.toLowerCase();
-            return c.customer_phone.includes(s) || (c.known_slots && JSON.stringify(c.known_slots).toLowerCase().includes(s));
+            return c.customer_phone.includes(s) || (c.customer_name && c.customer_name.toLowerCase().includes(s)) || (c.known_slots && JSON.stringify(c.known_slots).toLowerCase().includes(s));
         }
         return true;
     });
@@ -214,7 +215,7 @@ export default function LiveConversations() {
                                 if (typeof kSlots === 'string') {
                                     try { kSlots = JSON.parse(kSlots); } catch (e) {}
                                 }
-                                const name = kSlots?.name || `Customer ${conv.id}`;
+                                const name = conv.customer_name || kSlots?.name || `Customer ${conv.id}`;
                                 const isSelected = activeConvId === conv.id;
                                 
                                 return (
@@ -305,7 +306,7 @@ export default function LiveConversations() {
                                                         <div className="bg-teal-900/30 p-2 rounded-lg text-teal-500"><Phone size={16} /></div>
                                                         <div>
                                                             <p className="text-xs text-slate-500 uppercase font-semibold">Phone Number</p>
-                                                            <p className="text-slate-200 font-medium">{activeConv?.customer_phone}</p>
+                                                            <p className="text-slate-200 font-medium">{activeConv?.customer_name || activeConv?.customer_phone}</p>
                                                         </div>
                                                     </div>
                                                     <div className="flex items-start gap-4">

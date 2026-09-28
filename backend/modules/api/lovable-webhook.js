@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const db = require('../../db');
 const agent = require('../whatsapp/agent');
-const { GoogleGenAI } = require('@google/genai');
 const fs = require('fs');
 const path = require('path');
 
@@ -10,7 +9,7 @@ router.post('/', async (req, res) => {
     const body = req.body;
     console.log('Received Lovable Webhook:', JSON.stringify(body, null, 2));
 
-    const { conversationId, customerPhone, messageType, content, mediaUrl, mediaBase64, mediaMimeType } = body;
+    const { conversationId, customerPhone, customerName, messageType, content, mediaUrl, mediaBase64, mediaMimeType } = body;
 
     if (!customerPhone) {
         return res.status(400).json({ error: 'Missing customerPhone' });
@@ -20,11 +19,15 @@ router.post('/', async (req, res) => {
         let dbConversationId = conversationId;
 
         if (!dbConversationId) {
-            const [rows] = await db.execute('SELECT id FROM conversations WHERE customer_phone = ?', [customerPhone]);
+            const [rows] = await db.execute('SELECT id, customer_name FROM conversations WHERE customer_phone = ?', [customerPhone]);
             if (rows.length > 0) {
                 dbConversationId = rows[0].id;
+                // Update customer_name from WhatsApp profile if we don't have it yet
+                if (customerName && !rows[0].customer_name) {
+                    await db.execute('UPDATE conversations SET customer_name = ? WHERE id = ?', [customerName, dbConversationId]);
+                }
             } else {
-                const [insertResult] = await db.execute('INSERT INTO conversations (customer_phone, status) VALUES (?, ?)', [customerPhone, 'agent_active']);
+                const [insertResult] = await db.execute('INSERT INTO conversations (customer_phone, customer_name, status) VALUES (?, ?, ?)', [customerPhone, customerName || null, 'agent_active']);
                 dbConversationId = insertResult.insertId;
             }
         }
