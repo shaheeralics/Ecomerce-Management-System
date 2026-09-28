@@ -10,8 +10,9 @@ const searchAvailableProducts = async (gender, size, color) => {
         params.push(gender);
     }
     if (size) {
-        query += ' AND size_original = ?';
-        params.push(size);
+        // Use LIKE for flexible size matching (handles "43", "43 EU", "Size 43", etc.)
+        query += ' AND size_original LIKE ?';
+        params.push(`%${size}%`);
     }
     if (color) {
         query += ' AND color LIKE ?';
@@ -22,6 +23,10 @@ const searchAvailableProducts = async (gender, size, color) => {
 
     try {
         const [rows] = await db.execute(query, params);
+        console.log(`[Search Products] Query: ${query} | Params: ${JSON.stringify(params)} | Found: ${rows.length} products`);
+        if (rows.length > 0) {
+            console.log(`[Search Products] Results: ${rows.map(r => `ID:${r.id} "${r.title}" Size:${r.size_original}`).join(', ')}`);
+        }
         return rows;
     } catch (err) {
         console.error('Failed to search products:', err);
