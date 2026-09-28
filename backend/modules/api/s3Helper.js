@@ -19,11 +19,16 @@ async function uploadToOracleS3(file) {
     const ext = path.extname(file.originalname) || '';
     const filename = `prod_${file.fieldname}_${Date.now()}_${Math.random().toString(36).substring(2, 8)}${ext}`;
     
+    let contentType = file.mimetype;
+    if (ext.toLowerCase() === '.ogg') {
+        contentType = 'audio/ogg; codecs=opus';
+    }
+
     const command = new PutObjectCommand({
         Bucket: process.env.ORACLE_S3_BUCKET_NAME,
         Key: filename,
         Body: file.buffer,
-        ContentType: file.mimetype
+        ContentType: contentType
     });
     
     await s3Client.send(command);
