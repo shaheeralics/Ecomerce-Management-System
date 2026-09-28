@@ -76,7 +76,10 @@ export default function LiveConversations() {
                 const data = await res.json();
                 if (data.data) {
                     setMessages(prev => {
-                        if (isFirstLoad || prev.length !== data.data.length) {
+                        const prevLastMsgId = prev.length > 0 ? prev[prev.length - 1].id : null;
+                        const newLastMsgId = data.data.length > 0 ? data.data[data.data.length - 1].id : null;
+
+                        if (isFirstLoad || prevLastMsgId !== newLastMsgId) {
                             setTimeout(() => {
                                 messagesEndRef.current?.scrollIntoView({ behavior: isFirstLoad ? 'auto' : 'smooth' });
                             }, 50);

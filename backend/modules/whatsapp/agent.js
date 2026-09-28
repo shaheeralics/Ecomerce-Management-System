@@ -108,16 +108,27 @@ ${conversationHistory}`
                         else if (args.media_type === 'voice') { url = productMedia.voice_note_url; mediaType = 'audio'; }
                         
                         if (url) {
-                            await sendMediaMessage(phone, mediaType, url, '');
-                            if (dbContext?.conversationId) {
-                                try {
+                            const sendResult = await sendMediaMessage(phone, mediaType, url, '');
+                            if (sendResult?.error) {
+                                if (dbContext?.conversationId) {
+                                    const errMsg = `[Error Sending Media]: ${JSON.stringify(sendResult.data)}`;
                                     await db.execute(
-                                        'INSERT INTO messages (conversation_id, sender, type, media_url) VALUES (?, ?, ?, ?)',
-                                        [dbContext.conversationId, 'agent', mediaType, url]
+                                        'INSERT INTO messages (conversation_id, sender, type, text_content) VALUES (?, ?, ?, ?)',
+                                        [dbContext.conversationId, 'system', 'text', errMsg]
                                     );
-                                } catch (e) { console.error('Failed to save agent media message:', e); }
+                                }
+                                console.error(`Failed to send ${args.media_type} to ${phone}:`, sendResult.data);
+                            } else {
+                                if (dbContext?.conversationId) {
+                                    try {
+                                        await db.execute(
+                                            'INSERT INTO messages (conversation_id, sender, type, media_url) VALUES (?, ?, ?, ?)',
+                                            [dbContext.conversationId, 'agent', mediaType, url]
+                                        );
+                                    } catch (e) { console.error('Failed to save agent media message:', e); }
+                                }
+                                console.log(`Agent sent ${args.media_type} for product ${args.product_id} to ${phone}`);
                             }
-                            console.log(`Agent sent ${args.media_type} for product ${args.product_id} to ${phone}`);
                         } else {
                             console.log(`Agent tried to send ${args.media_type} for product ${args.product_id}, but URL was empty.`);
                         }

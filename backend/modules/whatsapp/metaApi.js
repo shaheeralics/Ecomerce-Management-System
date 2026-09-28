@@ -26,8 +26,9 @@ const sendWhatsAppMessage = async (payload) => {
         const data = await response.json();
         if (!response.ok) {
             console.error('Lovable Bridge Error:', data);
+            return { error: true, data };
         }
-        return data;
+        return { error: false, data };
     } catch (error) {
         console.error('Error sending WhatsApp message via Lovable Bridge:', error);
     }
