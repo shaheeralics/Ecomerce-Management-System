@@ -2,7 +2,7 @@
 
 const db = require('../../db');
 
-const sendWhatsAppMessage = async (toPhone, messageData) => {
+const sendWhatsAppMessage = async (payload) => {
     const lovableDomain = process.env.LOVABLE_APP_DOMAIN;
     const bridgeSecret = 'PawandaBridge2026!';
 
@@ -14,24 +14,13 @@ const sendWhatsAppMessage = async (toPhone, messageData) => {
     try {
         const url = lovableDomain.startsWith('http') ? `${lovableDomain}/api/public/whatsapp/send` : `https://${lovableDomain}/api/public/whatsapp/send`;
         
-        let payloadBody = {
-            to: toPhone,
-            type: messageData.type
-        };
-
-        if (messageData.type === 'text') {
-            payloadBody.text = messageData.text.body;
-        } else if (messageData.type === 'image' || messageData.type === 'video' || messageData.type === 'audio' || messageData.type === 'document') {
-            payloadBody.url = messageData[messageData.type].link;
-        }
-
         const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'X-Bridge-Secret': bridgeSecret,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(payloadBody)
+            body: JSON.stringify(payload)
         });
 
         const data = await response.json();
@@ -45,21 +34,24 @@ const sendWhatsAppMessage = async (toPhone, messageData) => {
 };
 
 const sendTextMessage = async (toPhone, text) => {
-    return sendWhatsAppMessage(toPhone, {
+    return sendWhatsAppMessage({
+        to: toPhone,
         type: 'text',
-        text: { body: text }
+        text: text
     });
 };
 
 const sendMediaMessage = async (toPhone, type, mediaUrl, caption = '') => {
     // type can be 'image', 'video', 'audio', 'document'
-    return sendWhatsAppMessage(toPhone, {
+    let payload = {
+        to: toPhone,
         type: type,
-        [type]: {
-            link: mediaUrl,
-            caption: caption
-        }
-    });
+        url: mediaUrl
+    };
+    if (caption) {
+        payload.caption = caption;
+    }
+    return sendWhatsAppMessage(payload);
 };
 
 module.exports = {
