@@ -155,16 +155,32 @@ router.put('/:id', uploadMedia, async (req, res) => {
         const finalStatus = status || 'available';
         const initialStatus = (req.files && Object.keys(req.files).length > 0) ? 'uploading' : finalStatus;
 
+        // Fetch existing media to delete from S3 if clear flags are sent
+        const [existingRows] = await db.execute('SELECT video_url, voice_note_url FROM products WHERE id = ?', [productId]);
+        const existingMedia = existingRows[0] || {};
+
         // 1. Update text fields and set status
-        await db.execute(`
+        let initialUpdateQuery = `
             UPDATE products SET 
                 title = ?, brand = ?, gender = ?, color = ?, size_original = ?,
                 starting_price = ?, minimum_price = ?, status = ?
-            WHERE id = ?
-        `, [
+        `;
+        let initialParams = [
             title, brand || null, gender || 'unisex', color || null, size_original || null,
-            parseFloat(starting_price) || 0, parseFloat(minimum_price) || 0, initialStatus, productId
-        ]);
+            parseFloat(starting_price) || 0, parseFloat(minimum_price) || 0, initialStatus
+        ];
+
+        if (req.body.clear_voice === 'true') {
+            initialUpdateQuery += `, voice_note_url = NULL`;
+        }
+        if (req.body.clear_video === 'true') {
+            initialUpdateQuery += `, video_url = NULL`;
+        }
+
+        initialUpdateQuery += ` WHERE id = ?`;
+        initialParams.push(productId);
+
+        await db.execute(initialUpdateQuery, initialParams);
 
         res.json({ success: true, message: 'Product text updated, media uploading in background' });
 
@@ -189,9 +205,7 @@ router.put('/:id', uploadMedia, async (req, res) => {
                     params.push(await uploadToOracleS3(videoFiles[0]));
                 } else if (req.body.clear_video === 'true') {
                     updateQuery += `, video_url = NULL`;
-                    // Fetch existing video_url to delete from S3
-                    const [exVideo] = await db.execute('SELECT video_url FROM products WHERE id = ?', [productId]);
-                    if (exVideo[0]?.video_url) await deleteFromOracleS3(exVideo[0].video_url);
+                    if (existingMedia.video_url) await deleteFromOracleS3(existingMedia.video_url);
                 }
 
                 if (voiceFiles.length > 0) {
@@ -199,9 +213,7 @@ router.put('/:id', uploadMedia, async (req, res) => {
                     params.push(await uploadToOracleS3(voiceFiles[0]));
                 } else if (req.body.clear_voice === 'true') {
                     updateQuery += `, voice_note_url = NULL`;
-                    // Fetch existing voice_note_url to delete from S3
-                    const [exVoice] = await db.execute('SELECT voice_note_url FROM products WHERE id = ?', [productId]);
-                    if (exVoice[0]?.voice_note_url) await deleteFromOracleS3(exVoice[0].voice_note_url);
+                    if (existingMedia.voice_note_url) await deleteFromOracleS3(existingMedia.voice_note_url);
                 }
 
                 updateQuery += ` WHERE id = ?`;
