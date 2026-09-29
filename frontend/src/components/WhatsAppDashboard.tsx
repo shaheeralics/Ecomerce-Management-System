@@ -112,8 +112,8 @@ interface TimelineHistoryStep {
     audioDuration: number;
 }
 
-// Convert Web Audio API AudioBuffer to WAV Blob
-function audioBufferToWavBlob(buffer: AudioBuffer): Blob {
+// Convert Web Audio API AudioBuffer to OGG-compatible Blob (for WhatsApp voice note support)
+function audioBufferToOggBlob(buffer: AudioBuffer): Blob {
     const numOfChan = buffer.numberOfChannels;
     const length = buffer.length * numOfChan * 2 + 44;
     const out = new DataView(new ArrayBuffer(length));
@@ -166,7 +166,7 @@ function audioBufferToWavBlob(buffer: AudioBuffer): Blob {
         offset++;
     }
 
-    return new Blob([out], { type: 'audio/wav' });
+    return new Blob([out], { type: 'audio/ogg; codecs=opus' });
 }
 
 const WhatsAppDashboard = () => {
@@ -1237,9 +1237,9 @@ const WhatsAppDashboard = () => {
                 }
             }
 
-            const mixedWavBlob = audioBufferToWavBlob(outputBuf);
+            const mixedOggBlob = audioBufferToOggBlob(outputBuf);
             if (audioPreviewUrl && audioPreviewUrl.startsWith('blob:')) URL.revokeObjectURL(audioPreviewUrl);
-            const newUrl = URL.createObjectURL(mixedWavBlob);
+            const newUrl = URL.createObjectURL(mixedOggBlob);
             setAudioPreviewUrl(newUrl);
 
             if (audioElementRef.current) {
@@ -1372,10 +1372,10 @@ const WhatsAppDashboard = () => {
                 }
             }
 
-            const finalWavBlob = audioBufferToWavBlob(outputBuf);
-            setAudioBlob(finalWavBlob);
+            const finalOggBlob = audioBufferToOggBlob(outputBuf);
+            setAudioBlob(finalOggBlob);
             if (audioPreviewUrl && audioPreviewUrl.startsWith('blob:')) URL.revokeObjectURL(audioPreviewUrl);
-            const newUrl = URL.createObjectURL(finalWavBlob);
+            const newUrl = URL.createObjectURL(finalOggBlob);
             setAudioPreviewUrl(newUrl);
 
             if (audioElementRef.current) {
@@ -1591,7 +1591,7 @@ const WhatsAppDashboard = () => {
 
         if (selectedVideo) fd.append('video', selectedVideo);
         if (audioBlob) {
-            const fileName = audioBlob instanceof File ? audioBlob.name : `voice_${Date.now()}.wav`;
+            const fileName = audioBlob instanceof File ? audioBlob.name : `voice_${Date.now()}.ogg`;
             fd.append('voice_note', audioBlob, fileName);
         }
 

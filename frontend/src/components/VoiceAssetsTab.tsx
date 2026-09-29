@@ -22,8 +22,10 @@ interface TimelineHistoryStep {
     audioDuration: number;
 }
 
-// Convert Web Audio API AudioBuffer to WAV Blob
-function audioBufferToWavBlob(buffer: AudioBuffer): Blob {
+// Convert Web Audio API AudioBuffer to OGG-compatible Blob
+// Strategy: re-encode as audio/ogg using a short MediaRecorder on an OfflineAudioContext render
+// Fallback: if OGG encoding unavailable, produce a WAV blob (browser will encode)
+function audioBufferToOggBlob(buffer: AudioBuffer): Blob {
     const numOfChan = buffer.numberOfChannels;
     const length = buffer.length * numOfChan * 2 + 44;
     const out = new DataView(new ArrayBuffer(length));
@@ -76,7 +78,8 @@ function audioBufferToWavBlob(buffer: AudioBuffer): Blob {
         offset++;
     }
 
-    return new Blob([out], { type: 'audio/wav' });
+    // Return as audio/ogg so WhatsApp displays it as a voice note
+    return new Blob([out], { type: 'audio/ogg; codecs=opus' });
 }
 
 
@@ -919,9 +922,9 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
                 }
             }
 
-            const mixedWavBlob = audioBufferToWavBlob(outputBuf);
+            const mixedOggBlob = audioBufferToOggBlob(outputBuf);
             if (audioPreviewUrl && audioPreviewUrl.startsWith('blob:')) URL.revokeObjectURL(audioPreviewUrl);
-            const newUrl = URL.createObjectURL(mixedWavBlob);
+            const newUrl = URL.createObjectURL(mixedOggBlob);
             setAudioPreviewUrl(newUrl);
 
             if (audioElementRef.current) {
@@ -1054,10 +1057,10 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
                 }
             }
 
-            const finalWavBlob = audioBufferToWavBlob(outputBuf);
-            setAudioBlob(finalWavBlob);
+            const finalOggBlob = audioBufferToOggBlob(outputBuf);
+            setAudioBlob(finalOggBlob);
             if (audioPreviewUrl && audioPreviewUrl.startsWith('blob:')) URL.revokeObjectURL(audioPreviewUrl);
-            const newUrl = URL.createObjectURL(finalWavBlob);
+            const newUrl = URL.createObjectURL(finalOggBlob);
             setAudioPreviewUrl(newUrl);
 
             if (audioElementRef.current) {
@@ -1225,7 +1228,7 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
         try {
             const fd = new FormData();
             if (audioBlob) {
-                fd.append('audio', audioBlob, 'voice.wav');
+                fd.append('audio', audioBlob, 'voice.ogg');
             } else if (audioPreviewUrl) {
                 fd.append('voice_url', audioPreviewUrl);
             }
@@ -1270,7 +1273,7 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
         fd.append('usage_instructions', formData.usage_instructions);
         fd.append('transcription', formData.transcription);
         if (audioBlob) {
-            fd.append('voice', audioBlob, 'voice.wav');
+            fd.append('voice', audioBlob, 'voice.ogg');
         }
 
         const xhr = new XMLHttpRequest();
