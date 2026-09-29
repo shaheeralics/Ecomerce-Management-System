@@ -112,62 +112,35 @@ interface TimelineHistoryStep {
     audioDuration: number;
 }
 
-// Convert Web Audio API AudioBuffer to OGG-compatible Blob (for WhatsApp voice note support)
-function audioBufferToOggBlob(buffer: AudioBuffer): Blob {
-    const numOfChan = buffer.numberOfChannels;
-    const length = buffer.length * numOfChan * 2 + 44;
-    const out = new DataView(new ArrayBuffer(length));
-    let channels: Float32Array[] = [];
-    let sampleRate = buffer.sampleRate;
-    let offset = 0;
-    let pos = 0;
+// Encode an AudioBuffer directly to OGG/Opus using MediaRecorder (real browser-native encoding)
+async function audioBufferToOggBlob(buffer: AudioBuffer): Promise<Blob> {
+    return new Promise((resolve) => {
+        const preferredMime = MediaRecorder.isTypeSupported('audio/ogg; codecs=opus')
+            ? 'audio/ogg; codecs=opus'
+            : MediaRecorder.isTypeSupported('audio/webm; codecs=opus')
+            ? 'audio/webm; codecs=opus'
+            : 'audio/webm';
 
-    function writeString(str: string) {
-        for (let i = 0; i < str.length; i++) {
-            out.setUint8(pos++, str.charCodeAt(i));
-        }
-    }
+        const ctx = new AudioContext();
+        const dest = ctx.createMediaStreamDestination();
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+        source.connect(dest);
 
-    function writeUint32(data: number) {
-        out.setUint32(pos, data, true);
-        pos += 4;
-    }
+        const recorder = new MediaRecorder(dest.stream, { mimeType: preferredMime });
+        const chunks: BlobPart[] = [];
+        recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+        recorder.onstop = () => {
+            ctx.close();
+            resolve(new Blob(chunks, { type: preferredMime }));
+        };
 
-    function writeUint16(data: number) {
-        out.setUint16(pos, data, true);
-        pos += 2;
-    }
-
-    writeString('RIFF');
-    writeUint32(length - 8);
-    writeString('WAVE');
-    writeString('fmt ');
-    writeUint32(16);
-    writeUint16(1); // PCM
-    writeUint16(numOfChan);
-    writeUint32(sampleRate);
-    writeUint32(sampleRate * 2 * numOfChan);
-    writeUint16(numOfChan * 2);
-    writeUint16(16); // 16-bit PCM
-    writeString('data');
-    writeUint32(length - pos - 4);
-
-    for (let i = 0; i < buffer.numberOfChannels; i++) {
-        channels.push(buffer.getChannelData(i));
-    }
-
-    while (offset < buffer.length) {
-        for (let i = 0; i < numOfChan; i++) {
-            let sample = Math.max(-1, Math.min(1, channels[i][offset]));
-            sample = (sample < 0 ? sample * 32768 : sample * 32767) | 0;
-            out.setInt16(pos, sample, true);
-            pos += 2;
-        }
-        offset++;
-    }
-
-    return new Blob([out], { type: 'audio/ogg; codecs=opus' });
+        recorder.start();
+        source.start();
+        source.onended = () => recorder.stop();
+    });
 }
+
 
 const WhatsAppDashboard = () => {
     const [subTab, setSubTab] = useState<'products' | 'conversations' | 'policy' | 'prerecorded' | 'orders' | 'analytics' | 'configuration'>('products');
@@ -1237,7 +1210,7 @@ const WhatsAppDashboard = () => {
                 }
             }
 
-            const mixedOggBlob = audioBufferToOggBlob(outputBuf);
+            const mixedOggBlob = await audioBufferToOggBlob(outputBuf);
             if (audioPreviewUrl && audioPreviewUrl.startsWith('blob:')) URL.revokeObjectURL(audioPreviewUrl);
             const newUrl = URL.createObjectURL(mixedOggBlob);
             setAudioPreviewUrl(newUrl);
@@ -1372,7 +1345,7 @@ const WhatsAppDashboard = () => {
                 }
             }
 
-            const finalOggBlob = audioBufferToOggBlob(outputBuf);
+            const finalOggBlob = await audioBufferToOggBlob(outputBuf);
             setAudioBlob(finalOggBlob);
             if (audioPreviewUrl && audioPreviewUrl.startsWith('blob:')) URL.revokeObjectURL(audioPreviewUrl);
             const newUrl = URL.createObjectURL(finalOggBlob);
