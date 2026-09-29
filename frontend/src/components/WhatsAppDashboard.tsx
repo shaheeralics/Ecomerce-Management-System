@@ -1562,10 +1562,17 @@ const WhatsAppDashboard = () => {
 
         fd.append('image_order', JSON.stringify(imageOrder));
 
-        if (selectedVideo) fd.append('video', selectedVideo);
+        if (selectedVideo) {
+            fd.append('video', selectedVideo);
+        } else if (editingProduct && !videoPreviewUrl) {
+            fd.append('clear_video', 'true');
+        }
+        
         if (audioBlob) {
             const fileName = audioBlob instanceof File ? audioBlob.name : `voice_${Date.now()}.ogg`;
             fd.append('voice_note', audioBlob, fileName);
+        } else if (editingProduct && !audioPreviewUrl) {
+            fd.append('clear_voice', 'true');
         }
 
         // Optimistic Product Insertion for immediate UI feedback

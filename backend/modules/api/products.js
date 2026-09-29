@@ -4,7 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const db = require('../../db');
-const { uploadToOracleS3 } = require('./s3Helper');
+const { uploadToOracleS3, deleteFromOracleS3 } = require('./s3Helper');
 
 // Multer config for product media (images, video, voice notes) - Using Memory Storage for direct S3 upload
 const storage = multer.memoryStorage();
@@ -187,11 +187,21 @@ router.put('/:id', uploadMedia, async (req, res) => {
                 if (videoFiles.length > 0) {
                     updateQuery += `, video_url = ?`;
                     params.push(await uploadToOracleS3(videoFiles[0]));
+                } else if (req.body.clear_video === 'true') {
+                    updateQuery += `, video_url = NULL`;
+                    // Fetch existing video_url to delete from S3
+                    const [exVideo] = await db.execute('SELECT video_url FROM products WHERE id = ?', [productId]);
+                    if (exVideo[0]?.video_url) await deleteFromOracleS3(exVideo[0].video_url);
                 }
 
                 if (voiceFiles.length > 0) {
                     updateQuery += `, voice_note_url = ?`;
                     params.push(await uploadToOracleS3(voiceFiles[0]));
+                } else if (req.body.clear_voice === 'true') {
+                    updateQuery += `, voice_note_url = NULL`;
+                    // Fetch existing voice_note_url to delete from S3
+                    const [exVoice] = await db.execute('SELECT voice_note_url FROM products WHERE id = ?', [productId]);
+                    if (exVoice[0]?.voice_note_url) await deleteFromOracleS3(exVoice[0].voice_note_url);
                 }
 
                 updateQuery += ` WHERE id = ?`;
