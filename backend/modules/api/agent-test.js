@@ -188,6 +188,40 @@ You are an intelligent, thoughtful autonomous sales agent (like Claude / Antigra
     return { success: true, replies };
 }
 
+// Helper: save a message to DB
+async function saveTestMessage(role, content, mediaType, mediaUrl) {
+    try {
+        await db.execute(
+            'INSERT INTO agent_test_messages (role, content, media_type, media_url) VALUES (?, ?, ?, ?)',
+            [role, content || '', mediaType || null, mediaUrl || null]
+        );
+    } catch (e) {
+        console.error('[Agent Test] Failed to save message:', e.message);
+    }
+}
+
+// GET /api/agent-test/history - Load chat history
+router.get('/history', async (req, res) => {
+    try {
+        const [rows] = await db.execute('SELECT * FROM agent_test_messages ORDER BY created_at ASC');
+        res.json({ success: true, messages: rows });
+    } catch (err) {
+        console.error('[Agent Test History Error]:', err);
+        res.status(500).json({ error: 'Failed to load chat history' });
+    }
+});
+
+// DELETE /api/agent-test/history - Clear chat history
+router.delete('/history', async (req, res) => {
+    try {
+        await db.execute('DELETE FROM agent_test_messages');
+        res.json({ success: true });
+    } catch (err) {
+        console.error('[Agent Test Clear Error]:', err);
+        res.status(500).json({ error: 'Failed to clear chat history' });
+    }
+});
+
 // POST /api/agent-test - Text message test
 router.post('/', async (req, res) => {
     try {
@@ -195,7 +229,19 @@ router.post('/', async (req, res) => {
         if (!message || !message.trim()) {
             return res.status(400).json({ error: 'Message is required.' });
         }
+
+        // Save user message to DB
+        await saveTestMessage('user', message.trim(), null, null);
+
         const result = await runAgentTest(message.trim(), history || []);
+
+        // Save agent replies to DB
+        if (result.success && result.replies) {
+            for (const reply of result.replies) {
+                await saveTestMessage('assistant', reply.text || '', reply.mediaType || null, reply.mediaUrl || null);
+            }
+        }
+
         res.json(result);
     } catch (err) {
         console.error('[Agent Test Error]:', err);
@@ -209,11 +255,7 @@ router.post('/voice', upload.single('voice'), async (req, res) => {
         let history = [];
         try { history = JSON.parse(req.body.history || '[]'); } catch (e) { }
 
-        // For now, we just tell the agent a voice message was received
-        // A production version would use Whisper API for transcription
         const userMessage = '[Customer sent a voice message. Respond naturally as if you heard them greet you or ask about products.]';
-
-        // If OpenAI Whisper is available, transcribe the voice
         const apiKey = process.env.OPENAI_API_KEY;
         let transcribedText = userMessage;
 
@@ -230,11 +272,21 @@ router.post('/voice', upload.single('voice'), async (req, res) => {
                 }
             } catch (whisperErr) {
                 console.error('[Whisper Transcription Error]:', whisperErr.message);
-                // Fall back to generic message
             }
         }
 
+        // Save user voice message to DB
+        await saveTestMessage('user', transcribedText, 'audio', null);
+
         const result = await runAgentTest(transcribedText, history);
+
+        // Save agent replies to DB
+        if (result.success && result.replies) {
+            for (const reply of result.replies) {
+                await saveTestMessage('assistant', reply.text || '', reply.mediaType || null, reply.mediaUrl || null);
+            }
+        }
+
         res.json(result);
     } catch (err) {
         console.error('[Agent Test Voice Error]:', err);
@@ -243,3 +295,4 @@ router.post('/voice', upload.single('voice'), async (req, res) => {
 });
 
 module.exports = router;
+

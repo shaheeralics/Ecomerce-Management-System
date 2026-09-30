@@ -40,7 +40,7 @@ export default function AIAgentPanel() {
     // Chat scroll ref
     const chatEndRef = useRef<HTMLDivElement>(null);
 
-    // Load config on mount
+    // Load config + chat history on mount
     useEffect(() => {
         fetch('/api/agent-config')
             .then(res => res.json())
@@ -55,6 +55,24 @@ export default function AIAgentPanel() {
                 console.error('Failed to load agent config:', err);
                 setConfigLoaded(true);
             });
+
+        // Load saved chat history
+        fetch('/api/agent-test/history')
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.messages) {
+                    const loaded: ChatMessage[] = data.messages.map((m: any) => ({
+                        id: `db-${m.id}`,
+                        role: m.role as 'user' | 'assistant' | 'system',
+                        content: m.content || '',
+                        mediaType: m.media_type || null,
+                        mediaUrl: m.media_url || null,
+                        timestamp: new Date(m.created_at)
+                    }));
+                    setMessages(loaded);
+                }
+            })
+            .catch(err => console.error('Failed to load chat history:', err));
     }, []);
 
     // Auto-scroll chat
@@ -265,8 +283,13 @@ export default function AIAgentPanel() {
         setPlayingAudioId(msgId);
     };
 
-    const clearChat = () => {
+    const clearChat = async () => {
         setMessages([]);
+        try {
+            await fetch('/api/agent-test/history', { method: 'DELETE' });
+        } catch (e) {
+            console.error('Failed to clear chat from DB:', e);
+        }
     };
 
     const formatTime = (s: number) => {

@@ -159,6 +159,18 @@ async function setupDatabase() {
             )
         `);
 
+        // 10. Agent Test Chat Messages
+        await connection.execute(`
+            CREATE TABLE IF NOT EXISTS agent_test_messages (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                role VARCHAR(20) NOT NULL,
+                content TEXT,
+                media_type VARCHAR(20),
+                media_url VARCHAR(1024),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
         console.log('All tables created successfully.');
         await connection.end();
     } catch (e) {
