@@ -2,7 +2,7 @@ import VoiceAssetsTab from './VoiceAssetsTab';
 import AnalyticsPage from './AnalyticsPage';
 import LiveConversations from './LiveConversations';
 import OrdersPage from './OrdersPage';
-import Configuration from './Configuration';
+import AIAgentPanel from './AIAgentPanel';
 import React, { useState, useEffect, useRef } from 'react';
 import {
     Package,
@@ -143,7 +143,7 @@ async function audioBufferToOggBlob(buffer: AudioBuffer): Promise<Blob> {
 
 
 const WhatsAppDashboard = () => {
-    const [subTab, setSubTab] = useState<'products' | 'conversations' | 'policy' | 'prerecorded' | 'orders' | 'analytics' | 'configuration'>('products');
+    const [subTab, setSubTab] = useState<'products' | 'conversations' | 'policy' | 'prerecorded' | 'orders' | 'analytics' | 'ai-agent'>('products');
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(false);
@@ -1730,11 +1730,11 @@ const WhatsAppDashboard = () => {
                         Voice Assets
                     </button>
                     <button
-                        onClick={() => setSubTab('configuration')}
-                        className={`text-left px-4 py-3 rounded-xl font-medium text-xs transition-all flex items-center gap-3 ${subTab === 'configuration' ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/30 font-semibold' : 'text-slate-400 hover:bg-teal-950/40 hover:text-slate-200'}`}
+                        onClick={() => setSubTab('ai-agent')}
+                        className={`text-left px-4 py-3 rounded-xl font-medium text-xs transition-all flex items-center gap-3 ${subTab === 'ai-agent' ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/30 font-semibold' : 'text-slate-400 hover:bg-teal-950/40 hover:text-slate-200'}`}
                     >
-                        <Settings size={17} />
-                        Configuration
+                        <Sparkles size={17} />
+                        AI Agent
                     </button>
                 </nav>
 
@@ -2804,11 +2804,9 @@ const WhatsAppDashboard = () => {
                         />
                     )}
 
-                    {/* ===== CONFIGURATION TAB ===== */}
-                    {subTab === 'configuration' && (
-                        <div className="h-full w-full overflow-y-auto p-8 custom-scrollbar">
-                            <Configuration />
-                        </div>
+                    {/* ===== AI AGENT TAB ===== */}
+                    {subTab === 'ai-agent' && (
+                        <AIAgentPanel />
                     )}
                 </div>
             </div>

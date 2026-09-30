@@ -128,6 +128,7 @@ const orderRoutes = require('./orders');
 const analyticsRoutes = require('./analytics');
 const dbProxyRoutes = require('./db-proxy');
 const lovableWebhookRoutes = require('./lovable-webhook');
+const agentTestRoutes = require('./agent-test');
 
 // Mount routes
 router.use('/voices', voiceRoutes);
@@ -135,5 +136,6 @@ router.use('/orders', orderRoutes);
 router.use('/analytics', analyticsRoutes);
 router.use('/db-proxy', dbProxyRoutes);
 router.use('/lovable-webhook', lovableWebhookRoutes);
+router.use('/agent-test', agentTestRoutes);
 
 module.exports = router;
