@@ -1270,14 +1270,14 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
 
     return (
         <div className="space-y-6 max-w-6xl pb-10">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-4 md:mb-8">
                 <div>
                     <h2 className="text-3xl font-bold text-slate-100 tracking-tight">{title}</h2>
-                    <p className="text-slate-400 text-sm mt-1">{description}</p>
+                    <p className="text-slate-400 text-xs md:text-sm mt-1">{description}</p>
                 </div>
                 <button
                     onClick={() => { resetForm(); setShowAddModal(true); }}
-                    className="bg-teal-600 hover:bg-teal-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-teal-600/30 transition-all flex items-center gap-2"
+                    className="bg-teal-600 hover:bg-teal-500 text-white px-5 py-2.5 rounded-xl text-xs md:text-sm font-bold shadow-lg shadow-teal-600/30 transition-all flex items-center gap-2"
                 >
                     <Plus size={18} /> Add Voice
                 </button>
@@ -1292,15 +1292,15 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
                     <p className="text-xs text-slate-500 mt-1">Click Add Voice to upload your first audio asset.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                     {voices.map(voice => (
-                        <div key={voice.id} className="relative bg-gradient-to-b from-[#0B1E26]/90 to-[#050D10]/95 backdrop-blur-xl border border-teal-800/40 rounded-3xl p-6 shadow-2xl flex flex-col gap-5 group hover:border-teal-500/50 hover:shadow-[0_0_30px_rgba(20,184,166,0.15)] transition-all duration-300 overflow-hidden">
+                        <div key={voice.id} className="relative bg-gradient-to-b from-[#0B1E26]/90 to-[#050D10]/95 backdrop-blur-xl border border-teal-800/40 rounded-3xl p-3 md:p-6 shadow-2xl flex flex-col gap-5 group hover:border-teal-500/50 hover:shadow-[0_0_30px_rgba(20,184,166,0.15)] transition-all duration-300 overflow-hidden">
                             {/* Subtle futuristic glow */}
                             <div className="absolute top-0 right-0 w-40 h-40 bg-teal-500/5 rounded-full blur-3xl group-hover:bg-teal-500/10 transition-colors pointer-events-none"></div>
                             
                             <div className="flex justify-between items-start relative z-10">
                                 <div>
-                                    <h4 className="text-slate-100 font-extrabold text-xl tracking-tight group-hover:text-teal-300 transition-colors">{voice.title}</h4>
+                                    <h4 className="text-slate-100 font-extrabold text-base md:text-xl tracking-tight group-hover:text-teal-300 transition-colors">{voice.title}</h4>
                                     <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest bg-teal-950/50 text-teal-400 border border-teal-500/20 shadow-inner">
                                         <div className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse"></div>
                                         {voice.status}
@@ -1330,7 +1330,7 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
                                 </div>
                             )}
 
-                            <div className="relative z-10 bg-black/20 rounded-2xl p-4 border border-white/5">
+                            <div className="relative z-10 bg-black/20 rounded-2xl p-2 md:p-4 border border-white/5">
                                 <h5 className="text-teal-500 text-[10px] uppercase font-bold tracking-widest mb-1.5 flex items-center gap-1.5">
                                     <div className="w-1 h-1 bg-teal-500 rounded-full"></div>
                                     When to Use
@@ -1343,10 +1343,10 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
             )}
 
             {showAddModal && (
-                <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+                <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 md:p-4 overflow-y-auto">
                     <div className="bg-[#0A181D] border border-teal-900/50 rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl my-8 flex flex-col max-h-[90vh]">
                         <div className="bg-[#0B1E26] border-b border-teal-900/50 px-6 py-4 flex items-center justify-between flex-shrink-0">
-                            <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                            <h2 className="text-base md:text-xl font-bold text-slate-100 flex items-center gap-2">
                                 <Mic className="text-teal-400" size={22} /> {editId ? 'Edit Voice Asset' : 'Add New Voice Asset'}
                             </h2>
                             <button onClick={resetForm} className="p-2 bg-[#050D10] text-slate-400 hover:text-slate-200 hover:bg-teal-900/30 rounded-xl transition-all cursor-pointer">
@@ -1354,15 +1354,15 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
                             </button>
                         </div>
 
-                        <div className="p-6 overflow-y-auto flex-1 custom-scrollbar space-y-6">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="p-3 md:p-6 overflow-y-auto flex-1 custom-scrollbar space-y-6">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-6">
                                 <div>
                                     <label className="block text-xs font-semibold text-slate-300 mb-2">Voice Title</label>
-                                    <input type="text" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="w-full bg-[#050D10] border border-teal-900/50 rounded-xl px-4 py-3 text-sm text-slate-100 focus:ring-2 focus:ring-teal-500 outline-none" placeholder="e.g. Greetings / Policy / Negotiation, etc." />
+                                    <input type="text" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="w-full bg-[#050D10] border border-teal-900/50 rounded-xl px-4 py-3 text-xs md:text-sm text-slate-100 focus:ring-2 focus:ring-teal-500 outline-none" placeholder="e.g. Greetings / Policy / Negotiation, etc." />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-semibold text-slate-300 mb-2">When should AI use this voice?</label>
-                                    <textarea value={formData.usage_instructions} onChange={e => setFormData({ ...formData, usage_instructions: e.target.value })} className="w-full bg-[#050D10] border border-teal-900/50 rounded-xl px-4 py-3 text-sm text-slate-100 h-[50px] focus:ring-2 focus:ring-teal-500 outline-none resize-none" placeholder="e.g. Play this voice note when..." />
+                                    <textarea value={formData.usage_instructions} onChange={e => setFormData({ ...formData, usage_instructions: e.target.value })} className="w-full bg-[#050D10] border border-teal-900/50 rounded-xl px-4 py-3 text-xs md:text-sm text-slate-100 h-[50px] focus:ring-2 focus:ring-teal-500 outline-none resize-none" placeholder="e.g. Play this voice note when..." />
                                 </div>
                             </div>
 
@@ -1374,7 +1374,7 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
                                         Step 3 — Product Voice Note Pitch & Timeline Studio
                                     </div>
 
-                                    <div className="bg-[#050D10] border border-teal-900/40 rounded-xl p-6 text-center">
+                                    <div className="bg-[#050D10] border border-teal-900/40 rounded-xl p-3 md:p-6 text-center">
 
                                         {/* Recording Controls */}
                                         <div className="flex flex-col items-center justify-center gap-4">
@@ -1400,7 +1400,7 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
                                                     </button>
 
                                                     <div className="ml-7 bg-[#FF3B30] h-[48px] w-full rounded-r-full flex items-center pl-10 pr-2 justify-between gap-[3px] shadow-sm overflow-hidden animate-fade-in-right">
-                                                        <div className="flex items-center gap-1.5 text-white font-mono text-sm ml-1">
+                                                        <div className="flex items-center gap-1.5 text-white font-mono text-xs md:text-sm ml-1">
                                                             <span className={`w-2 h-2 rounded-full ${isPaused ? 'bg-amber-400' : 'bg-white animate-pulse'}`} />
                                                             {formatTimer(recordingTime)}
                                                         </div>
@@ -1478,7 +1478,7 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
 
                                                     {/* CapCut Visual Multi-Track Timeline Studio Drawer */}
                                                     {showTimelineEditor && (
-                                                        <div className="bg-[#050D10] p-4.5 rounded-2xl border border-teal-500/40 shadow-2xl space-y-4 transition-all">
+                                                        <div className="bg-[#050D10] p-2 md:p-4.5 rounded-2xl border border-teal-500/40 shadow-2xl space-y-4 transition-all">
                                                             {/* Top Control Toolbar with Edit Icon */}
                                                             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-teal-900/40 pb-3">
                                                                 <div className="flex items-center gap-2">
@@ -1818,7 +1818,7 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
                             )}
 
                             {audioPreviewUrl && (
-                                <div className="bg-[#140F08] border border-amber-900/40 rounded-xl p-6 space-y-4 shadow-inner">
+                                <div className="bg-[#140F08] border border-amber-900/40 rounded-xl p-3 md:p-6 space-y-4 shadow-inner">
                                     <div className="flex justify-between items-center">
                                         <h4 className="text-amber-500 font-semibold text-xs uppercase tracking-wider flex items-center gap-2">
                                             <FileText size={16} /> Speech-to-Text Transcription
@@ -1829,14 +1829,14 @@ export default function VoiceAssetsTab({ category, title, description }: { categ
                                         </button>
                                     </div>
                                     <p className="text-[11px] text-slate-400">Convert the recorded audio to text so the AI Agent can understand exactly what you are saying.</p>
-                                    <textarea value={formData.transcription} onChange={e => setFormData({ ...formData, transcription: e.target.value })} className="w-full bg-[#050D10] border border-amber-900/50 rounded-xl px-4 py-3 text-sm text-slate-100 h-28 focus:ring-2 focus:ring-amber-500 outline-none resize-none" placeholder="Click 'Convert to Text' to auto-generate, or type manually..." />
+                                    <textarea value={formData.transcription} onChange={e => setFormData({ ...formData, transcription: e.target.value })} className="w-full bg-[#050D10] border border-amber-900/50 rounded-xl px-4 py-3 text-xs md:text-sm text-slate-100 h-28 focus:ring-2 focus:ring-amber-500 outline-none resize-none" placeholder="Click 'Convert to Text' to auto-generate, or type manually..." />
                                 </div>
                             )}
                         </div>
 
-                        <div className="p-6 border-t border-teal-900/50 bg-[#0B1E26] flex justify-end gap-3 flex-shrink-0">
-                            <button onClick={resetForm} className="px-6 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 text-sm font-semibold transition-all">Cancel</button>
-                            <button onClick={submitVoice} disabled={!formData.title || (!editId && !audioBlob)} className="bg-teal-600 hover:bg-teal-500 text-white px-8 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-teal-600/30 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <div className="p-3 md:p-6 border-t border-teal-900/50 bg-[#0B1E26] flex justify-end gap-3 flex-shrink-0">
+                            <button onClick={resetForm} className="px-6 py-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 text-xs md:text-sm font-semibold transition-all">Cancel</button>
+                            <button onClick={submitVoice} disabled={!formData.title || (!editId && !audioBlob)} className="bg-teal-600 hover:bg-teal-500 text-white px-8 py-2.5 rounded-xl text-xs md:text-sm font-bold shadow-lg shadow-teal-600/30 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                                 <CheckCircle size={18} /> {editId ? 'Save Changes' : 'Save & Upload Voice'}
                             </button>
                         </div>

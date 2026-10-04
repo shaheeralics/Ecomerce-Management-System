@@ -49,12 +49,12 @@ export default function Configuration() {
 
     return (
         <div className="mx-auto max-w-2xl text-slate-100">
-            <h1 className="text-2xl font-semibold tracking-tight">Configuration</h1>
-            <p className="mt-1 text-sm text-slate-400">
+            <h1 className="text-base md:text-lg md:text-2xl font-semibold tracking-tight">Configuration</h1>
+            <p className="mt-1 text-xs md:text-sm text-slate-400">
                 System prompt, reply delays and advance payment amount.
             </p>
 
-            <section className="mt-6 rounded-2xl bg-[#09181E] border border-teal-900/40 p-5 shadow-lg">
+            <section className="mt-6 rounded-2xl bg-[#09181E] border border-teal-900/40 p-3 md:p-5 shadow-lg">
                 <div className="flex items-center gap-3">
                     <Settings className="h-5 w-5 text-teal-400" />
                     <h2 className="font-medium">AI Agent Configuration</h2>

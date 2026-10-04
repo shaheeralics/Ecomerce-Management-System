@@ -202,12 +202,12 @@ export default function AddOrderModal({ isOpen, onClose, onSuccess, editOrder }:
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 print:hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4 print:hidden">
             <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose}></div>
             <div className="relative bg-[#050D10] border border-teal-900/50 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
                 {/* Header */}
-                <div className="flex justify-between items-center p-5 border-b border-teal-900/30 bg-[#09181E]">
-                    <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+                <div className="flex justify-between items-center p-3 md:p-5 border-b border-teal-900/30 bg-[#09181E]">
+                    <h2 className="text-base md:text-xl font-bold text-slate-100 flex items-center gap-2">
                         {editOrder ? <CreditCard className="text-teal-500" /> : <Plus className="text-teal-500" />} 
                         {editOrder ? 'Edit Order' : 'Add New Order'}
                     </h2>
@@ -217,11 +217,11 @@ export default function AddOrderModal({ isOpen, onClose, onSuccess, editOrder }:
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-8">
+                <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-8">
                     
                     {/* Customer Section */}
                     <section>
-                        <h3 className="text-sm font-bold text-teal-500 uppercase tracking-wider mb-4 flex items-center gap-2"><User size={16}/> Customer Details</h3>
+                        <h3 className="text-xs md:text-sm font-bold text-teal-500 uppercase tracking-wider mb-4 flex items-center gap-2"><User size={16}/> Customer Details</h3>
                         
                         {!selectedCustomer && (
                             <div className="relative mb-4">
@@ -231,13 +231,13 @@ export default function AddOrderModal({ isOpen, onClose, onSuccess, editOrder }:
                                     placeholder="Search existing customer by name or phone..." 
                                     value={customerSearch}
                                     onChange={(e) => setCustomerSearch(e.target.value)}
-                                    className="w-full bg-[#09181E] border border-teal-900/50 rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-100 outline-none focus:border-teal-500"
+                                    className="w-full bg-[#09181E] border border-teal-900/50 rounded-xl pl-9 pr-4 py-2.5 text-xs md:text-sm text-slate-100 outline-none focus:border-teal-500"
                                 />
                                 {customerResults.length > 0 && (
                                     <div className="absolute top-full left-0 right-0 mt-1 bg-[#09181E] border border-teal-900/50 rounded-xl shadow-xl z-10 max-h-48 overflow-y-auto">
                                         {customerResults.map((c, i) => (
                                             <div key={i} onClick={() => selectCustomer(c)} className="px-4 py-3 hover:bg-teal-900/30 cursor-pointer border-b border-teal-900/20 last:border-0">
-                                                <p className="text-sm font-bold text-slate-200">{c.customer_name}</p>
+                                                <p className="text-xs md:text-sm font-bold text-slate-200">{c.customer_name}</p>
                                                 <p className="text-xs text-slate-400">{c.customer_phone} • {c.city}</p>
                                             </div>
                                         ))}
@@ -249,19 +249,19 @@ export default function AddOrderModal({ isOpen, onClose, onSuccess, editOrder }:
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-xs font-bold text-slate-400 mb-1">Full Name *</label>
-                                <input type="text" value={customerName} onChange={e => {setCustomerName(e.target.value); setSelectedCustomer(null);}} className="w-full bg-[#09181E] border border-teal-900/50 rounded-xl px-4 py-2 text-sm text-slate-100" />
+                                <input type="text" value={customerName} onChange={e => {setCustomerName(e.target.value); setSelectedCustomer(null);}} className="w-full bg-[#09181E] border border-teal-900/50 rounded-xl px-4 py-2 text-xs md:text-sm text-slate-100" />
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-slate-400 mb-1">Phone Number *</label>
-                                <input type="text" value={customerPhone} onChange={e => {setCustomerPhone(e.target.value); setSelectedCustomer(null);}} className="w-full bg-[#09181E] border border-teal-900/50 rounded-xl px-4 py-2 text-sm text-slate-100" />
+                                <input type="text" value={customerPhone} onChange={e => {setCustomerPhone(e.target.value); setSelectedCustomer(null);}} className="w-full bg-[#09181E] border border-teal-900/50 rounded-xl px-4 py-2 text-xs md:text-sm text-slate-100" />
                             </div>
                             <div className="md:col-span-2">
                                 <label className="block text-xs font-bold text-slate-400 mb-1">Complete Address</label>
-                                <input type="text" value={address} onChange={e => setAddress(e.target.value)} className="w-full bg-[#09181E] border border-teal-900/50 rounded-xl px-4 py-2 text-sm text-slate-100" />
+                                <input type="text" value={address} onChange={e => setAddress(e.target.value)} className="w-full bg-[#09181E] border border-teal-900/50 rounded-xl px-4 py-2 text-xs md:text-sm text-slate-100" />
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-slate-400 mb-1">City</label>
-                                <input type="text" value={city} onChange={e => setCity(e.target.value)} className="w-full bg-[#09181E] border border-teal-900/50 rounded-xl px-4 py-2 text-sm text-slate-100" />
+                                <input type="text" value={city} onChange={e => setCity(e.target.value)} className="w-full bg-[#09181E] border border-teal-900/50 rounded-xl px-4 py-2 text-xs md:text-sm text-slate-100" />
                             </div>
                         </div>
                     </section>
@@ -270,7 +270,7 @@ export default function AddOrderModal({ isOpen, onClose, onSuccess, editOrder }:
 
                     {/* Products Section */}
                     <section>
-                        <h3 className="text-sm font-bold text-teal-500 uppercase tracking-wider mb-4 flex items-center gap-2"><Box size={16}/> Order Items</h3>
+                        <h3 className="text-xs md:text-sm font-bold text-teal-500 uppercase tracking-wider mb-4 flex items-center gap-2"><Box size={16}/> Order Items</h3>
                         
                         <div className="relative mb-4">
                             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -279,7 +279,7 @@ export default function AddOrderModal({ isOpen, onClose, onSuccess, editOrder }:
                                 placeholder="Search product to add..." 
                                 value={productSearch}
                                 onChange={(e) => setProductSearch(e.target.value)}
-                                className="w-full bg-[#09181E] border border-teal-900/50 rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-100 outline-none focus:border-teal-500"
+                                className="w-full bg-[#09181E] border border-teal-900/50 rounded-xl pl-9 pr-4 py-2.5 text-xs md:text-sm text-slate-100 outline-none focus:border-teal-500"
                             />
                         </div>
                         
@@ -292,7 +292,7 @@ export default function AddOrderModal({ isOpen, onClose, onSuccess, editOrder }:
                                                 <img src={p.main_image_url} alt="" className="w-10 h-10 rounded-lg object-cover border border-teal-900/30" />
                                             ) : <div className="w-10 h-10 rounded-lg bg-teal-900/50 border border-teal-900/30 flex items-center justify-center text-teal-700"><Box size={16}/></div>}
                                             <div className="flex-1">
-                                                <p className="text-sm font-bold text-slate-200">{p.title}</p>
+                                                <p className="text-xs md:text-sm font-bold text-slate-200">{p.title}</p>
                                                 <p className="text-xs text-teal-400">Rs {p.starting_price}</p>
                                             </div>
                                             <div className="bg-teal-900/40 text-teal-400 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-teal-800/60 transition-colors">Add Item +</div>
@@ -329,20 +329,20 @@ export default function AddOrderModal({ isOpen, onClose, onSuccess, editOrder }:
                                     <tbody className="divide-y divide-teal-900/20">
                                         {items.map((item, idx) => (
                                             <tr key={idx}>
-                                                <td className="px-4 py-3 text-sm text-slate-200">{item.title}</td>
+                                                <td className="px-4 py-3 text-xs md:text-sm text-slate-200">{item.title}</td>
                                                 <td className="px-4 py-3">
                                                     <input type="text" value={item.size} onChange={e => updateItem(idx, 'size', e.target.value)} className="w-full bg-[#050D10] border border-teal-900/50 rounded px-2 py-1 text-xs text-slate-200" />
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <input type="number" min="1" value={item.quantity} onChange={e => updateItem(idx, 'quantity', Number(e.target.value))} className="w-full bg-[#050D10] border border-teal-900/50 rounded px-2 py-1 text-xs text-slate-200" />
                                                 </td>
-                                                <td className="px-4 py-3 text-sm text-slate-400 line-through">
+                                                <td className="px-4 py-3 text-xs md:text-sm text-slate-400 line-through">
                                                     Rs {Number(item.unit_price).toLocaleString()}
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <input type="number" value={item.negotiated_price ?? item.unit_price} onChange={e => updateItem(idx, 'negotiated_price', Number(e.target.value))} className="w-full bg-[#050D10] border border-teal-900/50 rounded px-2 py-1 text-xs text-teal-300 font-bold" />
                                                 </td>
-                                                <td className="px-4 py-3 text-sm font-bold text-teal-400">
+                                                <td className="px-4 py-3 text-xs md:text-sm font-bold text-teal-400">
                                                     Rs {(item.quantity * (item.negotiated_price ?? item.unit_price)).toLocaleString()}
                                                 </td>
                                                 <td className="px-4 py-3 text-right">
@@ -355,7 +355,7 @@ export default function AddOrderModal({ isOpen, onClose, onSuccess, editOrder }:
                             </div>
                         )}
                         {items.length === 0 && (
-                            <div className="text-center py-6 text-sm text-slate-500 border border-dashed border-teal-900/40 rounded-xl">
+                            <div className="text-center py-6 text-xs md:text-sm text-slate-500 border border-dashed border-teal-900/40 rounded-xl">
                                 No items added yet. Search a product above.
                             </div>
                         )}
@@ -364,24 +364,24 @@ export default function AddOrderModal({ isOpen, onClose, onSuccess, editOrder }:
                     <div className="h-px bg-teal-900/30"></div>
 
                     {/* Footer / Meta Section */}
-                    <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <section className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
                         <div className="space-y-4">
-                            <h3 className="text-sm font-bold text-teal-500 uppercase tracking-wider flex items-center gap-2"><Truck size={16}/> Delivery & Payment</h3>
+                            <h3 className="text-xs md:text-sm font-bold text-teal-500 uppercase tracking-wider flex items-center gap-2"><Truck size={16}/> Delivery & Payment</h3>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-bold text-slate-400 mb-1">Delivery Method</label>
-                                    <select value={deliveryMethod} onChange={e => setDeliveryMethod(e.target.value)} className="w-full bg-[#09181E] border border-teal-900/50 rounded-xl px-4 py-2 text-sm text-slate-100 outline-none">
+                                    <select value={deliveryMethod} onChange={e => setDeliveryMethod(e.target.value)} className="w-full bg-[#09181E] border border-teal-900/50 rounded-xl px-4 py-2 text-xs md:text-sm text-slate-100 outline-none">
                                         <option value="Standard">Standard</option>
                                         <option value="Express">Express</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-slate-400 mb-1">Delivery Fee</label>
-                                    <input type="number" value={deliveryFee} onChange={e => setDeliveryFee(Number(e.target.value))} className="w-full bg-[#09181E] border border-teal-900/50 rounded-xl px-4 py-2 text-sm text-slate-100 outline-none" />
+                                    <input type="number" value={deliveryFee} onChange={e => setDeliveryFee(Number(e.target.value))} className="w-full bg-[#09181E] border border-teal-900/50 rounded-xl px-4 py-2 text-xs md:text-sm text-slate-100 outline-none" />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-slate-400 mb-1">Payment Method</label>
-                                    <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} className="w-full bg-[#09181E] border border-teal-900/50 rounded-xl px-4 py-2 text-sm text-slate-100 outline-none">
+                                    <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} className="w-full bg-[#09181E] border border-teal-900/50 rounded-xl px-4 py-2 text-xs md:text-sm text-slate-100 outline-none">
                                         <option value="COD">COD</option>
                                         <option value="Bank Transfer">Bank Transfer</option>
                                         <option value="Credit Card">Credit Card</option>
@@ -389,7 +389,7 @@ export default function AddOrderModal({ isOpen, onClose, onSuccess, editOrder }:
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-slate-400 mb-1">Payment Status</label>
-                                    <select value={paymentStatus} onChange={e => setPaymentStatus(e.target.value)} className="w-full bg-[#09181E] border border-teal-900/50 rounded-xl px-4 py-2 text-sm text-slate-100 outline-none">
+                                    <select value={paymentStatus} onChange={e => setPaymentStatus(e.target.value)} className="w-full bg-[#09181E] border border-teal-900/50 rounded-xl px-4 py-2 text-xs md:text-sm text-slate-100 outline-none">
                                         <option value="Pending">Pending</option>
                                         <option value="Paid">Paid</option>
                                     </select>
@@ -397,9 +397,9 @@ export default function AddOrderModal({ isOpen, onClose, onSuccess, editOrder }:
                             </div>
                         </div>
 
-                        <div className="bg-[#09181E] border border-teal-900/40 rounded-xl p-6 h-fit">
-                            <h3 className="text-sm font-bold text-teal-500 uppercase tracking-wider mb-4 flex items-center gap-2"><CreditCard size={16}/> Summary</h3>
-                            <div className="space-y-3 text-sm">
+                        <div className="bg-[#09181E] border border-teal-900/40 rounded-xl p-3 md:p-6 h-fit">
+                            <h3 className="text-xs md:text-sm font-bold text-teal-500 uppercase tracking-wider mb-4 flex items-center gap-2"><CreditCard size={16}/> Summary</h3>
+                            <div className="space-y-3 text-xs md:text-sm">
                                 <div className="flex justify-between text-slate-300">
                                     <span>Original Subtotal</span>
                                     <span className="font-semibold">Rs {originalSubtotal.toLocaleString()}</span>
@@ -418,7 +418,7 @@ export default function AddOrderModal({ isOpen, onClose, onSuccess, editOrder }:
                                     <span>Delivery Fee</span>
                                     <span className="font-semibold">Rs {deliveryFee.toLocaleString()}</span>
                                 </div>
-                                <div className="flex justify-between text-lg font-bold text-teal-400 pt-1">
+                                <div className="flex justify-between text-base md:text-lg font-bold text-teal-400 pt-1">
                                     <span>Grand Total</span>
                                     <span>Rs {total.toLocaleString()}</span>
                                 </div>
@@ -426,7 +426,7 @@ export default function AddOrderModal({ isOpen, onClose, onSuccess, editOrder }:
                             
                             <div className="mt-6">
                                 <label className="block text-xs font-bold text-slate-400 mb-1">Initial Order Status</label>
-                                <select value={orderStatus} onChange={e => setOrderStatus(e.target.value)} className="w-full bg-[#050D10] border border-teal-900/50 rounded-xl px-4 py-2 text-sm text-slate-100 outline-none mb-4">
+                                <select value={orderStatus} onChange={e => setOrderStatus(e.target.value)} className="w-full bg-[#050D10] border border-teal-900/50 rounded-xl px-4 py-2 text-xs md:text-sm text-slate-100 outline-none mb-4">
                                     <option value="Pending">Pending</option>
                                     <option value="Confirmed">Confirmed</option>
                                 </select>
@@ -435,7 +435,7 @@ export default function AddOrderModal({ isOpen, onClose, onSuccess, editOrder }:
                             <button 
                                 onClick={handleSubmit}
                                 disabled={items.length === 0 || !customerName || !customerPhone}
-                                className="w-full bg-teal-600 hover:bg-teal-500 disabled:bg-teal-900/50 disabled:text-teal-700 text-white py-3 rounded-xl text-sm font-bold transition-all shadow-lg shadow-teal-600/20"
+                                className="w-full bg-teal-600 hover:bg-teal-500 disabled:bg-teal-900/50 disabled:text-teal-700 text-white py-3 rounded-xl text-xs md:text-sm font-bold transition-all shadow-lg shadow-teal-600/20"
                             >
                                 Create Order
                             </button>

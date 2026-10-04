@@ -82,12 +82,12 @@ const ApiSettings = () => {
   return (
     <div className="h-full w-full bg-[#071317] flex overflow-hidden">
       {/* Sidebar Tabs */}
-      <div className="w-64 bg-[#0A181D] border-r border-teal-900/30 flex flex-col p-4 flex-shrink-0">
+      <div className="w-64 bg-[#0A181D] border-r border-teal-900/30 flex flex-col p-2 md:p-4 flex-shrink-0">
         <div className="flex items-center gap-3 px-2 mb-6">
           <div className="w-8 h-8 rounded-lg bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400">
             <Key size={18} />
           </div>
-          <h2 className="text-sm font-bold text-slate-100">Global Credentials</h2>
+          <h2 className="text-xs md:text-sm font-bold text-slate-100">Global Credentials</h2>
         </div>
         <nav className="flex flex-col space-y-1.5">
             <button 
@@ -118,17 +118,17 @@ const ApiSettings = () => {
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 p-8 bg-[#071317] overflow-auto">
+      <div className="flex-1 p-3 md:p-8 bg-[#071317] overflow-auto">
         
         {/* Modal Guidance */}
         {activeGuidance && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-2 md:p-4">
             <div className="bg-[#09181E] border border-teal-800/40 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
               <div className="bg-[#0B1D25] px-6 py-4 border-b border-teal-900/40 flex justify-between items-center">
-                <h3 className="font-bold text-sm text-slate-100">{apiGuidanceData[activeGuidance].title}</h3>
-                <button onClick={() => setActiveGuidance(null)} className="text-slate-400 hover:text-slate-200 font-bold text-lg">&times;</button>
+                <h3 className="font-bold text-xs md:text-sm text-slate-100">{apiGuidanceData[activeGuidance].title}</h3>
+                <button onClick={() => setActiveGuidance(null)} className="text-slate-400 hover:text-slate-200 font-bold text-base md:text-lg">&times;</button>
               </div>
-              <div className="p-6">
+              <div className="p-3 md:p-6">
                 <p className="text-xs text-slate-300 whitespace-pre-line leading-relaxed">{apiGuidanceData[activeGuidance].content}</p>
               </div>
               <div className="bg-[#050D10] px-6 py-3 border-t border-teal-900/40 flex justify-end">
@@ -142,8 +142,8 @@ const ApiSettings = () => {
           
           {/* WhatsApp Settings */}
           {activeApiTab === 'whatsapp' && (
-            <section className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-6 shadow-xl space-y-4">
-              <h3 className="text-lg font-bold text-slate-100 pb-3 border-b border-teal-900/30">Meta WhatsApp API Credentials</h3>
+            <section className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-3 md:p-6 shadow-xl space-y-4">
+              <h3 className="text-base md:text-lg font-bold text-slate-100 pb-3 border-b border-teal-900/30">Meta WhatsApp API Credentials</h3>
               
               <div className="space-y-4">
                 <div>
@@ -197,8 +197,8 @@ const ApiSettings = () => {
 
           {/* LLM Settings */}
           {activeApiTab === 'llm' && (
-            <section className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-6 shadow-xl space-y-4">
-              <h3 className="text-lg font-bold text-slate-100 pb-3 border-b border-teal-900/30">LLM AI Provider Key</h3>
+            <section className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-3 md:p-6 shadow-xl space-y-4">
+              <h3 className="text-base md:text-lg font-bold text-slate-100 pb-3 border-b border-teal-900/30">LLM AI Provider Key</h3>
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">AI Provider API Key (Gemini / OpenAI)</label>
                 <div className="flex gap-2">
@@ -214,8 +214,8 @@ const ApiSettings = () => {
 
           {/* Shopify Settings */}
           {activeApiTab === 'shopify' && (
-            <section className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-6 shadow-xl space-y-4">
-              <h3 className="text-lg font-bold text-slate-100 pb-3 border-b border-teal-900/30">Shopify API Integration</h3>
+            <section className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-3 md:p-6 shadow-xl space-y-4">
+              <h3 className="text-base md:text-lg font-bold text-slate-100 pb-3 border-b border-teal-900/30">Shopify API Integration</h3>
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1">Store URL</label>

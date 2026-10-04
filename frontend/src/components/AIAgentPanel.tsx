@@ -309,14 +309,14 @@ export default function AIAgentPanel() {
     return (
         <div className="h-full w-full flex flex-col overflow-hidden">
             {/* Top: Agent Config Section */}
-            <div className="flex-shrink-0 p-6 pb-4 border-b border-teal-900/30 overflow-y-auto custom-scrollbar" style={{ maxHeight: '45%' }}>
+            <div className="flex-shrink-0 p-3 md:p-6 pb-4 border-b border-teal-900/30 overflow-y-auto custom-scrollbar" style={{ maxHeight: '45%' }}>
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-teal-600/30">
                             <Bot size={22} className="text-white" />
                         </div>
                         <div>
-                            <h1 className="text-lg font-bold text-slate-100 tracking-tight">AI Agent</h1>
+                            <h1 className="text-base md:text-lg font-bold text-slate-100 tracking-tight">AI Agent</h1>
                             <p className="text-[10px] text-slate-500">Autonomous sales agent powered by your system prompt</p>
                         </div>
                     </div>

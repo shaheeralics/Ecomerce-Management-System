@@ -1679,10 +1679,24 @@ const WhatsAppDashboard = () => {
     };
 
     return (
-        <div className="h-full w-full bg-[#071317] flex overflow-hidden">
+        <div className="h-full w-full bg-[#071317] flex overflow-hidden relative">
+            {/* Mobile Sidebar Overlay Backdrop */}
+            {isSidebarOpen && (
+                <div 
+                    className="md:hidden fixed inset-0 bg-black/60 z-30" 
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
+            
             {/* Devsil Teal Sidebar */}
-            <div className={`w-64 bg-[#0A181D] border-r border-teal-900/30 flex flex-col p-4 flex-shrink-0 transition-all duration-300 ${isSidebarOpen ? '' : '-ml-64'}`}>
-                <nav className="flex flex-col space-y-1.5 mt-2">
+            <div className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#0A181D] border-r border-teal-900/30 flex flex-col p-3 md:p-2 md:p-4 transition-transform duration-300 md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                {/* Mobile Close Button inside Sidebar */}
+                <div className="md:hidden flex justify-end mb-2">
+                    <button onClick={() => setIsSidebarOpen(false)} className="text-teal-500 p-1">
+                        <X size={20} />
+                    </button>
+                </div>
+                <nav className="flex flex-col space-y-1.5 mt-2 overflow-y-auto custom-scrollbar">
                     <button
                         onClick={() => setSubTab('products')}
                         className={`text-left px-4 py-3 rounded-xl font-medium text-xs transition-all flex items-center gap-3 ${subTab === 'products' ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/30 font-semibold' : 'text-slate-400 hover:bg-teal-950/40 hover:text-slate-200'
@@ -1743,21 +1757,21 @@ const WhatsAppDashboard = () => {
                     <div className="bg-[#0D2128] rounded-xl p-3 border border-teal-900/30 flex items-center justify-between">
                         <div>
                             <p className="text-[10px] font-semibold text-teal-400/80 uppercase tracking-wider">Total Products</p>
-                            <p className="text-lg font-bold text-slate-100">{products.length}</p>
+                            <p className="text-base md:text-lg font-bold text-slate-100">{products.length}</p>
                         </div>
                         <Layers className="text-teal-500/60" size={18} />
                     </div>
                     <div className="bg-[#0D2128] rounded-xl p-3 border border-teal-900/30 flex items-center justify-between">
                         <div>
                             <p className="text-[10px] font-semibold text-emerald-400/80 uppercase tracking-wider">Available</p>
-                            <p className="text-lg font-bold text-emerald-400">{products.filter(p => p.status === 'available').length}</p>
+                            <p className="text-base md:text-lg font-bold text-emerald-400">{products.filter(p => p.status === 'available').length}</p>
                         </div>
                         <CheckCircle className="text-emerald-500/60" size={18} />
                     </div>
                     <div className="bg-[#0D2128] rounded-xl p-3 border border-teal-900/30 flex items-center justify-between">
                         <div>
                             <p className="text-[10px] font-semibold text-amber-400/80 uppercase tracking-wider">Sold</p>
-                            <p className="text-lg font-bold text-amber-400">{products.filter(p => p.status === 'sold').length}</p>
+                            <p className="text-base md:text-lg font-bold text-amber-400">{products.filter(p => p.status === 'sold').length}</p>
                         </div>
                         <Tag className="text-amber-500/60" size={18} />
                     </div>
@@ -1765,19 +1779,20 @@ const WhatsAppDashboard = () => {
             </div>
 
             {/* Main Content Workspace */}
-            <div className="flex-1 flex flex-col bg-[#071317] overflow-hidden">
-                <div className="h-14 border-b border-teal-900/30 flex items-center px-4 shrink-0">
-                    <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-teal-400 hover:text-white p-2 rounded-lg bg-teal-950/40 hover:bg-teal-900/60 transition-all cursor-pointer">
+            <div className="flex-1 flex flex-col bg-[#071317] overflow-hidden w-full">
+                <div className="h-12 md:h-14 border-b border-teal-900/30 flex items-center px-3 md:px-4 shrink-0 bg-[#071317]/90 backdrop-blur-sm z-20">
+                    <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="md:hidden text-teal-400 hover:text-white p-1.5 rounded-lg bg-teal-950/40 hover:bg-teal-900/60 transition-all cursor-pointer">
                         <Menu size={20} />
                     </button>
+                    <h2 className="md:hidden ml-3 font-bold text-slate-100 text-xs md:text-sm">E-Commerce</h2>
                 </div>
-                <div className="flex-1 p-8 overflow-auto">
+                <div className="flex-1 p-3 md:p-3 md:p-8 overflow-auto custom-scrollbar relative">
                     {/* ===== PRODUCTS TAB ===== */}
                     {subTab === 'products' && (
                         <div>
-                            <div className="flex items-center justify-between mb-8 pb-4 border-b border-teal-900/30">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4 md:mb-4 md:mb-8 pb-3 md:pb-4 border-b border-teal-900/30">
                                 <div>
-                                    <h3 className="text-2xl font-bold text-slate-100 tracking-tight">Products Catalog</h3>
+                                    <h3 className="text-base md:text-lg md:text-2xl font-bold text-slate-100 tracking-tight">Products Catalog</h3>
                                     <p className="text-slate-400 text-xs mt-1">Manage multi-image alignments, product videos, and punch-in audio notes for AI bot responses.</p>
                                 </div>
                                 <button
@@ -1791,7 +1806,7 @@ const WhatsAppDashboard = () => {
 
                             {/* ===== MULTI-PHASE PRODUCT CREATION MODAL ===== */}
                             {showAddModal && (
-                                <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto pt-10 pb-10">
+                                <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-2 md:p-4 overflow-y-auto pt-10 pb-10">
                                     <div className="bg-[#09181E] border border-teal-800/40 rounded-2xl w-full max-w-3xl flex flex-col max-h-[90vh] shadow-2xl relative">
                                         {/* Modal Header */}
                                         <div className="px-6 py-4 bg-[#0B1D25] border-b border-teal-900/40 flex items-center justify-between flex-shrink-0 rounded-t-2xl z-10">
@@ -1852,7 +1867,7 @@ const WhatsAppDashboard = () => {
                                         </div>
 
                                         {/* Modal Body - Phase Content */}
-                                        <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                                        <div className="p-3 md:p-6 overflow-y-auto flex-1 custom-scrollbar">
                                             {/* PHASE 1: BASIC DETAILS */}
                                             {activePhase === 1 && (
                                                 <div className="space-y-4">
@@ -1965,7 +1980,7 @@ const WhatsAppDashboard = () => {
                                                             <span>Product Gallery Images</span>
                                                             <span className="text-teal-400 font-semibold text-[11px]">Position 1 (Leftmost) = MAIN THUMBNAIL</span>
                                                         </label>
-                                                        <div className="border-2 border-dashed border-teal-900/40 hover:border-teal-500 rounded-xl p-5 bg-[#050D10] hover:bg-[#08151A] transition-all text-center group cursor-pointer">
+                                                        <div className="border-2 border-dashed border-teal-900/40 hover:border-teal-500 rounded-xl p-3 md:p-5 bg-[#050D10] hover:bg-[#08151A] transition-all text-center group cursor-pointer">
                                                             <input
                                                                 type="file"
                                                                 multiple
@@ -2075,7 +2090,7 @@ const WhatsAppDashboard = () => {
                                                                 </button>
                                                             </div>
                                                         ) : (
-                                                            <div className="border-2 border-dashed border-teal-900/40 hover:border-teal-500 rounded-xl p-5 bg-[#050D10] hover:bg-[#08151A] transition-all text-center group cursor-pointer">
+                                                            <div className="border-2 border-dashed border-teal-900/40 hover:border-teal-500 rounded-xl p-3 md:p-5 bg-[#050D10] hover:bg-[#08151A] transition-all text-center group cursor-pointer">
                                                                 <input
                                                                     type="file"
                                                                     accept="video/*"
@@ -2103,7 +2118,7 @@ const WhatsAppDashboard = () => {
                                                         Step 3 — Product Voice Note Pitch & Timeline Studio
                                                     </div>
 
-                                                    <div className="bg-[#050D10] border border-teal-900/40 rounded-xl p-6 text-center">
+                                                    <div className="bg-[#050D10] border border-teal-900/40 rounded-xl p-3 md:p-6 text-center">
 
                                                         {/* Recording Controls */}
                                                         <div className="flex flex-col items-center justify-center gap-4">
@@ -2129,7 +2144,7 @@ const WhatsAppDashboard = () => {
                                                                     </button>
 
                                                                     <div className="ml-7 bg-[#FF3B30] h-[48px] w-full rounded-r-full flex items-center pl-10 pr-2 justify-between gap-[3px] shadow-sm overflow-hidden animate-fade-in-right">
-                                                                        <div className="flex items-center gap-1.5 text-white font-mono text-sm ml-1">
+                                                                        <div className="flex items-center gap-1.5 text-white font-mono text-xs md:text-sm ml-1">
                                                                             <span className={`w-2 h-2 rounded-full ${isPaused ? 'bg-amber-400' : 'bg-white animate-pulse'}`} />
                                                                             {formatTimer(recordingTime)}
                                                                         </div>
@@ -2207,7 +2222,7 @@ const WhatsAppDashboard = () => {
 
                                                                     {/* CapCut Visual Multi-Track Timeline Studio Drawer */}
                                                                     {showTimelineEditor && (
-                                                                        <div className="bg-[#050D10] p-4.5 rounded-2xl border border-teal-500/40 shadow-2xl space-y-4 transition-all">
+                                                                        <div className="bg-[#050D10] p-2 md:p-4.5 rounded-2xl border border-teal-500/40 shadow-2xl space-y-4 transition-all">
                                                                             {/* Top Control Toolbar with Edit Icon */}
                                                                             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-teal-900/40 pb-3">
                                                                                 <div className="flex items-center gap-2">
@@ -2594,7 +2609,7 @@ const WhatsAppDashboard = () => {
                                     <p className="text-xs text-slate-500 mt-1">Click "Add New Product" to start building your catalog</p>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                                     {products.map(product => {
                                         const allImages = getProductAllImages(product);
                                         const activeImgIdx = cardActiveImageIndex[product.id] || 0;
@@ -2667,7 +2682,7 @@ const WhatsAppDashboard = () => {
                                                 </div>
 
                                                 {/* Product Details Info */}
-                                                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                                                <div className="p-3 md:p-5 flex-1 flex flex-col justify-between space-y-4">
                                                     <div>
                                                         <h4 className="font-bold text-slate-100 text-base leading-snug line-clamp-1 mb-1">{product.title}</h4>
                                                         <p className="text-xs text-slate-400 font-medium">
@@ -2679,7 +2694,7 @@ const WhatsAppDashboard = () => {
                                                     <div className="flex items-baseline justify-between pt-2 border-t border-teal-900/30">
                                                         <div>
                                                             <p className="text-[10px] text-teal-400/70 font-semibold uppercase">Asking Price</p>
-                                                            <p className="text-lg font-bold text-slate-100">Rs {product.starting_price}</p>
+                                                            <p className="text-base md:text-lg font-bold text-slate-100">Rs {product.starting_price}</p>
                                                         </div>
                                                         <div className="text-right">
                                                             <p className="text-[10px] text-slate-500 font-semibold uppercase">Min Negotiable</p>
@@ -2729,7 +2744,7 @@ const WhatsAppDashboard = () => {
 
                     {/* ===== MEDIA PREVIEW MODAL ===== */}
                     {activeMediaPreview && (
-                        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+                        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-2 md:p-4">
                             <div className="bg-[#09181E] border border-teal-800/40 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
                                 <div className="px-5 py-4 bg-[#0B1D25] border-b border-teal-900/40 flex items-center justify-between">
                                     <h5 className="text-xs font-bold text-slate-200">
@@ -2739,7 +2754,7 @@ const WhatsAppDashboard = () => {
                                         <X size={18} />
                                     </button>
                                 </div>
-                                <div className="p-6 text-center">
+                                <div className="p-3 md:p-6 text-center">
                                     {activeMediaPreview.type === 'video' ? (
                                         <video src={activeMediaPreview.url} controls autoPlay className="w-full rounded-xl bg-black max-h-80" />
                                     ) : (
@@ -2755,13 +2770,13 @@ const WhatsAppDashboard = () => {
 
                     {/* ===== GUIDANCE MODAL OVERLAY ===== */}
                     {activeGuidance && (
-                        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-2 md:p-4">
                             <div className="bg-[#09181E] border border-teal-800/40 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
                                 <div className="bg-[#0B1D25] px-6 py-4 border-b border-teal-900/40 flex justify-between items-center">
-                                    <h3 className="font-bold text-sm text-slate-100">{apiGuidanceData[activeGuidance].title}</h3>
-                                    <button onClick={() => setActiveGuidance(null)} className="text-slate-400 hover:text-slate-200 font-bold text-lg">&times;</button>
+                                    <h3 className="font-bold text-xs md:text-sm text-slate-100">{apiGuidanceData[activeGuidance].title}</h3>
+                                    <button onClick={() => setActiveGuidance(null)} className="text-slate-400 hover:text-slate-200 font-bold text-base md:text-lg">&times;</button>
                                 </div>
-                                <div className="p-6">
+                                <div className="p-3 md:p-6">
                                     <p className="text-xs text-slate-300 whitespace-pre-line leading-relaxed">{apiGuidanceData[activeGuidance].content}</p>
                                 </div>
                                 <div className="bg-[#050D10] px-6 py-3 border-t border-teal-900/40 flex justify-end">

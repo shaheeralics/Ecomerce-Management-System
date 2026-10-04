@@ -139,7 +139,7 @@ export default function OrdersPage() {
                     {/* Header */}
                     <div className="flex items-center justify-between mb-4 pb-4 border-b border-teal-900/30 print:hidden">
                         <div>
-                            <h3 className="text-2xl font-bold text-slate-100 tracking-tight">Orders</h3>
+                            <h3 className="text-base md:text-lg md:text-2xl font-bold text-slate-100 tracking-tight">Orders</h3>
                             <p className="text-slate-400 text-xs mt-1">Manage customer orders, status, payment, delivery and receipts.</p>
                         </div>
                         <div className="flex gap-3">
@@ -154,64 +154,64 @@ export default function OrdersPage() {
 
                     {/* Summary Cards */}
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 print:hidden">
-                        <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-4 flex flex-col justify-between shadow-lg">
+                        <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-2 md:p-4 flex flex-col justify-between shadow-lg">
                             <div className="flex justify-between items-start mb-2">
                                 <div className="p-2 bg-teal-900/20 rounded-lg text-teal-400"><ShoppingBag size={18} /></div>
                             </div>
                             <div>
-                                <h4 className="text-xl font-bold text-slate-100">{stats.total}</h4>
+                                <h4 className="text-base md:text-xl font-bold text-slate-100">{stats.total}</h4>
                                 <p className="text-[10px] text-slate-400 font-medium">Total Orders</p>
                             </div>
                         </div>
-                        <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-4 flex flex-col justify-between shadow-lg">
+                        <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-2 md:p-4 flex flex-col justify-between shadow-lg">
                             <div className="flex justify-between items-start mb-2">
                                 <div className="p-2 bg-emerald-900/20 rounded-lg text-emerald-400"><Activity size={18} /></div>
                             </div>
                             <div>
-                                <h4 className="text-xl font-bold text-slate-100">{formatCurrency(stats.revenue || 0)}</h4>
+                                <h4 className="text-base md:text-xl font-bold text-slate-100">{formatCurrency(stats.revenue || 0)}</h4>
                                 <p className="text-[10px] text-slate-400 font-medium">Total Revenue</p>
                             </div>
                         </div>
-                        <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-4 flex flex-col justify-between shadow-lg">
+                        <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-2 md:p-4 flex flex-col justify-between shadow-lg">
                             <div className="flex justify-between items-start mb-2">
                                 <div className="p-2 bg-amber-900/20 rounded-lg text-amber-400"><Clock size={18} /></div>
                             </div>
                             <div>
-                                <h4 className="text-xl font-bold text-slate-100">{stats.pending}</h4>
+                                <h4 className="text-base md:text-xl font-bold text-slate-100">{stats.pending}</h4>
                                 <p className="text-[10px] text-slate-400 font-medium">Pending</p>
                             </div>
                         </div>
-                        <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-4 flex flex-col justify-between shadow-lg">
+                        <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-2 md:p-4 flex flex-col justify-between shadow-lg">
                             <div className="flex justify-between items-start mb-2">
                                 <div className="p-2 bg-blue-900/20 rounded-lg text-blue-400"><Truck size={18} /></div>
                             </div>
                             <div>
-                                <h4 className="text-xl font-bold text-slate-100">{stats.processing}</h4>
+                                <h4 className="text-base md:text-xl font-bold text-slate-100">{stats.processing}</h4>
                                 <p className="text-[10px] text-slate-400 font-medium">Processing</p>
                             </div>
                         </div>
-                        <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-4 flex flex-col justify-between shadow-lg">
+                        <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-2 md:p-4 flex flex-col justify-between shadow-lg">
                             <div className="flex justify-between items-start mb-2">
                                 <div className="p-2 bg-emerald-900/20 rounded-lg text-emerald-400"><CheckCircle size={18} /></div>
                             </div>
                             <div>
-                                <h4 className="text-xl font-bold text-slate-100">{stats.delivered}</h4>
+                                <h4 className="text-base md:text-xl font-bold text-slate-100">{stats.delivered}</h4>
                                 <p className="text-[10px] text-slate-400 font-medium">Delivered</p>
                             </div>
                         </div>
-                        <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-4 flex flex-col justify-between shadow-lg">
+                        <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-2 md:p-4 flex flex-col justify-between shadow-lg">
                             <div className="flex justify-between items-start mb-2">
                                 <div className="p-2 bg-red-900/20 rounded-lg text-red-400"><XCircle size={18} /></div>
                             </div>
                             <div>
-                                <h4 className="text-xl font-bold text-slate-100">{stats.cancelled}</h4>
+                                <h4 className="text-base md:text-xl font-bold text-slate-100">{stats.cancelled}</h4>
                                 <p className="text-[10px] text-slate-400 font-medium">Cancelled</p>
                             </div>
                         </div>
                     </div>
 
                     {/* Filter Bar */}
-                    <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-4 shadow-lg flex flex-wrap gap-4 items-center print:hidden">
+                    <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-2 md:p-4 shadow-lg flex flex-wrap gap-4 items-center print:hidden">
                         <div className="flex-1 min-w-[200px] relative">
                             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                             <input 
@@ -219,7 +219,7 @@ export default function OrdersPage() {
                                 placeholder="Search order #, name, phone..." 
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full bg-[#050D10] border border-teal-900/50 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-100 outline-none focus:ring-2 focus:ring-teal-500 transition-all"
+                                className="w-full bg-[#050D10] border border-teal-900/50 rounded-xl pl-9 pr-4 py-2 text-xs md:text-sm text-slate-100 outline-none focus:ring-2 focus:ring-teal-500 transition-all"
                             />
                         </div>
                         <div className="flex gap-4">
@@ -228,7 +228,7 @@ export default function OrdersPage() {
                                 <select 
                                     value={statusFilter}
                                     onChange={(e) => setStatusFilter(e.target.value)}
-                                    className="bg-transparent text-sm text-slate-200 outline-none cursor-pointer"
+                                    className="bg-transparent text-xs md:text-sm text-slate-200 outline-none cursor-pointer"
                                 >
                                     <option value="all" className="bg-[#050D10] text-slate-200">All Status</option>
                                     <option value="pending" className="bg-[#050D10] text-slate-200">Pending</option>
@@ -245,7 +245,7 @@ export default function OrdersPage() {
                                 <select 
                                     value={paymentFilter}
                                     onChange={(e) => setPaymentFilter(e.target.value)}
-                                    className="bg-transparent text-sm text-slate-200 outline-none cursor-pointer"
+                                    className="bg-transparent text-xs md:text-sm text-slate-200 outline-none cursor-pointer"
                                 >
                                     <option value="all" className="bg-[#050D10] text-slate-200">All Payments</option>
                                     <option value="pending" className="bg-[#050D10] text-slate-200">Pending</option>
@@ -292,8 +292,8 @@ export default function OrdersPage() {
                                                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-teal-900/20 text-teal-500 mb-4">
                                                     <ShoppingBag size={28} />
                                                 </div>
-                                                <h4 className="text-lg font-bold text-slate-200 mb-1">No Orders Found</h4>
-                                                <p className="text-sm text-slate-500">Try adjusting your filters or search term.</p>
+                                                <h4 className="text-base md:text-lg font-bold text-slate-200 mb-1">No Orders Found</h4>
+                                                <p className="text-xs md:text-sm text-slate-500">Try adjusting your filters or search term.</p>
                                             </td>
                                         </tr>
                                     ) : (
@@ -304,7 +304,7 @@ export default function OrdersPage() {
                                                 className="hover:bg-teal-900/10 transition-colors cursor-pointer group"
                                             >
                                                 <td className="px-6 py-4">
-                                                    <span className="font-mono text-sm font-semibold text-teal-400">#{order.id}</span>
+                                                    <span className="font-mono text-xs md:text-sm font-semibold text-teal-400">#{order.id}</span>
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-3">
@@ -312,7 +312,7 @@ export default function OrdersPage() {
                                                             {order.customer_name ? order.customer_name.charAt(0) : '?'}
                                                         </div>
                                                         <div>
-                                                            <p className="text-sm font-bold text-slate-200 group-hover:text-white transition-colors">{order.customer_name || 'Unknown'}</p>
+                                                            <p className="text-xs md:text-sm font-bold text-slate-200 group-hover:text-white transition-colors">{order.customer_name || 'Unknown'}</p>
                                                             <p className="text-[11px] text-slate-500">{order.customer_phone}</p>
                                                         </div>
                                                     </div>
@@ -346,7 +346,7 @@ export default function OrdersPage() {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <p className="text-sm font-bold text-slate-200">{formatCurrency(calculateOrderTotals(order).totalPayable)}</p>
+                                                    <p className="text-xs md:text-sm font-bold text-slate-200">{formatCurrency(calculateOrderTotals(order).totalPayable)}</p>
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex flex-col">

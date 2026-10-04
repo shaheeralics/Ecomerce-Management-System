@@ -126,7 +126,7 @@ const AnalyticsPage = () => {
             {/* Header */}
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-4 pb-4 border-b border-teal-900/40 gap-4">
                 <div>
-                    <h3 className="text-2xl font-bold text-white tracking-tight">Analytics & Insights</h3>
+                    <h3 className="text-base md:text-lg md:text-2xl font-bold text-white tracking-tight">Analytics & Insights</h3>
                     <p className="text-slate-400 text-xs mt-1">Track your business performance, understand customer behavior, and make data-driven decisions.</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
@@ -169,70 +169,70 @@ const AnalyticsPage = () => {
             {/* ROW 1: KPI Cards */}
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
                 {/* Revenue */}
-                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-4 shadow-lg flex items-center gap-3">
+                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-2 md:p-4 shadow-lg flex items-center gap-3">
                     <div className="p-2.5 bg-emerald-950/40 rounded-full border border-emerald-900/50 text-emerald-400 shrink-0 flex items-center justify-center w-9 h-9">
-                        <span className="font-bold text-sm">Rs</span>
+                        <span className="font-bold text-xs md:text-sm">Rs</span>
                     </div>
                     <div className="min-w-0 flex-1">
                         <h4 className="text-[10px] font-semibold text-slate-400 truncate">Total Revenue</h4>
                         <div className="flex items-baseline gap-2">
-                            <p className="text-xl font-bold text-white truncate">{formatCurrency(kpi?.totalRevenue || 0)}</p>
+                            <p className="text-base md:text-xl font-bold text-white truncate">{formatCurrency(kpi?.totalRevenue || 0)}</p>
                             {renderChange(kpi?.changes?.revenue)}
                         </div>
                         <p className="text-[9px] text-slate-500 mt-0.5 truncate">vs prev period</p>
                     </div>
                 </div>
                 {/* Orders */}
-                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-4 shadow-lg flex items-center gap-3">
+                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-2 md:p-4 shadow-lg flex items-center gap-3">
                     <div className="p-2.5 bg-cyan-950/40 rounded-full border border-cyan-900/50 text-cyan-400 shrink-0">
                         <ShoppingCart size={20} />
                     </div>
                     <div className="min-w-0 flex-1">
                         <h4 className="text-[10px] font-semibold text-slate-400 truncate">Total Orders</h4>
                         <div className="flex items-baseline gap-2">
-                            <p className="text-xl font-bold text-white truncate">{formatNumber(kpi?.totalOrders || 0)}</p>
+                            <p className="text-base md:text-xl font-bold text-white truncate">{formatNumber(kpi?.totalOrders || 0)}</p>
                             {renderChange(kpi?.changes?.orders)}
                         </div>
                         <p className="text-[9px] text-slate-500 mt-0.5 truncate">vs prev period</p>
                     </div>
                 </div>
                 {/* Customers */}
-                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-4 shadow-lg flex items-center gap-3">
+                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-2 md:p-4 shadow-lg flex items-center gap-3">
                     <div className="p-2.5 bg-blue-950/40 rounded-full border border-blue-900/50 text-blue-400 shrink-0">
                         <Users size={20} />
                     </div>
                     <div className="min-w-0 flex-1">
                         <h4 className="text-[10px] font-semibold text-slate-400 truncate">Active Customers</h4>
                         <div className="flex items-baseline gap-2">
-                            <p className="text-xl font-bold text-white truncate">{formatNumber(kpi?.activeCustomers || 0)}</p>
+                            <p className="text-base md:text-xl font-bold text-white truncate">{formatNumber(kpi?.activeCustomers || 0)}</p>
                             {renderChange(kpi?.changes?.customers)}
                         </div>
                         <p className="text-[9px] text-slate-500 mt-0.5 truncate">vs prev period</p>
                     </div>
                 </div>
                 {/* AOV */}
-                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-4 shadow-lg flex items-center gap-3">
+                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-2 md:p-4 shadow-lg flex items-center gap-3">
                     <div className="p-2.5 bg-amber-950/40 rounded-full border border-amber-900/50 text-amber-400 shrink-0">
                         <Activity size={20} />
                     </div>
                     <div className="min-w-0 flex-1">
                         <h4 className="text-[10px] font-semibold text-slate-400 truncate">Average Order Value</h4>
                         <div className="flex items-baseline gap-2">
-                            <p className="text-xl font-bold text-white truncate">{formatCurrency(kpi?.aov || 0)}</p>
+                            <p className="text-base md:text-xl font-bold text-white truncate">{formatCurrency(kpi?.aov || 0)}</p>
                             {renderChange(kpi?.changes?.aov)}
                         </div>
                         <p className="text-[9px] text-slate-500 mt-0.5 truncate">vs prev period</p>
                     </div>
                 </div>
                 {/* Conversion */}
-                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-4 shadow-lg flex items-center gap-3">
+                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-2 md:p-4 shadow-lg flex items-center gap-3">
                     <div className="p-2.5 bg-purple-950/40 rounded-full border border-purple-900/50 text-purple-400 shrink-0">
                         <Filter size={20} />
                     </div>
                     <div className="min-w-0 flex-1">
                         <h4 className="text-[10px] font-semibold text-slate-400 truncate">Conversion Rate</h4>
                         <div className="flex items-baseline gap-2">
-                            <p className="text-xl font-bold text-white truncate">{kpi?.conversionRate != null ? `${kpi.conversionRate}%` : 'N/A'}</p>
+                            <p className="text-base md:text-xl font-bold text-white truncate">{kpi?.conversionRate != null ? `${kpi.conversionRate}%` : 'N/A'}</p>
                             {renderChange(kpi?.changes?.conversion)}
                         </div>
                         <p className="text-[9px] text-slate-500 mt-0.5 truncate">vs prev period</p>
@@ -244,12 +244,12 @@ const AnalyticsPage = () => {
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
                 
                 {/* Revenue Overview Chart */}
-                <div className="xl:col-span-2 bg-[#0b1426] border border-teal-900/40 rounded-xl p-5 shadow-lg relative overflow-hidden h-[300px] flex flex-col">
+                <div className="xl:col-span-2 bg-[#0b1426] border border-teal-900/40 rounded-xl p-3 md:p-5 shadow-lg relative overflow-hidden h-[300px] flex flex-col">
                     <div className="flex justify-between items-start mb-4">
                         <div>
                             <h4 className="text-[11px] font-semibold text-slate-300">Revenue Overview</h4>
                             <div className="flex items-baseline gap-2 mt-1">
-                                <p className="text-2xl font-bold text-white">{formatCurrency(kpi?.totalRevenue || 0)}</p>
+                                <p className="text-base md:text-lg md:text-2xl font-bold text-white">{formatCurrency(kpi?.totalRevenue || 0)}</p>
                                 {renderChange(kpi?.changes?.revenue)}
                             </div>
                         </div>
@@ -286,7 +286,7 @@ const AnalyticsPage = () => {
                 </div>
 
                 {/* Orders by Status */}
-                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-5 shadow-lg relative overflow-hidden flex flex-col h-[300px]">
+                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-3 md:p-5 shadow-lg relative overflow-hidden flex flex-col h-[300px]">
                     <div className="flex justify-between items-center mb-2">
                         <h4 className="text-[11px] font-semibold text-slate-300">Orders by Status</h4>
                     </div>
@@ -312,7 +312,7 @@ const AnalyticsPage = () => {
                                 </PieChart>
                             </ResponsiveContainer>
                             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                <span className="text-xl font-bold text-white">{kpi?.totalOrders || 0}</span>
+                                <span className="text-base md:text-xl font-bold text-white">{kpi?.totalOrders || 0}</span>
                                 <span className="text-[8px] text-slate-400 uppercase">Total Orders</span>
                             </div>
                         </div>
@@ -338,7 +338,7 @@ const AnalyticsPage = () => {
             {/* ROW 3 */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Sales by Category */}
-                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-5 shadow-lg relative flex flex-col h-[280px]">
+                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-3 md:p-5 shadow-lg relative flex flex-col h-[280px]">
                     <div className="flex justify-between items-center mb-2">
                         <h4 className="text-[11px] font-semibold text-slate-300">Sales by Category</h4>
                         <div className="bg-slate-900/50 border border-teal-900/40 text-teal-400 font-medium text-[9px] rounded px-2 py-1">{getRangeLabel()}</div>
@@ -387,7 +387,7 @@ const AnalyticsPage = () => {
                 </div>
 
                 {/* Top Selling Products */}
-                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-5 shadow-lg flex flex-col h-[280px]">
+                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-3 md:p-5 shadow-lg flex flex-col h-[280px]">
                     <div className="flex justify-between items-center mb-4">
                         <h4 className="text-[11px] font-semibold text-slate-300">Top Selling Products</h4>
                         <div className="bg-slate-900/50 border border-teal-900/40 text-teal-400 font-medium text-[9px] rounded px-2 py-1">{getRangeLabel()}</div>
@@ -418,12 +418,12 @@ const AnalyticsPage = () => {
                 </div>
 
                 {/* Customer Growth */}
-                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-5 shadow-lg flex flex-col h-[280px]">
+                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-3 md:p-5 shadow-lg flex flex-col h-[280px]">
                     <div className="flex justify-between items-center mb-2">
                         <div>
                             <h4 className="text-[11px] font-semibold text-slate-300">Customer Growth</h4>
                             <div className="flex items-baseline gap-2 mt-0.5">
-                                <p className="text-xl font-bold text-white">{kpi?.activeCustomers || 0}</p>
+                                <p className="text-base md:text-xl font-bold text-white">{kpi?.activeCustomers || 0}</p>
                                 {renderChange(kpi?.changes?.customers)}
                             </div>
                             <p className="text-[9px] text-slate-500">New customers</p>
@@ -451,7 +451,7 @@ const AnalyticsPage = () => {
             {/* ROW 4 */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Top Customer Locations */}
-                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-5 shadow-lg h-[240px]">
+                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-3 md:p-5 shadow-lg h-[240px]">
                     <div className="flex justify-between items-center mb-4">
                         <h4 className="text-[11px] font-semibold text-slate-300">Top Customer Locations</h4>
                         <div className="bg-slate-900/50 border border-teal-900/40 text-teal-400 font-medium text-[9px] rounded px-2 py-1">{getRangeLabel()}</div>
@@ -472,7 +472,7 @@ const AnalyticsPage = () => {
                 </div>
 
                 {/* Orders Trend */}
-                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-5 shadow-lg flex flex-col h-[240px]">
+                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-3 md:p-5 shadow-lg flex flex-col h-[240px]">
                     <div className="flex justify-between items-center mb-2">
                         <h4 className="text-[11px] font-semibold text-slate-300">Orders Trend</h4>
                         <div className="flex items-center gap-3">
@@ -501,7 +501,7 @@ const AnalyticsPage = () => {
                 </div>
 
                 {/* Payment Methods */}
-                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-5 shadow-lg h-[240px]">
+                <div className="bg-[#0b1426] border border-teal-900/40 rounded-xl p-3 md:p-5 shadow-lg h-[240px]">
                     <div className="flex justify-between items-center mb-6">
                         <h4 className="text-[11px] font-semibold text-slate-300">Payment Methods</h4>
                         <div className="bg-slate-900/50 border border-teal-900/40 text-teal-400 font-medium text-[9px] rounded px-2 py-1">{getRangeLabel()}</div>

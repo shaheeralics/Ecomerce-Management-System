@@ -75,7 +75,7 @@ const TimelineView = ({ timeline }: { timeline: any[] }) => (
                         {i < timeline.length - 1 && <div className={`w-0.5 flex-1 my-1.5 transition-colors ${entry.done ? 'bg-teal-700/50' : 'bg-slate-800'}`} style={{minHeight: 24}} />}
                     </div>
                     <div className={`pb-4 ${i === timeline.length - 1 ? 'pb-0' : ''}`}>
-                        <p className={`text-xs sm:text-sm font-black transition-colors ${entry.current ? ism.color : entry.done ? 'text-slate-200' : 'text-slate-600'}`}>
+                        <p className={`text-xs sm:text-xs md:text-sm font-black transition-colors ${entry.current ? ism.color : entry.done ? 'text-slate-200' : 'text-slate-600'}`}>
                             {entry.status}
                         </p>
                         {entry.description && (
@@ -293,12 +293,12 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
                 <div>
                     <button
                         onClick={onBack}
-                        className="flex items-center gap-1.5 text-teal-400 hover:text-teal-300 transition-colors text-sm font-bold mb-2"
+                        className="flex items-center gap-1.5 text-teal-400 hover:text-teal-300 transition-colors text-xs md:text-sm font-bold mb-2"
                     >
                         <ArrowLeft size={14} /> Back to Orders
                     </button>
                     <div className="flex flex-wrap items-center gap-3">
-                        <h2 className="text-2xl font-black text-slate-100 uppercase tracking-tight">Order #{order.id}</h2>
+                        <h2 className="text-base md:text-lg md:text-2xl font-black text-slate-100 uppercase tracking-tight">Order #{order.id}</h2>
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${sm.bg} ${sm.color} border ${sm.border}`}>
                             {order.status}
                         </span>
@@ -365,25 +365,25 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
 
                 {/* ========= OVERVIEW TAB ========= */}
                 {activeTab === 'overview' && (
-                    <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6 items-start">
+                    <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-3 md:gap-6 items-start">
                         {/* MAIN UNIFIED COLUMN */}
                         <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl shadow-lg flex flex-col divide-y divide-teal-900/20">
                             
                             {/* Customer Information */}
-                            <div className="p-6 hover:bg-white/[0.01] transition-colors">
+                            <div className="p-3 md:p-6 hover:bg-white/[0.01] transition-colors">
                                 <div className="flex items-center justify-between mb-4">
                                     <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><User size={14} className="text-teal-400"/> Customer Information</h4>
                                     <button onClick={() => setIsEditOpen(true)} className="text-teal-400 hover:text-teal-300 text-[10px] font-bold border border-teal-900/50 bg-teal-900/20 px-3 py-1 rounded-full transition-colors">Edit</button>
                                 </div>
                                 <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 rounded-full bg-teal-900/50 text-teal-400 border border-teal-900/50 flex items-center justify-center text-xl font-black flex-shrink-0">
+                                    <div className="w-12 h-12 rounded-full bg-teal-900/50 text-teal-400 border border-teal-900/50 flex items-center justify-center text-base md:text-xl font-black flex-shrink-0">
                                         {(order.customer_name || 'U')[0].toUpperCase()}
                                     </div>
                                     <div className="overflow-hidden">
-                                        <h3 className="font-bold text-slate-100 text-lg truncate">{order.customer_name}</h3>
+                                        <h3 className="font-bold text-slate-100 text-base md:text-lg truncate">{order.customer_name}</h3>
                                         <div className="flex flex-wrap items-center gap-2 mt-1">
                                             <Phone size={12} className="text-slate-500" />
-                                            <p className="text-sm text-slate-300 truncate">{order.customer_phone}</p>
+                                            <p className="text-xs md:text-sm text-slate-300 truncate">{order.customer_phone}</p>
                                             <span className="bg-[#25D366]/20 text-[#25D366] text-[8px] font-bold px-1.5 py-0.5 rounded uppercase">WhatsApp</span>
                                         </div>
                                         <div className="flex items-start gap-2 mt-2">
@@ -399,24 +399,24 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
                             </div>
 
                             {/* Payment & Delivery */}
-                            <div className="p-6 hover:bg-white/[0.01] transition-colors">
+                            <div className="p-3 md:p-6 hover:bg-white/[0.01] transition-colors">
                                 <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-1.5"><CreditCard size={14} className="text-teal-400"/> Payment & Delivery</h4>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <p className="text-[10px] text-slate-500 mb-1">Payment Method</p>
-                                        <p className="text-sm font-bold text-slate-200 capitalize mb-2">{order.payment_method || 'COD'}</p>
+                                        <p className="text-xs md:text-sm font-bold text-slate-200 capitalize mb-2">{order.payment_method || 'COD'}</p>
                                         <span className="bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[10px] font-bold px-2 py-0.5 rounded">Status: {order.payment_status || 'Pending'}</span>
                                     </div>
                                     <div>
                                         <p className="text-[10px] text-slate-500 mb-1">Delivery Method</p>
-                                        <p className="text-sm font-bold text-slate-200 capitalize mb-1">Standard</p>
+                                        <p className="text-xs md:text-sm font-bold text-slate-200 capitalize mb-1">Standard</p>
                                         <p className="text-[10px] text-slate-400">Fee: {fmt(Number(order.delivery_fee || 0))}</p>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Items Summary */}
-                            <div className="p-6 hover:bg-white/[0.01] transition-colors">
+                            <div className="p-3 md:p-6 hover:bg-white/[0.01] transition-colors">
                                 <div className="flex items-center justify-between mb-4">
                                     <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><CheckCheck size={14} className="text-teal-400"/> Items Summary</h4>
                                 </div>
@@ -431,11 +431,11 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
                                                 )}
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <h5 className="text-sm font-bold text-slate-200 truncate">{item.title}</h5>
+                                                <h5 className="text-xs md:text-sm font-bold text-slate-200 truncate">{item.title}</h5>
                                                 <p className="text-xs text-slate-400 mt-0.5">{item.quantity} × {fmt(Number(item.unit_price))}</p>
                                             </div>
                                             <div className="text-right">
-                                                <p className="text-sm font-black text-slate-100">{fmt(item.quantity * Number(item.unit_price))}</p>
+                                                <p className="text-xs md:text-sm font-black text-slate-100">{fmt(item.quantity * Number(item.unit_price))}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -443,27 +443,27 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
                             </div>
 
                             {/* Invoice Summary */}
-                            <div className="p-6 hover:bg-white/[0.01] transition-colors">
+                            <div className="p-3 md:p-6 hover:bg-white/[0.01] transition-colors">
                                 <div className="flex items-center justify-between mb-4">
                                     <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><FileText size={14} className="text-teal-400"/> Invoice</h4>
                                     <button onClick={() => setActiveTab('invoice')} className="text-teal-400 hover:text-teal-300 text-[10px] font-bold border border-teal-900/50 bg-teal-900/20 px-3 py-1 rounded-full transition-colors">View Invoice</button>
                                 </div>
                                 <div className="space-y-3">
-                                    <div className="flex justify-between items-center text-sm">
+                                    <div className="flex justify-between items-center text-xs md:text-sm">
                                         <span className="text-slate-400">Original Price</span>
                                         <span className="text-slate-200 font-bold">{fmt(originalPrice)}</span>
                                     </div>
                                     {discountAmount > 0 && (
-                                        <div className="flex justify-between items-center text-sm">
+                                        <div className="flex justify-between items-center text-xs md:text-sm">
                                             <span className="text-slate-400">Discount</span>
                                             <span className="text-red-400 font-bold">- {fmt(discountAmount)}</span>
                                         </div>
                                     )}
-                                    <div className="flex justify-between items-center text-sm">
+                                    <div className="flex justify-between items-center text-xs md:text-sm">
                                         <span className="text-slate-400">Negotiated Price</span>
                                         <span className="text-slate-200 font-bold">{fmt(negotiatedPrice)}</span>
                                     </div>
-                                    <div className="flex justify-between items-center text-sm pb-4 border-b border-teal-900/30">
+                                    <div className="flex justify-between items-center text-xs md:text-sm pb-4 border-b border-teal-900/30">
                                         <span className="text-slate-400">Delivery Fee</span>
                                         <span className="text-slate-200 font-bold">{fmt(deliveryFee)}</span>
                                     </div>
@@ -475,7 +475,7 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
                             </div>
 
                             {/* Customer Notes */}
-                            <div className="p-6 hover:bg-white/[0.01] transition-colors">
+                            <div className="p-3 md:p-6 hover:bg-white/[0.01] transition-colors">
                                 <div className="flex items-center justify-between mb-4">
                                     <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5"><MessageCircle size={14} className="text-teal-400"/> Customer Notes</h4>
                                     <button onClick={() => setActiveTab('notes')} className="text-teal-400 hover:text-teal-300 text-[10px] font-bold border border-teal-900/50 bg-teal-900/20 px-3 py-1 rounded-full transition-colors">Add Note</button>
@@ -483,7 +483,7 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
                                 <div className="space-y-3">
                                     {(order.notes?.length || 0) === 0 ? (
                                         <div className="py-4 flex items-center justify-center bg-[#050D10]/30 rounded-xl border border-dashed border-teal-900/40">
-                                            <p className="text-slate-500 text-sm">No notes yet.</p>
+                                            <p className="text-slate-500 text-xs md:text-sm">No notes yet.</p>
                                         </div>
                                     ) : (
                                         order.notes.map(n => (
@@ -497,7 +497,7 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
                             </div>
 
                             {/* Order Status */}
-                            <div className="p-6 hover:bg-white/[0.01] transition-colors">
+                            <div className="p-3 md:p-6 hover:bg-white/[0.01] transition-colors">
                                 <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-1.5"><Package size={14} className="text-teal-400"/> Order Status</h4>
                                 <div className="space-y-3 max-w-sm">
                                     <div>
@@ -506,7 +506,7 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
                                             <select
                                                 value={pendingStatus}
                                                 onChange={(e) => setPendingStatus(e.target.value)}
-                                                className="w-full bg-[#050D10] border border-teal-900/50 rounded-xl px-4 py-3 text-sm text-slate-200 font-bold appearance-none outline-none focus:border-teal-500 transition-colors"
+                                                className="w-full bg-[#050D10] border border-teal-900/50 rounded-xl px-4 py-3 text-xs md:text-sm text-slate-200 font-bold appearance-none outline-none focus:border-teal-500 transition-colors"
                                             >
                                                 {ALL_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                                             </select>
@@ -526,8 +526,8 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
                         </div>
 
                         {/* TIMELINE COLUMN */}
-                        <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-5 shadow-lg h-fit sticky top-6">
-                            <h4 className="font-black text-slate-100 mb-6 flex items-center gap-2 text-sm"><Clock size={16} className="text-teal-400"/> Order Timeline</h4>
+                        <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-3 md:p-5 shadow-lg h-fit sticky top-6">
+                            <h4 className="font-black text-slate-100 mb-6 flex items-center gap-2 text-xs md:text-sm"><Clock size={16} className="text-teal-400"/> Order Timeline</h4>
                             <TimelineView timeline={timeline} />
                         </div>
                     </div>
@@ -535,7 +535,7 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
                 {/* ========= ITEMS TAB ========= */}
                 {activeTab === 'items' && (
                     <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl overflow-hidden max-w-4xl mx-auto shadow-xl">
-                        <div className="flex items-center justify-between p-5 border-b border-teal-900/30">
+                        <div className="flex items-center justify-between p-3 md:p-5 border-b border-teal-900/30">
                             <h4 className="font-black text-slate-100">Order Items ({orderItems.length})</h4>
                             <button onClick={() => setIsEditOpen(true)} className="bg-teal-900/20 border border-teal-900/50 hover:bg-teal-900/40 text-teal-400 text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-2 transition-colors">
                                 <Plus size={14} /> Add Item
@@ -545,17 +545,17 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
                             <table className="w-full min-w-[500px]">
                                 <thead>
                                     <tr className="border-b border-teal-900/20 bg-[#050D10]/50">
-                                        <th className="text-left p-4 text-[10px] font-black text-slate-500 uppercase tracking-wider">Product</th>
-                                        <th className="text-center p-4 text-[10px] font-black text-slate-500 uppercase tracking-wider">Size</th>
-                                        <th className="text-center p-4 text-[10px] font-black text-slate-500 uppercase tracking-wider">Qty</th>
-                                        <th className="text-right p-4 text-[10px] font-black text-slate-500 uppercase tracking-wider">Price</th>
-                                        <th className="text-right p-4 text-[10px] font-black text-slate-500 uppercase tracking-wider">Total</th>
+                                        <th className="text-left p-2 md:p-4 text-[10px] font-black text-slate-500 uppercase tracking-wider">Product</th>
+                                        <th className="text-center p-2 md:p-4 text-[10px] font-black text-slate-500 uppercase tracking-wider">Size</th>
+                                        <th className="text-center p-2 md:p-4 text-[10px] font-black text-slate-500 uppercase tracking-wider">Qty</th>
+                                        <th className="text-right p-2 md:p-4 text-[10px] font-black text-slate-500 uppercase tracking-wider">Price</th>
+                                        <th className="text-right p-2 md:p-4 text-[10px] font-black text-slate-500 uppercase tracking-wider">Total</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-teal-900/20">
                                     {orderItems.map((item: any, i: number) => (
                                         <tr key={i} className="hover:bg-white/[0.02] transition-colors">
-                                            <td className="p-4">
+                                            <td className="p-2 md:p-4">
                                                 <div className="flex items-center gap-4">
                                                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#050D10] border border-teal-900/30 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
                                                         {item.main_image_url ? (
@@ -565,16 +565,16 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <p className="text-xs sm:text-sm font-bold text-slate-200">{item.title}</p>
+                                                        <p className="text-xs sm:text-xs md:text-sm font-bold text-slate-200">{item.title}</p>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="p-4 text-center">
+                                            <td className="p-2 md:p-4 text-center">
                                                 <span className="text-[10px] sm:text-xs text-slate-400 bg-[#050D10] px-2 py-1 rounded-md border border-teal-900/30">{item.size || '—'}</span>
                                             </td>
-                                            <td className="p-4 text-center text-xs sm:text-sm font-bold text-slate-300">{item.quantity}</td>
-                                            <td className="p-4 text-right text-xs sm:text-sm text-slate-400">{fmt(Number(item.unit_price))}</td>
-                                            <td className="p-4 text-right text-xs sm:text-sm font-black text-teal-400">{fmt(item.quantity * Number(item.unit_price))}</td>
+                                            <td className="p-2 md:p-4 text-center text-xs sm:text-xs md:text-sm font-bold text-slate-300">{item.quantity}</td>
+                                            <td className="p-2 md:p-4 text-right text-xs sm:text-xs md:text-sm text-slate-400">{fmt(Number(item.unit_price))}</td>
+                                            <td className="p-2 md:p-4 text-right text-xs sm:text-xs md:text-sm font-black text-teal-400">{fmt(item.quantity * Number(item.unit_price))}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -585,30 +585,30 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
 
                 {/* ========= INVOICE TAB ========= */}
                 {activeTab === 'invoice' && (
-                    <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-6 sm:p-8 max-w-4xl mx-auto shadow-xl">
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-6 border-b border-teal-900/30">
+                    <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-3 md:p-6 sm:p-3 md:p-8 max-w-4xl mx-auto shadow-xl">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4 md:mb-8 pb-6 border-b border-teal-900/30">
                             <div>
-                                <h2 className="text-xl font-black text-slate-100 uppercase tracking-tight">Invoice / Receipt</h2>
-                                <p className="text-sm text-slate-400 mt-1">Order #{order.id}</p>
+                                <h2 className="text-base md:text-xl font-black text-slate-100 uppercase tracking-tight">Invoice / Receipt</h2>
+                                <p className="text-xs md:text-sm text-slate-400 mt-1">Order #{order.id}</p>
                                 <p className="text-xs text-slate-500">{fmtDate(order.created_at)}</p>
                             </div>
                             <div className="text-left sm:text-right w-full sm:w-auto">
-                                <h2 className="text-lg font-black text-teal-400">DEVSIL ECOMMERCE</h2>
-                                <p className="text-sm text-slate-400 mt-1">Status: {order.status}</p>
+                                <h2 className="text-base md:text-lg font-black text-teal-400">DEVSIL ECOMMERCE</h2>
+                                <p className="text-xs md:text-sm text-slate-400 mt-1">Status: {order.status}</p>
                                 <button onClick={printReceipt} className="mt-3 w-full sm:w-auto bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center justify-center gap-2 transition-all">
                                     <Printer size={14} /> Print Invoice
                                 </button>
                             </div>
                         </div>
                         
-                        <div className="mb-8 bg-[#050D10] border border-teal-900/30 p-5 rounded-xl">
+                        <div className="mb-4 md:mb-8 bg-[#050D10] border border-teal-900/30 p-3 md:p-5 rounded-xl">
                             <p className="text-xs font-black text-teal-500 uppercase tracking-wider mb-2">Billed To</p>
                             <p className="font-bold text-slate-200 text-base">{order.customer_name}</p>
-                            <p className="text-sm text-slate-400 mt-1">{order.customer_phone}</p>
-                            <p className="text-sm text-slate-400 mt-1 max-w-sm">{order.address}{order.city && `, ${order.city}`}{order.zip_code && ` - ${order.zip_code}`}</p>
+                            <p className="text-xs md:text-sm text-slate-400 mt-1">{order.customer_phone}</p>
+                            <p className="text-xs md:text-sm text-slate-400 mt-1 max-w-sm">{order.address}{order.city && `, ${order.city}`}{order.zip_code && ` - ${order.zip_code}`}</p>
                         </div>
 
-                        <div className="overflow-x-auto mb-8 custom-scrollbar">
+                        <div className="overflow-x-auto mb-4 md:mb-8 custom-scrollbar">
                             <table className="w-full min-w-[500px]">
                                 <thead>
                                     <tr className="border-b border-teal-900/40">
@@ -621,7 +621,7 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
                                 <tbody className="divide-y divide-teal-900/20">
                                     {orderItems.map((item: any, i: number) => (
                                         <tr key={i}>
-                                            <td className="py-4 text-sm font-bold text-slate-200">
+                                            <td className="py-4 text-xs md:text-sm font-bold text-slate-200">
                                                 <div className="flex items-center gap-3">
                                                     {item.main_image_url && (
                                                         <img src={item.main_image_url} alt={item.title} className="w-8 h-8 rounded border border-teal-900/30 object-cover" />
@@ -629,9 +629,9 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
                                                     {item.title}
                                                 </div>
                                             </td>
-                                            <td className="py-4 text-sm text-slate-400">{item.size || '—'}</td>
-                                            <td className="py-4 text-sm font-bold text-slate-300 text-right">{item.quantity}</td>
-                                            <td className="py-4 text-sm font-black text-teal-400 text-right">{fmt(item.quantity * Number(item.unit_price))}</td>
+                                            <td className="py-4 text-xs md:text-sm text-slate-400">{item.size || '—'}</td>
+                                            <td className="py-4 text-xs md:text-sm font-bold text-slate-300 text-right">{item.quantity}</td>
+                                            <td className="py-4 text-xs md:text-sm font-black text-teal-400 text-right">{fmt(item.quantity * Number(item.unit_price))}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -639,25 +639,25 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
                         </div>
 
                         <div className="flex flex-col items-end gap-3 w-full border-t border-teal-900/30 pt-6">
-                            <div className="flex justify-between w-full sm:max-w-xs text-sm">
+                            <div className="flex justify-between w-full sm:max-w-xs text-xs md:text-sm">
                                 <span className="text-slate-400">Original Price</span>
                                 <span className="text-slate-200 font-bold">{fmt(originalPrice)}</span>
                             </div>
                             {discountAmount > 0 && (
-                                <div className="flex justify-between w-full sm:max-w-xs text-sm">
+                                <div className="flex justify-between w-full sm:max-w-xs text-xs md:text-sm">
                                     <span className="text-slate-400">Discount</span>
                                     <span className="text-red-400 font-bold">- {fmt(discountAmount)}</span>
                                 </div>
                             )}
-                            <div className="flex justify-between w-full sm:max-w-xs text-sm">
+                            <div className="flex justify-between w-full sm:max-w-xs text-xs md:text-sm">
                                 <span className="text-slate-400">Negotiated Price</span>
                                 <span className="text-teal-300 font-bold">{fmt(negotiatedPrice)}</span>
                             </div>
-                            <div className="flex justify-between w-full sm:max-w-xs text-sm pb-3 border-b border-teal-900/20">
+                            <div className="flex justify-between w-full sm:max-w-xs text-xs md:text-sm pb-3 border-b border-teal-900/20">
                                 <span className="text-slate-400">Delivery Fee</span>
                                 <span className="text-slate-200 font-bold">{fmt(deliveryFee)}</span>
                             </div>
-                            <div className="flex justify-between w-full sm:max-w-xs text-lg mt-1 bg-teal-900/20 p-3 rounded-xl border border-teal-900/50">
+                            <div className="flex justify-between w-full sm:max-w-xs text-base md:text-lg mt-1 bg-teal-900/20 p-3 rounded-xl border border-teal-900/50">
                                 <span className="text-slate-100 font-black">Total Payable</span>
                                 <span className="text-teal-400 font-black">{fmt(totalPayable)}</span>
                             </div>
@@ -666,7 +666,7 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
                         <div className="mt-10 pt-6 border-t border-teal-900/30 flex flex-col sm:flex-row justify-between gap-4">
                             <div>
                                 <p className="text-xs font-black text-slate-500 uppercase tracking-wider mb-1">Payment Method</p>
-                                <p className="text-sm font-bold text-slate-200 capitalize">{order.payment_method || 'COD'}</p>
+                                <p className="text-xs md:text-sm font-bold text-slate-200 capitalize">{order.payment_method || 'COD'}</p>
                                 <p className="text-xs text-slate-400 mt-1">Status: {order.payment_status || 'Pending'}</p>
                             </div>
                             <div className="sm:text-right mt-auto">
@@ -678,8 +678,8 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
 
                 {/* ========= TIMELINE TAB ========= */}
                 {activeTab === 'timeline' && (
-                    <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-6 sm:p-10 max-w-2xl mx-auto shadow-xl">
-                        <h4 className="font-black text-slate-100 mb-8 text-lg flex items-center gap-2"><Clock size={18} className="text-teal-400"/> Order Timeline</h4>
+                    <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-3 md:p-6 sm:p-10 max-w-2xl mx-auto shadow-xl">
+                        <h4 className="font-black text-slate-100 mb-4 md:mb-8 text-base md:text-lg flex items-center gap-2"><Clock size={18} className="text-teal-400"/> Order Timeline</h4>
                         <div className="pl-2">
                             <TimelineView timeline={timeline} />
                         </div>
@@ -689,13 +689,13 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
                 {/* ========= NOTES TAB ========= */}
                 {activeTab === 'notes' && (
                     <div className="max-w-2xl mx-auto space-y-6">
-                        <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-6 shadow-xl">
+                        <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-3 md:p-6 shadow-xl">
                             <h4 className="font-black text-slate-100 mb-4 flex items-center gap-2"><FileText size={16} className="text-teal-400"/> Add a Note</h4>
                             <textarea
                                 value={newNote}
                                 onChange={(e) => setNewNote(e.target.value)}
                                 placeholder="Write something about this order..."
-                                className="w-full bg-[#050D10] border border-teal-900/30 rounded-xl p-4 text-sm text-slate-200 placeholder:text-slate-600 focus:border-teal-500 outline-none resize-none h-24 mb-3"
+                                className="w-full bg-[#050D10] border border-teal-900/30 rounded-xl p-2 md:p-4 text-xs md:text-sm text-slate-200 placeholder:text-slate-600 focus:border-teal-500 outline-none resize-none h-24 mb-3"
                             />
                             <div className="flex justify-end">
                                 <button
@@ -716,8 +716,8 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
                         ) : (
                             <div className="space-y-4">
                                 {order.notes.map(n => (
-                                    <div key={n.id} className="bg-[#09181E] border border-teal-900/30 rounded-2xl p-5 group relative shadow-lg">
-                                        <p className="text-sm text-slate-300 leading-relaxed">{n.note}</p>
+                                    <div key={n.id} className="bg-[#09181E] border border-teal-900/30 rounded-2xl p-3 md:p-5 group relative shadow-lg">
+                                        <p className="text-xs md:text-sm text-slate-300 leading-relaxed">{n.note}</p>
                                         <div className="flex items-center justify-between mt-4 border-t border-teal-900/20 pt-4">
                                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{fmtDate(n.created_at)}</p>
                                             <button
@@ -737,7 +737,7 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
                 {/* ========= ATTACHMENTS TAB ========= */}
                 {activeTab === 'attachments' && (
                     <div className="max-w-4xl mx-auto space-y-6">
-                        <div className="flex items-center justify-between bg-[#09181E] border border-teal-900/40 rounded-2xl p-5 mb-6 shadow-xl">
+                        <div className="flex items-center justify-between bg-[#09181E] border border-teal-900/40 rounded-2xl p-3 md:p-5 mb-6 shadow-xl">
                             <h4 className="font-black text-slate-100 flex items-center gap-2 text-base"><Paperclip size={18} className="text-teal-400"/> Order Attachments</h4>
                             <button
                                 onClick={() => additionalRef.current?.click()}
@@ -756,7 +756,7 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
                             const inputRef = section.type === 'payment_screenshot' ? paymentRef : additionalRef;
                             
                             return (
-                                <div key={section.type} className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-6 shadow-lg">
+                                <div key={section.type} className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-3 md:p-6 shadow-lg">
                                     <div className="flex items-center justify-between mb-5 border-b border-teal-900/30 pb-3">
                                         <h5 className="font-black text-slate-200 flex items-center gap-2">
                                             {section.label} <span className="bg-teal-900/40 text-teal-400 px-2 py-0.5 rounded-full text-xs">{sectionAttachments.length}</span>
@@ -831,7 +831,7 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
             {/* ========= LIGHTBOX ========= */}
             {previewUrl && (
                 <div
-                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4"
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-2 md:p-4"
                     onClick={() => setPreviewUrl(null)}
                 >
                     <button
@@ -851,7 +851,7 @@ export default function OrderDetailPage({ orderId, onBack, onOrderUpdated }: Pro
                         target="_blank"
                         rel="noreferrer"
                         onClick={e => e.stopPropagation()}
-                        className="absolute bottom-8 bg-teal-600 hover:bg-teal-500 text-white text-sm font-bold px-6 py-3 rounded-xl flex items-center gap-2 shadow-xl shadow-teal-600/20"
+                        className="absolute bottom-8 bg-teal-600 hover:bg-teal-500 text-white text-xs md:text-sm font-bold px-6 py-3 rounded-xl flex items-center gap-2 shadow-xl shadow-teal-600/20"
                     >
                         <Download size={16}/> Download Image
                     </a>
