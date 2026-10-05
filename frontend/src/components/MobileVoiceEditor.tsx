@@ -181,7 +181,7 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
                         style={{ left: `${trimStartPct}%`, width: `${trimEnd - trimStartPct}%` }}
                     >
                         {/* Active Waveform Highlights */}
-                        <div className="absolute inset-0 flex items-center px-4 overflow-hidden" style={{ left: \`-\${(trimStartPct / (trimEnd - trimStartPct)) * 100}%\`, width: \`\${(100 / (trimEnd - trimStartPct)) * 100}%\` }}>
+                        <div className="absolute inset-0 flex items-center px-4 overflow-hidden" style={{ left: `-${(trimStartPct / (trimEnd - trimStartPct)) * 100}%`, width: `${(100 / (trimEnd - trimStartPct)) * 100}%` }}>
                              <div className="w-full flex items-center justify-between">
                                 {peaks.map((h, i) => (
                                     <div key={i} className="w-1 bg-indigo-400 rounded-full" style={{ height: `${h}%` }} />
