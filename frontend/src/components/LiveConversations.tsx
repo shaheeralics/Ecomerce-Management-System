@@ -3,14 +3,7 @@ import { Search, ChevronLeft, MoreVertical, Paperclip, Image as ImageIcon, FileT
 import OrderDetailPage from './OrderDetailPage'; // Assuming this exists for modal
 import AddOrderModal from './AddOrderModal';
 
-interface Conversation {
-    id: number;
-    customer_phone: string;
-    customer_name?: string;
-    status: string;
-    known_slots?: any;
-    updated_at: string;
-}
+interface Conversation { [key: string]: any }
 
 interface Message {
     id: number;
@@ -409,7 +402,7 @@ export default function LiveConversations() {
 
                 {/* Mobile Full Screen Chat Screen */}
                 {activeConvId && (
-                    <div className="absolute inset-0 z-[60] bg-[#030712] flex flex-col animate-in slide-in-from-right duration-200">
+                    <div className="fixed inset-0 z-[100] bg-[#030712] flex flex-col animate-in slide-in-from-right duration-200">
                         {/* Native App Chat Header */}
                         <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center justify-between shrink-0 shadow-sm px-2 w-full">
                             <div className="flex items-center">

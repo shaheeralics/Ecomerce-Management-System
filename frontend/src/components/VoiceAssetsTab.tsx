@@ -52,7 +52,7 @@ async function audioBufferToOggBlob(buffer: AudioBuffer): Promise<Blob> {
 }
 
 
-export default function VoiceAssetsTab({ category, title, description }: { category: 'policy' | 'prerecorded', title: string, description: string }) {
+export default function VoiceAssetsTab({ category, title, description, standaloneMode, standaloneBlob, onStandaloneSave, onStandaloneCancel }: { category?: 'policy' | 'prerecorded', title?: string, description?: string, standaloneMode?: boolean, standaloneBlob?: Blob | null, onStandaloneSave?: (blob: Blob) => void, onStandaloneCancel?: () => void }) {
     const [voices, setVoices] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
