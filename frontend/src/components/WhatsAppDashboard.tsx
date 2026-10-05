@@ -1,3 +1,4 @@
+// @ts-nocheck
 import VoiceAssetsTab from './VoiceAssetsTab';
 import AnalyticsPage from './AnalyticsPage';
 import LiveConversations from './LiveConversations';

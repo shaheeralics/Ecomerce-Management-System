@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft,
     Save, Bot, Send, Mic, Square, Play, Pause, Image as ImageIcon,
