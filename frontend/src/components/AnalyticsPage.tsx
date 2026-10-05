@@ -126,7 +126,7 @@ const AnalyticsPage = () => {
             {/* Header */}
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-4 pb-4 border-b border-white/5 gap-4">
                 <div>
-                    <h3 className="hidden md:block text-2xl font-bold text-white tracking-tight">Analytics & Insights</h3>
+                    
                     <p className="text-slate-400 text-xs mt-1">Track your business performance, understand customer behavior, and make data-driven decisions.</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">

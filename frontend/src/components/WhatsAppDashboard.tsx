@@ -1722,9 +1722,7 @@ const WhatsAppDashboard = () => {
                             <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-zinc-400 hover:text-white p-2 rounded-lg hover:bg-white/5 transition-all">
                                 <Menu size={18} />
                             </button>
-                            <h1 className="text-xl font-bold tracking-tight text-white capitalize flex items-center gap-2">
-                                {subTab.replace('-', ' ')}
-                            </h1>
+                            
                         </div>
                         {subTab === 'products' && (
                             <button 
@@ -1969,9 +1967,7 @@ const WhatsAppDashboard = () => {
                 {activeMobilePage === 'main' && (
                     <div className="flex flex-col h-full w-full absolute inset-0 animate-in fade-in duration-200">
                         {/* Mobile Header */}
-                        <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm z-20">
-                            <h1 className="text-lg font-bold tracking-tight text-white capitalize">{subTab === 'products' ? 'Catalog' : subTab.replace('-', ' ')}</h1>
-                        </div>
+                        
                         
                         {/* Mobile Feed */}
                         <div className="flex-1 overflow-y-auto pb-[85px] pt-4 px-4">

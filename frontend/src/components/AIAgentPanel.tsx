@@ -443,8 +443,7 @@ export default function AIAgentPanel() {
                             <Bot size={20} />
                         </div>
                         <div>
-                            <h3 className="font-bold text-white text-base">AI Agent Engine</h3>
-                            <p className="text-xs text-zinc-500">Autonomous responses</p>
+                            
                         </div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
@@ -495,7 +494,7 @@ export default function AIAgentPanel() {
                     <div className="p-6 border-b border-white/5 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <Bot size={24} className="text-white" />
-                            <h1 className="text-lg font-bold text-white">AI Agent Engine</h1>
+                            
                         </div>
                         <label className="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" checked={agentEnabled} onChange={e => setAgentEnabled(e.target.checked)} className="sr-only peer" />
