@@ -416,13 +416,24 @@ const WhatsAppDashboard = () => {
         setActiveMobilePage('add-product-voice-transcribe');
         setIsTranscribing(true);
         try {
-            // Using Gemini API route (Mocking actual API latency for now, replace with real Gemini fetch)
-            // const formData = new FormData(); formData.append('audio', audioBlob);
-            // const res = await fetch('/api/gemini/transcribe', { method: 'POST', body: formData });
+            if (!audioBlob) throw new Error('No audio recorded.');
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'voice-note.webm');
             
-            await new Promise(r => setTimeout(r, 2500)); // Simulate Gemini API processing
-            setTranscriptionText("This is an auto-generated transcription powered by Gemini API. You can edit this text seamlessly.");
+            // Call the real backend transcribe API powered by Gemini
+            const res = await fetch('http://localhost:3000/api/transcribe', { 
+                method: 'POST', 
+                body: formData 
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                setTranscriptionText(data.text);
+            } else {
+                throw new Error(data.error || 'Failed to transcribe');
+            }
         } catch (err) {
+            console.error('Transcription error:', err);
             setTranscriptionText("Failed to transcribe via Gemini API.");
         } finally {
             setIsTranscribing(false);
