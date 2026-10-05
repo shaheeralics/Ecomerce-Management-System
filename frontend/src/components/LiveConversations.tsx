@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState, useEffect, useRef } from 'react';
 import { Search, ChevronLeft, MoreVertical, Paperclip, Image as ImageIcon, FileText, Smile, Mic, Send, MapPin, Phone, Mail, ShoppingBag, User, XCircle, Bot, UserCheck, MessageSquare, Video, Plus } from 'lucide-react';
 import OrderDetailPage from './OrderDetailPage'; // Assuming this exists for modal
@@ -176,7 +175,7 @@ export default function LiveConversations() {
     });
 
     return (
-        <div className="h-full w-full bg-[#030712] text-zinc-100 flex font-sans overflow-hidden">
+        <div className="h-full min-h-[100dvh] w-full bg-[#030712] text-zinc-100 flex font-sans overflow-hidden">
             
             {/* ======================================= */}
             {/* ========== DESKTOP VIEW =============== */}
@@ -215,7 +214,7 @@ export default function LiveConversations() {
                                 >
                                     <div className="relative">
                                         <div className="w-12 h-12 rounded-full bg-[#18181b] border border-white/10 flex items-center justify-center text-zinc-400 font-bold shrink-0">
-                                            {conv.customer_name ? conv.customer_name.substring(0, 2).toUpperCase() : <User size={20} />}
+                                            {conv.customer_name ? String(conv.customer_name).substring(0, 2).toUpperCase() : <User size={20} />}
                                         </div>
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -244,7 +243,7 @@ export default function LiveConversations() {
                                 <div className="h-16 bg-[#09090b] border-b border-white/5 flex items-center px-6 justify-between shrink-0 shadow-sm z-10 cursor-pointer hover:bg-white/5 transition-colors" onClick={() => setShowProfile(!showProfile)}>
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-full bg-[#18181b] flex items-center justify-center font-bold text-zinc-300">
-                                            {activeConv?.customer_name ? activeConv.customer_name.substring(0, 2).toUpperCase() : <User size={18} />}
+                                            {activeConv?.customer_name ? String(activeConv.customer_name).substring(0, 2).toUpperCase() : <User size={18} />}
                                         </div>
                                         <div>
                                             <h3 className="font-bold text-white leading-tight">{activeConv?.customer_name || activeConv?.phone_number}</h3>
@@ -330,7 +329,7 @@ export default function LiveConversations() {
                                 <div className="w-[300px] bg-[#09090b] flex flex-col border-l border-white/5 h-full animate-in slide-in-from-right duration-200 shadow-2xl shrink-0">
                                     <div className="p-6 border-b border-white/5 text-center flex flex-col items-center shrink-0">
                                         <div className="w-20 h-20 rounded-full bg-[#18181b] border-2 border-white/10 flex items-center justify-center font-bold text-3xl text-zinc-400 mb-3 shadow-xl">
-                                            {activeConv?.customer_name ? activeConv.customer_name.substring(0, 2).toUpperCase() : <User size={32} />}
+                                            {activeConv?.customer_name ? String(activeConv.customer_name).substring(0, 2).toUpperCase() : <User size={32} />}
                                         </div>
                                         <h3 className="font-bold text-lg text-white">{activeConv?.customer_name || 'Unknown User'}</h3>
                                         <p className="text-sm text-zinc-500 flex items-center gap-1 mt-1 justify-center"><Phone size={12} /> {activeConv?.phone_number}</p>
@@ -375,7 +374,7 @@ export default function LiveConversations() {
             <div className="md:hidden flex h-[100dvh] w-full bg-[#030712] relative overflow-hidden">
                 
                 {/* Mobile Full Screen Chat List (Edge-to-Edge) */}
-                <div className="absolute inset-0 flex flex-col w-full h-full bg-[#030712] overflow-hidden">
+                <div className="flex flex-col w-full h-full bg-[#030712] overflow-hidden">
                     <div className="flex-1 overflow-y-auto w-full custom-scrollbar pt-2 pb-[85px]">
                         {loading ? (
                             <div className="p-8 text-center text-zinc-500 text-sm">Loading chats...</div>
@@ -389,7 +388,7 @@ export default function LiveConversations() {
                                     className="p-4 border-b border-white/5 active:bg-white/5 flex gap-4 w-full"
                                 >
                                     <div className="w-12 h-12 rounded-full bg-[#18181b] border border-white/10 flex items-center justify-center text-zinc-400 font-bold shrink-0">
-                                        {conv.customer_name ? conv.customer_name.substring(0, 2).toUpperCase() : <User size={20} />}
+                                        {conv.customer_name ? String(conv.customer_name).substring(0, 2).toUpperCase() : <User size={20} />}
                                     </div>
                                     <div className="flex-1 min-w-0 flex flex-col justify-center">
                                         <div className="flex justify-between items-center mb-0.5">
@@ -419,7 +418,7 @@ export default function LiveConversations() {
                                 </button>
                                 <div className="flex items-center gap-3 cursor-pointer active:opacity-70" onClick={() => setShowProfile(true)}>
                                     <div className="w-9 h-9 rounded-full bg-[#18181b] flex items-center justify-center font-bold text-zinc-300 shrink-0">
-                                        {activeConv?.customer_name ? activeConv.customer_name.substring(0, 2).toUpperCase() : <User size={16} />}
+                                        {activeConv?.customer_name ? String(activeConv.customer_name).substring(0, 2).toUpperCase() : <User size={16} />}
                                     </div>
                                     <div className="flex flex-col">
                                         <h3 className="font-bold text-white text-base leading-tight truncate max-w-[150px]">{activeConv?.customer_name || activeConv?.phone_number}</h3>
@@ -502,7 +501,7 @@ export default function LiveConversations() {
                         <div className="flex-1 overflow-y-auto custom-scrollbar">
                             <div className="p-8 text-center flex flex-col items-center bg-[#09090b] border-b border-white/5 shadow-sm">
                                 <div className="w-24 h-24 rounded-full bg-[#18181b] border-2 border-white/10 flex items-center justify-center font-bold text-4xl text-zinc-400 mb-4 shadow-xl">
-                                    {activeConv?.customer_name ? activeConv.customer_name.substring(0, 2).toUpperCase() : <User size={40} />}
+                                    {activeConv?.customer_name ? String(activeConv.customer_name).substring(0, 2).toUpperCase() : <User size={40} />}
                                 </div>
                                 <h3 className="font-bold text-2xl text-white tracking-tight">{activeConv?.customer_name || 'Unknown User'}</h3>
                                 <p className="text-base text-zinc-400 flex items-center gap-2 mt-2 justify-center font-medium"><Phone size={16} /> {activeConv?.phone_number}</p>
