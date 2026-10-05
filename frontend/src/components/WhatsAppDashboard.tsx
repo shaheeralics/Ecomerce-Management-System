@@ -24,28 +24,26 @@ import {
     Volume2,
     CheckCircle,
     X,
-    ChevronRight,
-    ChevronLeft,
-    FileText,
     Upload,
-    Check,
-    RotateCcw,
-    Layers,
+    Download,
+    StopCircle,
+    SkipBack,
+    SkipForward,
+    Save,
+    LayoutDashboard,
+    Database,
+    RefreshCw,
     Tag,
-    Info,
-    ArrowLeft,
-    ArrowRight,
-    Star,
-    Scissors,
-    Move,
-    Shield,
+    DollarSign,
+    Box,
+    FileAudio,
+    Loader2,
     Sparkles,
-    Copy,
-    ZoomIn,
-    ZoomOut,
-    Minimize2,
-    Menu
-} from 'lucide-react';
+    Menu,
+    ChevronLeft,
+    MoreHorizontal,
+    FileText,
+    ChevronRight} from 'lucide-react';
 
 const apiGuidanceData = {
     metaToken: {
@@ -148,6 +146,7 @@ const WhatsAppDashboard = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [activeMobilePage, setActiveMobilePage] = useState<"main" | "add-product" | "more-menu" | "analytics" | "policy" | "prerecorded" | "ai-agent">("main");
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
     // Multi-phase stepper state (Phase 1: Details, Phase 2: Media Images & Video, Phase 3: Voice Note Pitch)
@@ -1679,120 +1678,76 @@ const WhatsAppDashboard = () => {
     };
 
     return (
-        <div className="h-screen w-full bg-[#030712] text-zinc-100 flex overflow-hidden font-sans selection:bg-indigo-500/30">
-            {/* Desktop Sidebar */}
-            <div className={`hidden md:flex w-64 bg-[#09090b] border-r border-white/5 flex-col transition-all duration-300 z-40 ${isSidebarOpen ? 'translate-x-0' : '-ml-64'}`}>
-                <div className="h-16 flex items-center px-6 border-b border-white/5">
-                    <div className="w-8 h-8 rounded-lg bg-white text-black flex items-center justify-center mr-3">
-                        <Package size={18} className="font-bold" />
+        <div className="h-[100dvh] w-full bg-[#030712] text-zinc-100 flex overflow-hidden font-sans selection:bg-indigo-500/30">
+            {/* ======================================= */}
+            {/* ========== DESKTOP VIEW =============== */}
+            {/* ======================================= */}
+            <div className="hidden md:flex w-full h-full relative">
+                {/* Desktop Sidebar */}
+                <div className={`w-64 bg-[#09090b] border-r border-white/5 flex-col transition-all duration-300 z-40 shrink-0 ${isSidebarOpen ? 'ml-0' : '-ml-64'}`}>
+                    <div className="h-16 flex items-center px-6 border-b border-white/5">
+                        <div className="w-8 h-8 rounded-lg bg-white text-black flex items-center justify-center mr-3">
+                            <Package size={18} className="font-bold" />
+                        </div>
+                        <span className="font-bold text-lg tracking-tight text-white">Devsil</span>
                     </div>
-                    <span className="font-bold text-lg tracking-tight text-white">Devsil</span>
-                </div>
-                <nav className="flex-1 overflow-y-auto custom-scrollbar py-6 px-3 space-y-1">
-                    {[
-                        { id: 'products', icon: Package, label: 'Catalog' },
-                        { id: 'conversations', icon: MessageSquare, label: 'Chat' },
-                        { id: 'orders', icon: ShoppingCart, label: 'Orders' },
-                        { id: 'analytics', icon: BarChart, label: 'Analytics' },
-                        { id: 'policy', icon: ShieldAlert, label: 'Policies' },
-                        { id: 'prerecorded', icon: Mic2, label: 'Voice Assets' },
-                        { id: 'ai-agent', icon: Sparkles, label: 'AI Agent' }
-                    ].map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setSubTab(tab.id as any)}
-                            className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all flex items-center gap-3 ${subTab === tab.id 
-                                ? 'bg-white/10 text-white shadow-sm' 
-                                : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-200'}`}
-                        >
-                            <tab.icon size={18} className={subTab === tab.id ? 'text-white' : 'text-zinc-500'} />
-                            {tab.label}
-                        </button>
-                    ))}
-                </nav>
-            </div>
-
-            {/* Main Content Area */}
-            <div className="flex-1 flex flex-col min-w-0 bg-[#030712] relative overflow-hidden">
-                {/* Header (Desktop + Mobile) */}
-                <div className="h-16 bg-[#030712]/80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-4 md:px-8 z-30 shrink-0">
-                    <div className="flex items-center gap-3">
-                        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="hidden md:flex text-zinc-400 hover:text-white p-2 rounded-lg hover:bg-white/5 transition-all">
-                            <Menu size={18} />
-                        </button>
-                        <h1 className="text-lg md:text-xl font-bold tracking-tight text-white capitalize flex items-center gap-2">
-                            {subTab.replace('-', ' ')}
-                        </h1>
-                    </div>
-                    {subTab === 'products' && (
-                        <button 
-                            onClick={() => { resetForm(); setShowAddModal(true); }}
-                            className="hidden md:flex bg-white hover:bg-zinc-200 text-black px-4 py-2 rounded-full text-xs font-bold transition-all items-center gap-2"
-                        >
-                            <Plus size={14} /> <span>New Product</span>
-                        </button>
-                    )}
+                    <nav className="flex-1 overflow-y-auto custom-scrollbar py-6 px-3 space-y-1">
+                        {[
+                            { id: 'products', icon: Package, label: 'Catalog' },
+                            { id: 'conversations', icon: MessageSquare, label: 'Chat' },
+                            { id: 'orders', icon: ShoppingCart, label: 'Orders' },
+                            { id: 'analytics', icon: BarChart, label: 'Analytics' },
+                            { id: 'policy', icon: ShieldAlert, label: 'Policies' },
+                            { id: 'prerecorded', icon: Mic2, label: 'Voice Assets' },
+                            { id: 'ai-agent', icon: Sparkles, label: 'AI Agent' }
+                        ].map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => { setSubTab(tab.id as any); setActiveMobilePage('main'); }}
+                                className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all flex items-center gap-3 ${subTab === tab.id 
+                                    ? 'bg-white/10 text-white shadow-sm' 
+                                    : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-200'}`}
+                            >
+                                <tab.icon size={18} className={subTab === tab.id ? 'text-white' : 'text-zinc-500'} />
+                                {tab.label}
+                            </button>
+                        ))}
+                    </nav>
                 </div>
 
-                {/* Content Workspace */}
-                <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar pb-24 md:pb-8">
-                    {/* ===== PRODUCTS TAB ===== */}
-                    {subTab === 'products' && (
-                        <div className="max-w-7xl mx-auto">
-                            {loading ? (
-                                <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div></div>
-                            ) : products.length === 0 ? (
-                                <div className="border border-dashed border-white/10 rounded-3xl h-64 flex flex-col items-center justify-center text-zinc-500">
-                                    <Package size={40} className="mb-4 text-zinc-700" />
-                                    <p className="font-semibold text-zinc-300">No products listed</p>
-                                </div>
-                            ) : (
-                                <>
-                                    {/* --- MOBILE NATIVE LIST VIEW --- */}
-                                    <div className="md:hidden flex flex-col space-y-3 pb-6">
-                                        {products.map(product => {
-                                            const allImages = getProductAllImages(product);
-                                            const activeImgIdx = cardActiveImageIndex[product.id] || 0;
-                                            const currentImgUrl = allImages[activeImgIdx] || product.main_image_url;
+                {/* Main Content Area */}
+                <div className="flex-1 flex flex-col min-w-0 bg-[#030712] relative overflow-hidden">
+                    <div className="h-16 bg-[#030712]/80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-8 z-30 shrink-0">
+                        <div className="flex items-center gap-3">
+                            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-zinc-400 hover:text-white p-2 rounded-lg hover:bg-white/5 transition-all">
+                                <Menu size={18} />
+                            </button>
+                            <h1 className="text-xl font-bold tracking-tight text-white capitalize flex items-center gap-2">
+                                {subTab.replace('-', ' ')}
+                            </h1>
+                        </div>
+                        {subTab === 'products' && (
+                            <button 
+                                onClick={() => { resetForm(); setShowAddModal(true); }}
+                                className="bg-white hover:bg-zinc-200 text-black px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2"
+                            >
+                                <Plus size={14} /> <span>New Product</span>
+                            </button>
+                        )}
+                    </div>
 
-                                            return (
-                                                <div key={product.id} className="bg-[#09090b] border border-white/5 rounded-2xl p-3 flex gap-4 items-center relative active:bg-white/5 transition-colors">
-                                                    {/* Thumbnail */}
-                                                    <div className="w-20 h-20 rounded-xl bg-[#18181b] shrink-0 overflow-hidden relative">
-                                                        {currentImgUrl ? (
-                                                            <img src={currentImgUrl} className="w-full h-full object-cover" />
-                                                        ) : (
-                                                            <Camera size={20} className="text-zinc-700 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
-                                                        )}
-                                                        {/* Status Dot */}
-                                                        <div className="absolute top-1.5 right-1.5">
-                                                            <span className={`w-2 h-2 rounded-full block border border-[#09090b] ${
-                                                                (product.status as any) === 'uploading' ? 'bg-amber-500 animate-pulse' :
-                                                                product.status === 'available' ? 'bg-emerald-500' : 'bg-zinc-500'
-                                                            }`} />
-                                                        </div>
-                                                    </div>
-                                                    {/* Info */}
-                                                    <div className="flex-1 min-w-0 flex flex-col justify-between h-20 py-0.5">
-                                                        <div>
-                                                            <h4 className="font-bold text-zinc-100 text-sm truncate">{product.title}</h4>
-                                                            <p className="text-[10px] text-zinc-500 truncate mt-0.5">{product.brand} • {product.gender}</p>
-                                                        </div>
-                                                        <div className="flex items-end justify-between mt-auto">
-                                                            <p className="text-sm font-bold text-white tracking-tight">Rs {product.starting_price}</p>
-                                                            <div className="flex gap-3 pr-1">
-                                                                <button onClick={() => handleEdit(product)} className="text-zinc-400 p-1 active:scale-95"><Edit3 size={16} /></button>
-                                                                <button onClick={() => handleDelete(product.id)} className="text-red-400 p-1 active:scale-95"><Trash2 size={16} /></button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
+                    <div className="flex-1 overflow-y-auto p-8 custom-scrollbar relative">
+                        {subTab === 'products' && (
+                            <div className="max-w-7xl mx-auto">
+                                {loading ? (
+                                    <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div></div>
+                                ) : products.length === 0 ? (
+                                    <div className="border border-dashed border-white/10 rounded-3xl h-64 flex flex-col items-center justify-center text-zinc-500">
+                                        <Package size={40} className="mb-4 text-zinc-700" />
+                                        <p className="font-semibold text-zinc-300">No products listed</p>
                                     </div>
-
-                                    {/* --- DESKTOP GRID VIEW --- */}
-                                    <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 md:gap-6">
+                                ) : (
+                                    <div className="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                                         {products.map(product => {
                                             const allImages = getProductAllImages(product);
                                             const activeImgIdx = cardActiveImageIndex[product.id] || 0;
@@ -1855,48 +1810,359 @@ const WhatsAppDashboard = () => {
                                             );
                                         })}
                                     </div>
-                                </>
-                            )}
+                                )}
+                            </div>
+                        )}
+                        {subTab === 'conversations' && <LiveConversations />}
+                        {subTab === 'orders' && <OrdersPage />}
+                        {subTab === 'analytics' && <AnalyticsPage />}
+                        {subTab === 'policy' && <VoiceAssetsTab category="policy" title="Policy Voices" description="" />}
+                        {subTab === 'prerecorded' && <VoiceAssetsTab category="prerecorded" title="Pre recorded voices" description="" />}
+                        {subTab === 'ai-agent' && <AIAgentPanel />}
+                    </div>
+
+                    {/* Desktop Side Drawer */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 z-50 flex justify-end">
+                            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowAddModal(false)} />
+                            <div className="w-[600px] bg-[#09090b] h-full flex flex-col relative z-10 shadow-2xl border-l border-white/5 animate-in slide-in-from-right duration-300">
+                                {/* Desktop Add Product Form rendering */}
+                                <div className="h-16 flex items-center justify-between px-6 border-b border-white/5 shrink-0 bg-[#09090b]">
+                                    <h2 className="text-lg font-bold text-white">{editingProduct ? 'Edit Product' : 'New Product'}</h2>
+                                    <button onClick={() => setShowAddModal(false)} className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-zinc-400">
+                                        <X size={16} />
+                                    </button>
+                                </div>
+                                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                                    <div className="flex gap-2 mb-8">
+                                        {[1, 2, 3].map(step => (
+                                            <div key={step} className={`h-1.5 flex-1 rounded-full ${activePhase >= step ? 'bg-white' : 'bg-white/10'}`} />
+                                        ))}
+                                    </div>
+
+                                    {activePhase === 1 && (
+                                        <div className="space-y-5 animate-in fade-in duration-300">
+                                            <div>
+                                                <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Product Title</label>
+                                                <input type="text" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white focus:border-white/20 focus:ring-1 focus:ring-white/20 outline-none transition-all" placeholder="e.g. Nike Air Max" />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Starting Price</label>
+                                                    <input type="number" value={formData.starting_price} onChange={e => setFormData({ ...formData, starting_price: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Min Price</label>
+                                                    <input type="number" value={formData.minimum_price} onChange={e => setFormData({ ...formData, minimum_price: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none" />
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Brand</label>
+                                                    <input type="text" value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Gender</label>
+                                                    <select value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none appearance-none">
+                                                        <option value="men">Men</option>
+                                                        <option value="women">Women</option>
+                                                        <option value="unisex">Unisex</option>
+                                                        <option value="kids">Kids</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {activePhase === 2 && (
+                                        <div className="space-y-5 animate-in fade-in duration-300">
+                                            <div>
+                                                <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Original Size</label>
+                                                <input type="text" value={formData.size_original} onChange={e => setFormData({ ...formData, size_original: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Color</label>
+                                                <input type="text" value={formData.color} onChange={e => setFormData({ ...formData, color: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Description / Condition</label>
+                                                <textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} rows={4} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none resize-none custom-scrollbar" />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {activePhase === 3 && (
+                                        <div className="space-y-5 animate-in fade-in duration-300">
+                                            <div>
+                                                <label className="block text-xs font-semibold text-zinc-400 mb-2 uppercase tracking-wider">Product Images</label>
+                                                <input type="file" multiple accept="image/*" onChange={handleImageSelect} className="hidden" id="file-images-desk" />
+                                                <label htmlFor="file-images-desk" className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-white/10 rounded-2xl hover:border-white/20 hover:bg-white/5 transition-all cursor-pointer">
+                                                    <Camera size={24} className="text-zinc-500 mb-2" />
+                                                    <span className="text-sm font-semibold text-zinc-300">Tap to upload photos</span>
+                                                </label>
+                                                {productImages && productImages.length > 0 && (
+                                                    <div className="mt-3 flex gap-2 overflow-x-auto custom-scrollbar pb-2">
+                                                        {productImages.map((img, i) => (
+                                                            <div key={i} className="w-16 h-16 rounded-xl bg-[#18181b] shrink-0 border border-white/10 overflow-hidden relative">
+                                                                <img src={img.url} className="w-full h-full object-cover" />
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-semibold text-zinc-400 mb-2 uppercase tracking-wider">Product Video</label>
+                                                <input type="file" accept="video/*" onChange={handleVideoSelect} className="hidden" id="file-video-desk" />
+                                                <label htmlFor="file-video-desk" className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-white/10 rounded-2xl hover:border-white/20 hover:bg-white/5 transition-all cursor-pointer">
+                                                    <Video size={24} className="text-zinc-500 mb-2" />
+                                                    <span className="text-sm font-semibold text-zinc-300">{selectedVideo ? selectedVideo.name : 'Tap to upload video'}</span>
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-semibold text-zinc-400 mb-2 uppercase tracking-wider">Voice Pitch Note</label>
+                                                <input type="file" accept="audio/*" onChange={handleAudioFileUpload} className="hidden" id="file-audio-desk" />
+                                                <label htmlFor="file-audio-desk" className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-white/10 rounded-2xl hover:border-white/20 hover:bg-white/5 transition-all cursor-pointer">
+                                                    <Volume2 size={24} className="text-zinc-500 mb-2" />
+                                                    <span className="text-sm font-semibold text-zinc-300">{audioBlob ? 'Audio ready' : 'Upload Audio'}</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="p-6 border-t border-white/5 bg-[#09090b] shrink-0 flex gap-3">
+                                    {activePhase > 1 && (
+                                        <button onClick={() => setActivePhase(p => (p - 1) as 1|2|3)} className="px-6 py-3 rounded-xl bg-[#18181b] text-white font-semibold text-sm hover:bg-white/10 transition-colors">
+                                            Back
+                                        </button>
+                                    )}
+                                    {activePhase < 3 ? (
+                                        <button onClick={() => setActivePhase(p => (p + 1) as 1|2|3)} className="flex-1 px-6 py-3 rounded-xl bg-white text-black font-semibold text-sm hover:bg-zinc-200 transition-colors">
+                                            Continue
+                                        </button>
+                                    ) : (
+                                        <button onClick={handleSubmit} disabled={loading} className="flex-1 px-6 py-3 rounded-xl bg-white text-black font-semibold text-sm hover:bg-zinc-200 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                                            {loading ? <span className="animate-spin h-4 w-4 border-2 border-black border-t-transparent rounded-full"></span> : 'Save Product'}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     )}
-
-                    {subTab === 'conversations' && <LiveConversations />}
-                    {subTab === 'orders' && <OrdersPage />}
-                    {subTab === 'analytics' && <AnalyticsPage />}
-                    {subTab === 'policy' && <VoiceAssetsTab category="policy" title="Policy Voices" description="" />}
-                    {subTab === 'prerecorded' && <VoiceAssetsTab category="prerecorded" title="Pre recorded voices" description="" />}
-                    {subTab === 'ai-agent' && <AIAgentPanel />}
                 </div>
             </div>
 
-            {/* iOS Mobile Bottom Nav */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 h-[65px] bg-[#09090b]/90 backdrop-blur-2xl border-t border-white/5 flex items-center justify-around z-50 px-2 pb-safe shadow-2xl">
-                {[
-                    { id: 'products', icon: Package, label: 'Products' },
-                    { id: 'conversations', icon: MessageSquare, label: 'Chat' },
-                    { id: 'orders', icon: ShoppingCart, label: 'Orders' },
-                    { id: 'ai-agent', icon: Sparkles, label: 'Agent' }
-                ].map(tab => (
-                    <button key={tab.id} onClick={() => setSubTab(tab.id as any)} className={`flex flex-col items-center justify-center w-full h-full gap-1 ${subTab === tab.id ? 'text-white' : 'text-zinc-500'}`}>
-                        <tab.icon size={20} />
-                        <span className="text-[9px] font-semibold">{tab.label}</span>
-                    </button>
-                ))}
+            {/* ======================================= */}
+            {/* ========== MOBILE VIEW ================ */}
+            {/* ======================================= */}
+            <div className="md:hidden flex flex-col w-full h-full relative bg-[#030712] overflow-hidden">
+                
+                {/* 1) MAIN TABS SCREEN */}
+                {activeMobilePage === 'main' && (
+                    <div className="flex flex-col h-full w-full absolute inset-0 animate-in fade-in duration-200">
+                        {/* Mobile Header */}
+                        <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm z-20">
+                            <h1 className="text-lg font-bold tracking-tight text-white capitalize">{subTab === 'products' ? 'Catalog' : subTab.replace('-', ' ')}</h1>
+                        </div>
+                        
+                        {/* Mobile Feed */}
+                        <div className="flex-1 overflow-y-auto pb-[85px] pt-4 px-4">
+                            {subTab === 'products' && (
+                                <div className="flex flex-col space-y-4">
+                                    {loading ? (
+                                        <div className="flex items-center justify-center h-32"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div></div>
+                                    ) : products.length === 0 ? (
+                                        <div className="text-center text-zinc-500 py-10 text-sm">No products listed. Tap + to add.</div>
+                                    ) : (
+                                        products.map(product => {
+                                            const allImages = getProductAllImages(product);
+                                            const currentImgUrl = allImages[0] || product.main_image_url;
+                                            return (
+                                                <div key={product.id} className="bg-[#09090b] border border-white/5 rounded-2xl p-3 flex gap-4 items-center relative active:bg-white/5 transition-colors">
+                                                    <div className="w-20 h-20 rounded-xl bg-[#18181b] shrink-0 overflow-hidden relative">
+                                                        {currentImgUrl ? <img src={currentImgUrl} className="w-full h-full object-cover" /> : <Camera size={20} className="text-zinc-700 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0 flex flex-col justify-between h-20 py-0.5">
+                                                        <div>
+                                                            <h4 className="font-bold text-zinc-100 text-base truncate leading-tight">{product.title}</h4>
+                                                            <p className="text-xs text-zinc-500 truncate mt-1">{product.brand} • {product.gender}</p>
+                                                        </div>
+                                                        <div className="flex items-end justify-between mt-auto">
+                                                            <p className="text-base font-bold text-white tracking-tight">Rs {product.starting_price}</p>
+                                                            <div className="flex gap-4 pr-1">
+                                                                <button onClick={() => { handleEdit(product); setActiveMobilePage('add-product'); }} className="text-zinc-400 p-2 -m-2"><Edit3 size={18} /></button>
+                                                                <button onClick={() => handleDelete(product.id)} className="text-red-400 p-2 -m-2"><Trash2 size={18} /></button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    )}
+                                </div>
+                            )}
+
+                            {subTab === 'conversations' && <LiveConversations />}
+                            {subTab === 'orders' && <OrdersPage />}
+                        </div>
+
+                        {/* Mobile FAB */}
+                        {subTab === 'products' && (
+                            <button 
+                                onClick={() => { resetForm(); setActiveMobilePage('add-product'); }}
+                                className="fixed bottom-[85px] right-4 w-14 h-14 bg-indigo-500 rounded-full flex items-center justify-center text-white shadow-[0_8px_30px_rgb(99,102,241,0.4)] z-40 active:scale-95 transition-transform"
+                            >
+                                <Plus size={28} strokeWidth={2.5} />
+                            </button>
+                        )}
+
+                        {/* iOS Bottom Navigation */}
+                        <div className="fixed bottom-0 left-0 right-0 h-[70px] bg-[#09090b]/95 backdrop-blur-xl border-t border-white/5 flex items-center justify-around z-50 px-2 pb-safe shadow-2xl">
+                            {[
+                                { id: 'products', icon: Package, label: 'Products' },
+                                { id: 'conversations', icon: MessageSquare, label: 'Chat' },
+                                { id: 'orders', icon: ShoppingCart, label: 'Orders' },
+                                { id: 'more', icon: MoreHorizontal, label: 'More' }
+                            ].map(tab => (
+                                <button key={tab.id} onClick={() => { if(tab.id==='more') { setActiveMobilePage('more-menu'); } else { setSubTab(tab.id as any); } }} className={`flex flex-col items-center justify-center w-full h-full gap-1.5 ${subTab === tab.id || (tab.id === 'more' && (activeMobilePage as any) === 'more-menu') ? 'text-white' : 'text-zinc-500'}`}>
+                                    <tab.icon size={22} strokeWidth={subTab === tab.id ? 2.5 : 2} />
+                                    <span className="text-[10px] font-semibold">{tab.label}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* 2) MORE MENU SCREEN (Full Screen Independent View) */}
+                {activeMobilePage === 'more-menu' && (
+                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#030712] z-50 animate-in slide-in-from-right duration-200">
+                        <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative">
+                            <button onClick={() => setActiveMobilePage('main')} className="absolute left-4 p-2 -m-2 text-indigo-400 active:opacity-50 flex items-center gap-1">
+                                <ChevronLeft size={24} /> <span className="text-base font-semibold">Back</span>
+                            </button>
+                            <h1 className="text-lg font-bold tracking-tight text-white capitalize w-full text-center">Menu</h1>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                            <div className="bg-[#09090b] rounded-2xl border border-white/5 overflow-hidden">
+                                {[
+                                    { id: 'analytics', label: 'Analytics', icon: BarChart, color: 'text-blue-400' },
+                                    { id: 'ai-agent', label: 'AI Agent Settings', icon: Sparkles, color: 'text-indigo-400' },
+                                    { id: 'policy', label: 'Store Policies', icon: ShieldAlert, color: 'text-amber-400' },
+                                    { id: 'prerecorded', label: 'Voice Assets', icon: Mic2, color: 'text-emerald-400' }
+                                ].map((item, idx) => (
+                                    <button 
+                                        key={item.id} 
+                                        onClick={() => { setSubTab(item.id as any); setActiveMobilePage(item.id as any); }}
+                                        className={`w-full flex items-center justify-between p-4 bg-[#09090b] active:bg-[#18181b] transition-colors ${idx !== 3 ? 'border-b border-white/5' : ''}`}
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className={`p-2 rounded-xl bg-white/5 ${item.color}`}><item.icon size={20} /></div>
+                                            <span className="font-semibold text-zinc-100 text-base">{item.label}</span>
+                                        </div>
+                                        <ChevronRight size={20} className="text-zinc-600" />
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* 3) SUB-SCREENS (Like Policy, AI Agent) from More Menu */}
+                {['analytics', 'ai-agent', 'policy', 'prerecorded'].includes(activeMobilePage as string) && (
+                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#030712] z-[60] animate-in slide-in-from-right duration-200">
+                        <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative">
+                            <button onClick={() => setActiveMobilePage('more-menu')} className="absolute left-4 p-2 -m-2 text-indigo-400 active:opacity-50 flex items-center gap-1 z-10">
+                                <ChevronLeft size={24} />
+                            </button>
+                            <h1 className="text-lg font-bold tracking-tight text-white capitalize w-full text-center">
+                                {(activeMobilePage as string).replace('-', ' ')}
+                            </h1>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                            {(activeMobilePage as any) === 'analytics' && <AnalyticsPage />}
+                            {(activeMobilePage as any) === 'policy' && <VoiceAssetsTab category="policy" title="Policy Voices" description="" />}
+                            {(activeMobilePage as any) === 'prerecorded' && <VoiceAssetsTab category="prerecorded" title="Pre recorded voices" description="" />}
+                            {(activeMobilePage as any) === 'ai-agent' && <AIAgentPanel />}
+                        </div>
+                    </div>
+                )}
+
+                {/* 4) ADD PRODUCT MOBILE NATIVE SCREEN (Full screen, no bottom nav) */}
+                {activeMobilePage === 'add-product' && (
+                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#09090b] z-[70] animate-in slide-in-from-bottom duration-300">
+                        <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative">
+                            <button onClick={() => setActiveMobilePage('main')} className="absolute left-4 p-2 -m-2 text-indigo-400 active:opacity-50 flex items-center gap-1 z-10">
+                                <ChevronLeft size={24} /> <span className="text-base">Cancel</span>
+                            </button>
+                            <h1 className="text-lg font-bold tracking-tight text-white w-full text-center">{editingProduct ? 'Edit Product' : 'New Product'}</h1>
+                            <button onClick={handleSubmit} disabled={loading} className="absolute right-4 p-2 -m-2 text-indigo-400 active:opacity-50 font-bold">
+                                {loading ? 'Saving...' : 'Save'}
+                            </button>
+                        </div>
+                        
+                        <div className="flex-1 overflow-y-auto p-4 pb-12 space-y-6">
+                            {/* Unified form without phases on mobile for faster scrolling */}
+                            <div className="space-y-4">
+                                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest pl-2">Basic Info</label>
+                                <div className="bg-[#18181b] rounded-2xl overflow-hidden border border-white/5">
+                                    <input type="text" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-4 py-4 text-base text-white outline-none" placeholder="Product Title" />
+                                    <input type="number" value={formData.starting_price} onChange={e => setFormData({ ...formData, starting_price: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-4 py-4 text-base text-white outline-none" placeholder="Starting Price (Rs)" />
+                                    <input type="number" value={formData.minimum_price} onChange={e => setFormData({ ...formData, minimum_price: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-4 py-4 text-base text-white outline-none" placeholder="Minimum Price (Rs)" />
+                                    <input type="text" value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value })} className="w-full bg-transparent px-4 py-4 text-base text-white outline-none" placeholder="Brand Name" />
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest pl-2">Details</label>
+                                <div className="bg-[#18181b] rounded-2xl overflow-hidden border border-white/5">
+                                    <select value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-4 py-4 text-base text-white outline-none appearance-none">
+                                        <option value="men">Men</option>
+                                        <option value="women">Women</option>
+                                        <option value="unisex">Unisex</option>
+                                        <option value="kids">Kids</option>
+                                    </select>
+                                    <input type="text" value={formData.size_original} onChange={e => setFormData({ ...formData, size_original: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-4 py-4 text-base text-white outline-none" placeholder="Size" />
+                                    <input type="text" value={formData.color} onChange={e => setFormData({ ...formData, color: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-4 py-4 text-base text-white outline-none" placeholder="Color" />
+                                    <textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} rows={3} className="w-full bg-transparent px-4 py-4 text-base text-white outline-none resize-none" placeholder="Description / Condition" />
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest pl-2">Media</label>
+                                <div className="grid grid-cols-3 gap-3">
+                                    <div className="col-span-3">
+                                        <input type="file" multiple accept="image/*" onChange={handleImageSelect} className="hidden" id="file-images-mob" />
+                                        <label htmlFor="file-images-mob" className="flex items-center justify-center gap-3 h-16 bg-[#18181b] border border-white/5 rounded-2xl active:bg-white/5 transition-all cursor-pointer">
+                                            <Camera size={20} className="text-zinc-400" />
+                                            <span className="text-base font-semibold text-zinc-200">Add Photos</span>
+                                        </label>
+                                        {productImages && productImages.length > 0 && (
+                                            <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
+                                                {productImages.map((img, i) => (
+                                                    <div key={i} className="w-20 h-20 rounded-xl bg-[#18181b] shrink-0 border border-white/10 overflow-hidden">
+                                                        <img src={img.url} className="w-full h-full object-cover" />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="col-span-3">
+                                        <input type="file" accept="video/*" onChange={handleVideoSelect} className="hidden" id="file-video-mob" />
+                                        <label htmlFor="file-video-mob" className="flex items-center justify-center gap-3 h-16 bg-[#18181b] border border-white/5 rounded-2xl active:bg-white/5 transition-all cursor-pointer">
+                                            <Video size={20} className="text-zinc-400" />
+                                            <span className="text-base font-semibold text-zinc-200">{selectedVideo ? 'Video Selected' : 'Add Video'}</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
-            {/* Mobile FAB for New Product */}
-            {subTab === 'products' && !showAddModal && (
-                <button 
-                    onClick={() => { resetForm(); setShowAddModal(true); }}
-                    className="md:hidden fixed bottom-[85px] right-4 w-14 h-14 bg-white rounded-full flex items-center justify-center text-black shadow-[0_8px_30px_rgb(0,0,0,0.5)] z-40 active:scale-95 transition-transform"
-                >
-                    <Plus size={24} strokeWidth={2.5} />
-                </button>
-            )}
-
-            {/* Media Preview Modal */}
+            {/* Global Media Preview */}
             {activeMediaPreview && (
-                <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4" onClick={() => setActiveMediaPreview(null)}>
+                <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4" onClick={() => setActiveMediaPreview(null)}>
                     <div className="bg-[#09090b] border border-white/10 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
                         <div className="p-4 flex justify-end absolute top-0 right-0 z-10">
                             <button onClick={() => setActiveMediaPreview(null)} className="w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center backdrop-blur-md">
@@ -1911,140 +2177,6 @@ const WhatsAppDashboard = () => {
                                 <audio src={activeMediaPreview.url} controls autoPlay className="w-full custom-audio-player" />
                             </div>
                         )}
-                    </div>
-                </div>
-            )}
-
-            {/* ===== SLEEK SIDE DRAWER FOR ADD PRODUCT ===== */}
-            {showAddModal && (
-                <div className="fixed inset-0 z-50 flex justify-end">
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={resetForm} />
-                    <div className="w-full md:w-[600px] bg-[#09090b] h-full flex flex-col relative z-10 shadow-2xl md:border-l border-white/5 animate-in md:slide-in-from-right slide-in-from-bottom duration-300">
-                        <div className="h-16 flex items-center justify-between px-6 border-b border-white/5 shrink-0 bg-[#09090b]">
-                            <h2 className="text-lg font-bold text-white">{editingProduct ? 'Edit Product' : 'New Product'}</h2>
-                            <button onClick={resetForm} className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-zinc-400">
-                                <X size={16} />
-                            </button>
-                        </div>
-                        
-                        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-                            {/* Form phases (simplified sleek UI) */}
-                            <div className="flex gap-2 mb-8">
-                                {[1, 2, 3].map(step => (
-                                    <div key={step} className={`h-1.5 flex-1 rounded-full ${activePhase >= step ? 'bg-white' : 'bg-white/10'}`} />
-                                ))}
-                            </div>
-
-                            {activePhase === 1 && (
-                                <div className="space-y-5 animate-in fade-in duration-300">
-                                    <div>
-                                        <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Product Title</label>
-                                        <input type="text" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-4 md:py-3 text-base md:text-sm text-white focus:border-white/20 focus:ring-1 focus:ring-white/20 outline-none transition-all" placeholder="e.g. Nike Air Max" />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Starting Price</label>
-                                            <input type="number" value={formData.starting_price} onChange={e => setFormData({ ...formData, starting_price: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-4 md:py-3 text-base md:text-sm text-white outline-none" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Min Price</label>
-                                            <input type="number" value={formData.minimum_price} onChange={e => setFormData({ ...formData, minimum_price: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-4 md:py-3 text-base md:text-sm text-white outline-none" />
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Brand</label>
-                                            <input type="text" value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-4 md:py-3 text-base md:text-sm text-white outline-none" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Gender</label>
-                                            <select value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-4 md:py-3 text-base md:text-sm text-white outline-none appearance-none">
-                                                <option value="men">Men</option>
-                                                <option value="women">Women</option>
-                                                <option value="unisex">Unisex</option>
-                                                <option value="kids">Kids</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {activePhase === 2 && (
-                                <div className="space-y-5 animate-in fade-in duration-300">
-                                    <div>
-                                        <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Original Size</label>
-                                        <input type="text" value={formData.size_original} onChange={e => setFormData({ ...formData, size_original: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-4 md:py-3 text-base md:text-sm text-white outline-none" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Color</label>
-                                        <input type="text" value={formData.color} onChange={e => setFormData({ ...formData, color: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-4 md:py-3 text-base md:text-sm text-white outline-none" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Description / Condition</label>
-                                        <textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} rows={4} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-4 md:py-3 text-base md:text-sm text-white outline-none resize-none custom-scrollbar" />
-                                    </div>
-                                </div>
-                            )}
-
-                            {activePhase === 3 && (
-                                <div className="space-y-5 animate-in fade-in duration-300">
-                                    <div>
-                                        <label className="block text-xs font-semibold text-zinc-400 mb-2 uppercase tracking-wider">Product Images</label>
-                                        <input type="file" multiple accept="image/*" onChange={handleImageSelect} className="hidden" id="file-images" />
-                                        <label htmlFor="file-images" className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-white/10 rounded-2xl hover:border-white/20 hover:bg-white/5 transition-all cursor-pointer">
-                                            <Camera size={24} className="text-zinc-500 mb-2" />
-                                            <span className="text-sm font-semibold text-zinc-300">Tap to upload photos</span>
-                                        </label>
-                                        {productImages && productImages.length > 0 && (
-                                            <div className="mt-3 flex gap-2 overflow-x-auto custom-scrollbar pb-2">
-                                                {productImages.map((img, i) => (
-                                                    <div key={i} className="w-16 h-16 rounded-xl bg-[#18181b] shrink-0 border border-white/10 overflow-hidden relative">
-                                                        <img src={img.url} className="w-full h-full object-cover" />
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-xs font-semibold text-zinc-400 mb-2 uppercase tracking-wider">Product Video</label>
-                                        <input type="file" accept="video/*" onChange={handleVideoSelect} className="hidden" id="file-video" />
-                                        <label htmlFor="file-video" className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-white/10 rounded-2xl hover:border-white/20 hover:bg-white/5 transition-all cursor-pointer">
-                                            <Video size={24} className="text-zinc-500 mb-2" />
-                                            <span className="text-sm font-semibold text-zinc-300">{selectedVideo ? selectedVideo.name : 'Tap to upload video'}</span>
-                                        </label>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-xs font-semibold text-zinc-400 mb-2 uppercase tracking-wider">Voice Pitch Note</label>
-                                        <input type="file" accept="audio/*" onChange={handleAudioFileUpload} className="hidden" id="file-audio" />
-                                        <div className="flex gap-2">
-                                            <label htmlFor="file-audio" className="flex-1 flex flex-col items-center justify-center h-24 border-2 border-dashed border-white/10 rounded-2xl hover:border-white/20 hover:bg-white/5 transition-all cursor-pointer">
-                                                <Volume2 size={24} className="text-zinc-500 mb-2" />
-                                                <span className="text-sm font-semibold text-zinc-300">{audioBlob ? 'Audio ready' : 'Upload Audio'}</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="p-6 border-t border-white/5 bg-[#09090b] shrink-0 flex gap-3">
-                            {activePhase > 1 && (
-                                <button onClick={() => setActivePhase(p => (p - 1) as 1|2|3)} className="px-6 py-3 rounded-xl bg-[#18181b] text-white font-semibold text-sm hover:bg-white/10 transition-colors">
-                                    Back
-                                </button>
-                            )}
-                            {activePhase < 3 ? (
-                                <button onClick={() => setActivePhase(p => (p + 1) as 1|2|3)} className="flex-1 px-6 py-3 rounded-xl bg-white text-black font-semibold text-sm hover:bg-zinc-200 transition-colors">
-                                    Continue
-                                </button>
-                            ) : (
-                                <button onClick={handleSubmit} disabled={loading} className="flex-1 px-6 py-3 rounded-xl bg-white text-black font-semibold text-sm hover:bg-zinc-200 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
-                                    {loading ? <span className="animate-spin h-4 w-4 border-2 border-black border-t-transparent rounded-full"></span> : 'Save Product'}
-                                </button>
-                            )}
-                        </div>
                     </div>
                 </div>
             )}
