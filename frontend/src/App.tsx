@@ -4,7 +4,7 @@ function App() {
   return (
     <div className="h-screen w-screen bg-[#071317] text-slate-100 flex flex-col overflow-hidden font-sans">
       {/* Devsil Top Navbar */}
-      <nav className="bg-[#0A1A20] border-b border-teal-900/40 px-6 py-3 flex items-center justify-between flex-shrink-0 z-30 shadow-lg">
+      <nav className="hidden md:flex bg-[#0A1A20] border-b border-teal-900/40 px-6 py-3 flex items-center justify-between flex-shrink-0 z-30 shadow-lg">
         {/* Brand Logo & Name */}
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-teal-500/10 border border-teal-500/30 p-1 flex items-center justify-center shadow-md shadow-teal-500/10">
