@@ -62,7 +62,7 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
             aud.onloadedmetadata = () => {
                 setAudioDuration(aud.duration);
                 setTrimEnd(aud.duration);
-                setMainClips([{ id: \`main-\${Date.now()}\`, track: 'main', start: 0, end: aud.duration, sourceStart: 0 }]);
+                setMainClips([{ id: `main-${Date.now()}`, track: 'main', start: 0, end: aud.duration, sourceStart: 0 }]);
             };
         }
     }, [audioBlob]);
@@ -70,7 +70,7 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
     const formatTimer = (seconds: number) => {
         const m = Math.floor(seconds / 60);
         const s = Math.floor(seconds % 60);
-        return \`\${m.toString().padStart(2, '0')}:\${s.toString().padStart(2, '0')}\`;
+        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     };
 
     const generateRealWaveformPeaks = async (blob: Blob | null, url: string | null) => {
@@ -274,8 +274,8 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
             const clipIdx = mainClips.findIndex(c => !c.isDeleted && c.start < time && c.end > time);
             if (clipIdx !== -1) {
                 const clip = mainClips[clipIdx];
-                const c1 = { ...clip, id: \`\${clip.id}-cut1\`, end: time };
-                const c2 = { ...clip, id: \`\${clip.id}-cut2\`, start: time, sourceStart: (clip.sourceStart !== undefined ? clip.sourceStart : clip.start) + (time - clip.start) };
+                const c1 = { ...clip, id: `${clip.id}-cut1`, end: time };
+                const c2 = { ...clip, id: `${clip.id}-cut2`, start: time, sourceStart: (clip.sourceStart !== undefined ? clip.sourceStart : clip.start) + (time - clip.start) };
                 const updated = [...mainClips];
                 updated.splice(clipIdx, 1, c1 as AudioTrackClip, c2 as AudioTrackClip);
                 setMainClips(updated);
@@ -285,8 +285,8 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
             const clipIdx = voiceoverClips.findIndex(c => !c.isDeleted && c.start < time && c.end > time);
             if (clipIdx !== -1) {
                 const clip = voiceoverClips[clipIdx];
-                const c1 = { ...clip, id: \`\${clip.id}-cut1\`, end: time };
-                const c2 = { ...clip, id: \`\${clip.id}-cut2\`, start: time, sourceStart: (clip.sourceStart !== undefined ? clip.sourceStart : clip.start) + (time - clip.start) };
+                const c1 = { ...clip, id: `${clip.id}-cut1`, end: time };
+                const c2 = { ...clip, id: `${clip.id}-cut2`, start: time, sourceStart: (clip.sourceStart !== undefined ? clip.sourceStart : clip.start) + (time - clip.start) };
                 const updated = [...voiceoverClips];
                 updated.splice(clipIdx, 1, c1 as AudioTrackClip, c2 as AudioTrackClip);
                 setVoiceoverClips(updated);
@@ -366,7 +366,7 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
                         const voStart = cutTime;
                         const voEnd = voStart + recordedDur;
                         const newVoClip: AudioTrackClip = {
-                            id: \`vo-\${Date.now()}\`, track: 'voiceover', start: voStart, end: voEnd, sourceStart: 0, buffer: newAudioBuf
+                            id: `vo-${Date.now()}`, track: 'voiceover', start: voStart, end: voEnd, sourceStart: 0, buffer: newAudioBuf
                         };
                         const updatedVOs = [...voiceoverClips, newVoClip];
                         setVoiceoverClips(updatedVOs);
@@ -588,7 +588,7 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
                                 </div>
                                 <div className="flex items-center justify-between gap-[3px] h-full flex-1 mx-2">
                                     {visualizerData.map((h, i) => (
-                                        <div key={i} className="w-[3px] rounded-full transition-all duration-150 bg-white" style={{ height: \`\${h}%\` }} />
+                                        <div key={i} className="w-[3px] rounded-full transition-all duration-150 bg-white" style={{ height: `${h}%` }} />
                                     ))}
                                 </div>
                                 <button onClick={stopRecording} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center"><Square size={12} className="text-white fill-current" /></button>
@@ -606,7 +606,7 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
                                     const heightPercent = waveformPeaks.length > 0 ? waveformPeaks[peakIdx] : (Math.sin(i * 0.8) * 30 + 50);
                                     const progressPercent = audioDuration > 0 ? seekTime / audioDuration : 0;
                                     const isActive = (i / 35) <= progressPercent;
-                                    return <div key={i} className={\`w-[3px] rounded-full transition-all duration-150 \${isActive ? 'bg-white' : 'bg-white/40'}\`} style={{ height: \`\${heightPercent}%\` }} />
+                                    return <div key={i} className={`w-[3px] rounded-full transition-all duration-150 ${isActive ? 'bg-white' : 'bg-white/40'}`} style={{ height: `${heightPercent}%` }} />
                                 })}
                             </div>
                         </div>
@@ -624,7 +624,7 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
                             <button onClick={togglePlayPause} className="bg-teal-600 active:bg-teal-500 text-white w-9 h-9 rounded-full flex items-center justify-center shadow transition-transform active:scale-95">
                                 {isPlaying ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
                             </button>
-                            <button onClick={startTimelineRecording} className={\`\${isTimelineRecording ? 'bg-red-500 animate-pulse' : 'bg-red-600'} text-white w-9 h-9 rounded-full flex items-center justify-center shadow active:scale-95\`}>
+                            <button onClick={startTimelineRecording} className={`${isTimelineRecording ? 'bg-red-500 animate-pulse' : 'bg-red-600'} text-white w-9 h-9 rounded-full flex items-center justify-center shadow active:scale-95`}>
                                 {isTimelineRecording ? <Square size={14} className="fill-current" /> : <Mic size={16} />}
                             </button>
                             <button onClick={splitClipAtPlayhead} className="bg-teal-600 text-white w-9 h-9 rounded-full flex items-center justify-center shadow active:scale-95">
@@ -643,7 +643,7 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
 
                     {/* Scrollable Timeline */}
                     <div ref={timelineScrollRef} className="overflow-x-auto overflow-y-hidden rounded-xl border border-teal-900/60 bg-[#08181F] shadow-inner custom-scrollbar" style={{ maxHeight: '160px' }}>
-                        <div ref={timelineTrackRef} onMouseDown={handleTimelineTouch} onTouchStart={handleTimelineTouch} className="relative cursor-pointer select-none group space-y-1 p-1" style={{ minWidth: \`\${timelineZoom * 100}%\` }}>
+                        <div ref={timelineTrackRef} onMouseDown={handleTimelineTouch} onTouchStart={handleTimelineTouch} className="relative cursor-pointer select-none group space-y-1 p-1" style={{ minWidth: `${timelineZoom * 100}%` }}>
                             
                             {/* Track 1: Main Audio */}
                             <div className="relative h-14 bg-[#051116] rounded-lg border border-teal-900/40 overflow-hidden flex items-center px-2">
@@ -660,10 +660,10 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
                                     const clipPeaks = (waveformPeaks.length > 0 ? waveformPeaks : Array.from({ length: 72 }).map(() => 45)).slice(startIdx, endIdx);
 
                                     return (
-                                        <div key={clip.id} onMouseDown={(e) => handleClipMove(e, clip)} onTouchStart={(e) => handleClipMove(e, clip)} className={\`absolute top-1 bottom-1 rounded-lg border-2 flex items-center justify-between px-2 transition-all z-10 overflow-hidden \${isSelected ? 'bg-teal-500/50 border-teal-400 shadow-[0_0_14px_rgba(20,184,166,0.7)] ring-2 ring-teal-300' : 'bg-teal-950/90 border-teal-800/80 text-teal-200'}\`} style={{ left: \`\${leftPercent}%\`, width: \`\${widthPercent}%\` }}>
+                                        <div key={clip.id} onMouseDown={(e) => handleClipMove(e, clip)} onTouchStart={(e) => handleClipMove(e, clip)} className={`absolute top-1 bottom-1 rounded-lg border-2 flex items-center justify-between px-2 transition-all z-10 overflow-hidden ${isSelected ? 'bg-teal-500/50 border-teal-400 shadow-[0_0_14px_rgba(20,184,166,0.7)] ring-2 ring-teal-300' : 'bg-teal-950/90 border-teal-800/80 text-teal-200'}`} style={{ left: `${leftPercent}%`, width: `${widthPercent}%` }}>
                                             <div onMouseDown={(e) => handleClipTrim(e, clip, 'start')} onTouchStart={(e) => handleClipTrim(e, clip, 'start')} className="absolute left-0 top-0 bottom-0 w-4 -ml-2 bg-teal-400 z-30 flex items-center justify-center"><div className="w-0.5 h-3.5 bg-teal-950 rounded-full" /></div>
                                             <div className="absolute inset-0 flex items-center justify-between px-2 opacity-40 pointer-events-none z-0">
-                                                {clipPeaks.map((h, i) => <div key={i} className="w-0.5 bg-teal-300 rounded-full" style={{ height: \`\${h}%\` }} />)}
+                                                {clipPeaks.map((h, i) => <div key={i} className="w-0.5 bg-teal-300 rounded-full" style={{ height: `${h}%` }} />)}
                                             </div>
                                             <div onMouseDown={(e) => handleClipTrim(e, clip, 'end')} onTouchStart={(e) => handleClipTrim(e, clip, 'end')} className="absolute right-0 top-0 bottom-0 w-4 -mr-2 bg-teal-400 z-30 flex items-center justify-center"><div className="w-0.5 h-3.5 bg-teal-950 rounded-full" /></div>
                                         </div>
@@ -675,7 +675,7 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
                                     const leftPercent = (vo.start / audioDuration) * 100;
                                     const widthPercent = ((vo.end - vo.start) / audioDuration) * 100;
                                     return (
-                                        <div key={\`silenced-\${vo.id}\`} className="absolute top-0 bottom-0 bg-red-950/80 border-x-2 border-red-500/80 flex items-center justify-center pointer-events-none z-15" style={{ left: \`\${leftPercent}%\`, width: \`\${widthPercent}%\` }}>
+                                        <div key={`silenced-${vo.id}`} className="absolute top-0 bottom-0 bg-red-950/80 border-x-2 border-red-500/80 flex items-center justify-center pointer-events-none z-15" style={{ left: `${leftPercent}%`, width: `${widthPercent}%` }}>
                                             <span className="text-[8px] font-bold text-red-300 uppercase tracking-tight bg-black/80 px-1 py-0.5 rounded truncate">Muted</span>
                                         </div>
                                     );
@@ -692,10 +692,10 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
                                     const voPeaks = Array.from({ length: 24 }).map((_, i) => Math.sin(i * 0.5) * 35 + 45);
 
                                     return (
-                                        <div key={vo.id} onMouseDown={(e) => handleClipMove(e, vo)} onTouchStart={(e) => handleClipMove(e, vo)} className={\`absolute top-1 bottom-1 rounded-lg border-2 flex items-center justify-between px-2 transition-all z-10 overflow-hidden \${isSelected ? 'bg-amber-500/60 border-amber-400 shadow-[0_0_14px_rgba(245,158,11,0.8)] ring-2 ring-amber-300' : 'bg-amber-950/90 border-amber-600/80 text-amber-200'}\`} style={{ left: \`\${leftPercent}%\`, width: \`\${widthPercent}%\` }}>
+                                        <div key={vo.id} onMouseDown={(e) => handleClipMove(e, vo)} onTouchStart={(e) => handleClipMove(e, vo)} className={`absolute top-1 bottom-1 rounded-lg border-2 flex items-center justify-between px-2 transition-all z-10 overflow-hidden ${isSelected ? 'bg-amber-500/60 border-amber-400 shadow-[0_0_14px_rgba(245,158,11,0.8)] ring-2 ring-amber-300' : 'bg-amber-950/90 border-amber-600/80 text-amber-200'}`} style={{ left: `${leftPercent}%`, width: `${widthPercent}%` }}>
                                             <div onMouseDown={(e) => handleClipTrim(e, vo, 'start')} onTouchStart={(e) => handleClipTrim(e, vo, 'start')} className="absolute left-0 top-0 bottom-0 w-4 -ml-2 bg-amber-400 z-30 flex items-center justify-center"><div className="w-0.5 h-3.5 bg-amber-950 rounded-full" /></div>
                                             <div className="absolute inset-0 flex items-center justify-between px-2 opacity-40 pointer-events-none z-0">
-                                                {voPeaks.map((h, i) => <div key={i} className="w-0.5 bg-amber-400 rounded-full" style={{ height: \`\${h}%\` }} />)}
+                                                {voPeaks.map((h, i) => <div key={i} className="w-0.5 bg-amber-400 rounded-full" style={{ height: `${h}%` }} />)}
                                             </div>
                                             <div onMouseDown={(e) => handleClipTrim(e, vo, 'end')} onTouchStart={(e) => handleClipTrim(e, vo, 'end')} className="absolute right-0 top-0 bottom-0 w-4 -mr-2 bg-amber-400 z-30 flex items-center justify-center"><div className="w-0.5 h-3.5 bg-amber-950 rounded-full" /></div>
                                         </div>
@@ -704,7 +704,7 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
                             </div>
 
                             {/* Playhead */}
-                            <div className="absolute top-0 bottom-0 w-[2px] bg-red-500 z-50 pointer-events-none" style={{ left: \`\${(seekTime / audioDuration) * 100}%\` }}>
+                            <div className="absolute top-0 bottom-0 w-[2px] bg-red-500 z-50 pointer-events-none" style={{ left: `${(seekTime / audioDuration) * 100}%` }}>
                                 <div className="absolute -top-1 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-[6px] border-l-transparent border-r-transparent border-t-red-500" />
                             </div>
                         </div>
