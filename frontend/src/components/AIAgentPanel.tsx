@@ -1,9 +1,6 @@
 // @ts-nocheck
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft,
-    Save, Bot, Send, Mic, Square, Play, Pause, Image as ImageIcon,
-    Video, Trash2, X, Loader2, RotateCcw, Volume2, Sparkles
-} from 'lucide-react';
+import { ChevronLeft, Save, Bot, Send, Mic, Square, Play, Pause, Image as ImageIcon, Video, Trash2, X, Loader2, RotateCcw, Volume2, Sparkles } from 'lucide-react';
 
 interface ChatMessage {
     id: string;

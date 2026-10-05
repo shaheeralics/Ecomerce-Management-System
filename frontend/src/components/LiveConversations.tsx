@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect, useRef } from 'react';
-import { Search, ChevronLeft, MoreVertical, Paperclip, Image as ImageIcon, FileText, Smile, Mic, Send, MapPin, Phone, Mail, ShoppingBag, User, XCircle, Bot, UserCheck } from 'lucide-react';
+import { Search, ChevronLeft, MoreVertical, Paperclip, Image as ImageIcon, FileText, Smile, Mic, Send, MapPin, Phone, Mail, ShoppingBag, User, XCircle, Bot, UserCheck, MessageSquare, Video, Plus } from 'lucide-react';
 import OrderDetailPage from './OrderDetailPage'; // Assuming this exists for modal
 import AddOrderModal from './AddOrderModal';
 
@@ -169,7 +169,8 @@ export default function LiveConversations() {
         // Search
         if (search) {
             const s = search.toLowerCase();
-            return c.customer_phone.includes(s) || (c.customer_name && c.customer_name.toLowerCase().includes(s)) || (c.known_slots && JSON.stringify(c.known_slots).toLowerCase().includes(s));
+            const phone = c.customer_phone || c.phone_number || '';
+            return phone.includes(s) || (c.customer_name && c.customer_name.toLowerCase().includes(s)) || (c.known_slots && JSON.stringify(c.known_slots).toLowerCase().includes(s));
         }
         return true;
     });
