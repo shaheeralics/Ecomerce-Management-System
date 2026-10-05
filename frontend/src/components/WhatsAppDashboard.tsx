@@ -1727,9 +1727,9 @@ const WhatsAppDashboard = () => {
                     {subTab === 'products' && (
                         <button 
                             onClick={() => { resetForm(); setShowAddModal(true); }}
-                            className="bg-white hover:bg-zinc-200 text-black px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2"
+                            className="hidden md:flex bg-white hover:bg-zinc-200 text-black px-4 py-2 rounded-full text-xs font-bold transition-all items-center gap-2"
                         >
-                            <Plus size={14} /> <span className="hidden md:inline">New Product</span>
+                            <Plus size={14} /> <span>New Product</span>
                         </button>
                     )}
                 </div>
@@ -1747,69 +1747,115 @@ const WhatsAppDashboard = () => {
                                     <p className="font-semibold text-zinc-300">No products listed</p>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-                                    {products.map(product => {
-                                        const allImages = getProductAllImages(product);
-                                        const activeImgIdx = cardActiveImageIndex[product.id] || 0;
-                                        const currentImgUrl = allImages[activeImgIdx] || product.main_image_url;
+                                <>
+                                    {/* --- MOBILE NATIVE LIST VIEW --- */}
+                                    <div className="md:hidden flex flex-col space-y-3 pb-6">
+                                        {products.map(product => {
+                                            const allImages = getProductAllImages(product);
+                                            const activeImgIdx = cardActiveImageIndex[product.id] || 0;
+                                            const currentImgUrl = allImages[activeImgIdx] || product.main_image_url;
 
-                                        return (
-                                            <div key={product.id} className="bg-[#09090b] border border-white/5 rounded-3xl overflow-hidden hover:border-white/10 transition-all duration-300 flex flex-col group">
-                                                <div className="h-40 md:h-52 bg-[#18181b] relative overflow-hidden flex items-center justify-center group-hover:bg-[#27272a] transition-colors">
-                                                    {currentImgUrl ? (
-                                                        <img src={currentImgUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                                                    ) : (
-                                                        <Camera size={30} className="text-zinc-700" />
-                                                    )}
-                                                    
-                                                    {/* Status Pill */}
-                                                    <div className="absolute top-3 right-3">
-                                                        {(product.status as any) === 'uploading' ? (
-                                                            <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-full px-2.5 py-1 flex items-center gap-1.5">
-                                                                <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
-                                                                <span className="text-[9px] font-bold text-amber-500 tracking-wider">UPLOADING</span>
-                                                            </div>
+                                            return (
+                                                <div key={product.id} className="bg-[#09090b] border border-white/5 rounded-2xl p-3 flex gap-4 items-center relative active:bg-white/5 transition-colors">
+                                                    {/* Thumbnail */}
+                                                    <div className="w-20 h-20 rounded-xl bg-[#18181b] shrink-0 overflow-hidden relative">
+                                                        {currentImgUrl ? (
+                                                            <img src={currentImgUrl} className="w-full h-full object-cover" />
                                                         ) : (
-                                                            <div className={`bg-black/60 backdrop-blur-md border border-white/10 rounded-full px-2.5 py-1 ${product.status === 'available' ? 'text-emerald-400' : 'text-zinc-400'}`}>
-                                                                <span className="text-[9px] font-bold tracking-wider">{product.status.toUpperCase()}</span>
+                                                            <Camera size={20} className="text-zinc-700 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+                                                        )}
+                                                        {/* Status Dot */}
+                                                        <div className="absolute top-1.5 right-1.5">
+                                                            <span className={`w-2 h-2 rounded-full block border border-[#09090b] ${
+                                                                (product.status as any) === 'uploading' ? 'bg-amber-500 animate-pulse' :
+                                                                product.status === 'available' ? 'bg-emerald-500' : 'bg-zinc-500'
+                                                            }`} />
+                                                        </div>
+                                                    </div>
+                                                    {/* Info */}
+                                                    <div className="flex-1 min-w-0 flex flex-col justify-between h-20 py-0.5">
+                                                        <div>
+                                                            <h4 className="font-bold text-zinc-100 text-sm truncate">{product.title}</h4>
+                                                            <p className="text-[10px] text-zinc-500 truncate mt-0.5">{product.brand} • {product.gender}</p>
+                                                        </div>
+                                                        <div className="flex items-end justify-between mt-auto">
+                                                            <p className="text-sm font-bold text-white tracking-tight">Rs {product.starting_price}</p>
+                                                            <div className="flex gap-3 pr-1">
+                                                                <button onClick={() => handleEdit(product)} className="text-zinc-400 p-1 active:scale-95"><Edit3 size={16} /></button>
+                                                                <button onClick={() => handleDelete(product.id)} className="text-red-400 p-1 active:scale-95"><Trash2 size={16} /></button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+
+                                    {/* --- DESKTOP GRID VIEW --- */}
+                                    <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 md:gap-6">
+                                        {products.map(product => {
+                                            const allImages = getProductAllImages(product);
+                                            const activeImgIdx = cardActiveImageIndex[product.id] || 0;
+                                            const currentImgUrl = allImages[activeImgIdx] || product.main_image_url;
+
+                                            return (
+                                                <div key={product.id} className="bg-[#09090b] border border-white/5 rounded-3xl overflow-hidden hover:border-white/10 transition-all duration-300 flex flex-col group">
+                                                    <div className="h-52 bg-[#18181b] relative overflow-hidden flex items-center justify-center group-hover:bg-[#27272a] transition-colors">
+                                                        {currentImgUrl ? (
+                                                            <img src={currentImgUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                                        ) : (
+                                                            <Camera size={30} className="text-zinc-700" />
+                                                        )}
+                                                        
+                                                        {/* Status Pill */}
+                                                        <div className="absolute top-3 right-3">
+                                                            {(product.status as any) === 'uploading' ? (
+                                                                <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-full px-2.5 py-1 flex items-center gap-1.5">
+                                                                    <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
+                                                                    <span className="text-[9px] font-bold text-amber-500 tracking-wider">UPLOADING</span>
+                                                                </div>
+                                                            ) : (
+                                                                <div className={`bg-black/60 backdrop-blur-md border border-white/10 rounded-full px-2.5 py-1 ${product.status === 'available' ? 'text-emerald-400' : 'text-zinc-400'}`}>
+                                                                    <span className="text-[9px] font-bold tracking-wider">{product.status.toUpperCase()}</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Image dots */}
+                                                        {allImages.length > 1 && (
+                                                            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1">
+                                                                {allImages.map((_, idx) => (
+                                                                    <div key={idx} onClick={(e) => { e.stopPropagation(); setCardActiveImageIndex(p => ({...p, [product.id]: idx})); }} className={`h-1.5 rounded-full transition-all cursor-pointer ${activeImgIdx === idx ? 'w-4 bg-white' : 'w-1.5 bg-white/30'}`} />
+                                                                ))}
                                                             </div>
                                                         )}
                                                     </div>
 
-                                                    {/* Image dots */}
-                                                    {allImages.length > 1 && (
-                                                        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1">
-                                                            {allImages.map((_, idx) => (
-                                                                <div key={idx} onClick={(e) => { e.stopPropagation(); setCardActiveImageIndex(p => ({...p, [product.id]: idx})); }} className={`h-1.5 rounded-full transition-all cursor-pointer ${activeImgIdx === idx ? 'w-4 bg-white' : 'w-1.5 bg-white/30'}`} />
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                <div className="p-4 flex-1 flex flex-col justify-between">
-                                                    <div>
-                                                        <h4 className="font-semibold text-zinc-100 text-sm line-clamp-1">{product.title}</h4>
-                                                        <p className="text-[10px] text-zinc-500 mt-1 line-clamp-1">{product.brand} • {product.gender}</p>
-                                                    </div>
-                                                    <div className="mt-4 flex items-end justify-between">
+                                                    <div className="p-4 flex-1 flex flex-col justify-between">
                                                         <div>
-                                                            <p className="text-[9px] text-zinc-500 uppercase font-semibold">Price</p>
-                                                            <p className="text-sm font-bold text-white">Rs {product.starting_price}</p>
+                                                            <h4 className="font-semibold text-zinc-100 text-sm line-clamp-1">{product.title}</h4>
+                                                            <p className="text-[10px] text-zinc-500 mt-1 line-clamp-1">{product.brand} • {product.gender}</p>
                                                         </div>
-                                                        <div className="flex gap-1">
-                                                            <button onClick={() => handleEdit(product)} className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-zinc-400 transition-colors">
-                                                                <Edit3 size={12} />
-                                                            </button>
-                                                            <button onClick={() => handleDelete(product.id)} className="w-7 h-7 rounded-full bg-red-500/10 hover:bg-red-500/20 flex items-center justify-center text-red-400 transition-colors">
-                                                                <Trash2 size={12} />
-                                                            </button>
+                                                        <div className="mt-4 flex items-end justify-between">
+                                                            <div>
+                                                                <p className="text-[9px] text-zinc-500 uppercase font-semibold">Price</p>
+                                                                <p className="text-sm font-bold text-white">Rs {product.starting_price}</p>
+                                                            </div>
+                                                            <div className="flex gap-1">
+                                                                <button onClick={() => handleEdit(product)} className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-zinc-400 transition-colors">
+                                                                    <Edit3 size={12} />
+                                                                </button>
+                                                                <button onClick={() => handleDelete(product.id)} className="w-7 h-7 rounded-full bg-red-500/10 hover:bg-red-500/20 flex items-center justify-center text-red-400 transition-colors">
+                                                                    <Trash2 size={12} />
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </>
                             )}
                         </div>
                     )}
@@ -1838,6 +1884,16 @@ const WhatsAppDashboard = () => {
                 ))}
             </div>
 
+            {/* Mobile FAB for New Product */}
+            {subTab === 'products' && !showAddModal && (
+                <button 
+                    onClick={() => { resetForm(); setShowAddModal(true); }}
+                    className="md:hidden fixed bottom-[85px] right-4 w-14 h-14 bg-white rounded-full flex items-center justify-center text-black shadow-[0_8px_30px_rgb(0,0,0,0.5)] z-40 active:scale-95 transition-transform"
+                >
+                    <Plus size={24} strokeWidth={2.5} />
+                </button>
+            )}
+
             {/* Media Preview Modal */}
             {activeMediaPreview && (
                 <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4" onClick={() => setActiveMediaPreview(null)}>
@@ -1863,7 +1919,7 @@ const WhatsAppDashboard = () => {
             {showAddModal && (
                 <div className="fixed inset-0 z-50 flex justify-end">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={resetForm} />
-                    <div className="w-full md:w-[600px] bg-[#09090b] h-full flex flex-col relative z-10 shadow-2xl border-l border-white/5 animate-in slide-in-from-right duration-300">
+                    <div className="w-full md:w-[600px] bg-[#09090b] h-full flex flex-col relative z-10 shadow-2xl md:border-l border-white/5 animate-in md:slide-in-from-right slide-in-from-bottom duration-300">
                         <div className="h-16 flex items-center justify-between px-6 border-b border-white/5 shrink-0 bg-[#09090b]">
                             <h2 className="text-lg font-bold text-white">{editingProduct ? 'Edit Product' : 'New Product'}</h2>
                             <button onClick={resetForm} className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-zinc-400">
@@ -1883,26 +1939,26 @@ const WhatsAppDashboard = () => {
                                 <div className="space-y-5 animate-in fade-in duration-300">
                                     <div>
                                         <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Product Title</label>
-                                        <input type="text" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white focus:border-white/20 focus:ring-1 focus:ring-white/20 outline-none transition-all" placeholder="e.g. Nike Air Max" />
+                                        <input type="text" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-4 md:py-3 text-base md:text-sm text-white focus:border-white/20 focus:ring-1 focus:ring-white/20 outline-none transition-all" placeholder="e.g. Nike Air Max" />
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Starting Price</label>
-                                            <input type="number" value={formData.starting_price} onChange={e => setFormData({ ...formData, starting_price: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none" />
+                                            <input type="number" value={formData.starting_price} onChange={e => setFormData({ ...formData, starting_price: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-4 md:py-3 text-base md:text-sm text-white outline-none" />
                                         </div>
                                         <div>
                                             <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Min Price</label>
-                                            <input type="number" value={formData.minimum_price} onChange={e => setFormData({ ...formData, minimum_price: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none" />
+                                            <input type="number" value={formData.minimum_price} onChange={e => setFormData({ ...formData, minimum_price: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-4 md:py-3 text-base md:text-sm text-white outline-none" />
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Brand</label>
-                                            <input type="text" value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none" />
+                                            <input type="text" value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-4 md:py-3 text-base md:text-sm text-white outline-none" />
                                         </div>
                                         <div>
                                             <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Gender</label>
-                                            <select value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none appearance-none">
+                                            <select value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-4 md:py-3 text-base md:text-sm text-white outline-none appearance-none">
                                                 <option value="men">Men</option>
                                                 <option value="women">Women</option>
                                                 <option value="unisex">Unisex</option>
@@ -1917,15 +1973,15 @@ const WhatsAppDashboard = () => {
                                 <div className="space-y-5 animate-in fade-in duration-300">
                                     <div>
                                         <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Original Size</label>
-                                        <input type="text" value={formData.size_original} onChange={e => setFormData({ ...formData, size_original: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none" />
+                                        <input type="text" value={formData.size_original} onChange={e => setFormData({ ...formData, size_original: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-4 md:py-3 text-base md:text-sm text-white outline-none" />
                                     </div>
                                     <div>
                                         <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Color</label>
-                                        <input type="text" value={formData.color} onChange={e => setFormData({ ...formData, color: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none" />
+                                        <input type="text" value={formData.color} onChange={e => setFormData({ ...formData, color: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-4 md:py-3 text-base md:text-sm text-white outline-none" />
                                     </div>
                                     <div>
                                         <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Description / Condition</label>
-                                        <textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} rows={4} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none resize-none custom-scrollbar" />
+                                        <textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} rows={4} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-4 md:py-3 text-base md:text-sm text-white outline-none resize-none custom-scrollbar" />
                                     </div>
                                 </div>
                             )}
