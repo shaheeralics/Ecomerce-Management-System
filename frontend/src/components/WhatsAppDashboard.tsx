@@ -434,7 +434,7 @@ const WhatsAppDashboard = () => {
             }
         } catch (err) {
             console.error('Transcription error:', err);
-            setTranscriptionText("Failed to transcribe via Gemini API.");
+            setTranscriptionText("Failed to transcribe via OpenAI API.");
         } finally {
             setIsTranscribing(false);
         }
