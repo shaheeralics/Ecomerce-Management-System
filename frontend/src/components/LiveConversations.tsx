@@ -65,18 +65,6 @@ export default function LiveConversations() {
         loadConversations();
         const interval = setInterval(loadConversations, 5000);
 
-        const filteredConversations = conversations.filter((c: any) => {
-        if (filter === 'unread') return c.unread_count && c.unread_count > 0;
-        if (filter === 'open') return c.status === 'bot_active';
-        if (filter === 'closed') return c.status === 'human_takeover';
-        return true;
-    }).filter(c => {
-        if (searchQuery) {
-            const s = searchQuery.toLowerCase();
-            return c.customer_phone.includes(s) || (c.customer_name && c.customer_name.toLowerCase().includes(s)) || (c.known_slots && JSON.stringify(c.known_slots).toLowerCase().includes(s));
-        }
-        return true;
-    });
 
     return () => clearInterval(interval);
     }, []);
@@ -218,7 +206,7 @@ export default function LiveConversations() {
                                 <p>No conversations found</p>
                             </div>
                         ) : (
-                            filteredConversations.map(conv => (
+                            filteredConvs.map(conv => (
                                 <div 
                                     key={conv.id} 
                                     onClick={() => { setActiveConvId(conv.id); setShowProfile(false); }}
@@ -393,7 +381,7 @@ export default function LiveConversations() {
                         ) : conversations.length === 0 ? (
                             <div className="p-8 text-center text-zinc-500 text-sm">No chats found</div>
                         ) : (
-                            filteredConversations.map(conv => (
+                            filteredConvs.map(conv => (
                                 <div 
                                     key={conv.id} 
                                     onClick={() => { setActiveConvId(conv.id); setShowProfile(false); }}

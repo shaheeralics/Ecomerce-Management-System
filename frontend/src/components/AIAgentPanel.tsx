@@ -353,78 +353,68 @@ export default function AIAgentPanel() {
 
     if (activeMobileView === 'chat') {
         return (
-            <div className="absolute inset-0 z-50 bg-[#030712] flex flex-col animate-in slide-in-from-right duration-200 md:hidden">
-                <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-2 justify-between shrink-0 shadow-sm">
-                    <button onClick={() => setActiveMobileView(null)} className="p-3 text-indigo-400 active:opacity-50 flex items-center gap-1">
-                        <ChevronLeft size={24} /> <span className="font-semibold">Back</span>
+            <div className="absolute inset-0 z-50 bg-[#0b141a] flex flex-col animate-in slide-in-from-right duration-200 md:hidden">
+                <div className="h-14 bg-[#202c33] flex items-center px-2 justify-between shrink-0 shadow-sm">
+                    <button onClick={() => setActiveMobileView(null)} className="p-2 text-white active:opacity-50 flex items-center gap-1">
+                        <ChevronLeft size={28} />
+                        <div className="w-9 h-9 rounded-full bg-indigo-500/20 flex items-center justify-center overflow-hidden border border-white/10">
+                            <Bot size={20} className="text-indigo-200"/>
+                        </div>
                     </button>
-                    <button onClick={clearChat} className="p-3 text-red-400 active:opacity-50 flex items-center gap-1">
+                    <button onClick={clearChat} className="p-3 text-white/80 active:opacity-50">
                         <Trash2 size={20} />
                     </button>
                 </div>
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-[#030712]">
-                    {messages.length === 0 && (
-                        <div className="flex flex-col items-center justify-center h-full opacity-50">
-                            <Bot size={40} className="text-zinc-500 mb-2" />
-                            <p className="text-sm text-zinc-400">Send a message to test agent</p>
-                        </div>
-                    )}
-                    {messages.map(msg => (
-                        <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-sm ${
-                                msg.role === 'user' ? 'bg-[#18181b] border border-white/5 text-zinc-200 rounded-tl-sm'
-                                : 'bg-white text-black rounded-tr-sm font-medium'
-                            }`}>
-                                {msg.mediaType === 'audio' && msg.mediaUrl && (
-                                    <button onClick={() => toggleAudioPlay(msg.id, msg.mediaUrl!)} className="flex items-center gap-2 p-2 bg-black/10 rounded-lg">
-                                        {playingAudioId === msg.id ? <Pause size={14} /> : <Play size={14} />} Audio
-                                    </button>
-                                )}
-                                {msg.content && <p className="whitespace-pre-wrap">{msg.content}</p>}
-                                <p className="text-[10px] mt-1 opacity-50 text-right">{msg.timestamp.toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'})}</p>
+                <div className="flex-1 overflow-y-auto p-2 bg-[#0b141a] relative custom-scrollbar">
+                    <div className="relative z-10 space-y-2">
+                        {messages.length === 0 && (
+                            <div className="flex justify-center mt-4">
+                                <span className="bg-[#182229] text-[#8696a0] text-[11px] font-bold px-3 py-1 rounded-lg shadow-sm">Today</span>
                             </div>
-                        </div>
-                    ))}
-                    {sending && (
-                        <div className="flex justify-start">
-                            <div className="bg-white text-black rounded-2xl rounded-tr-sm px-4 py-3 text-sm font-medium opacity-70">
-                                Thinking...
+                        )}
+                        {messages.map(msg => (
+                            <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} w-full`}>
+                                <div className={`max-w-[85%] rounded-lg px-2 pt-2 pb-1 text-[15px] shadow-sm relative ${
+                                    msg.role === 'user' ? 'bg-[#005c4b] text-[#e9edef] rounded-tr-none'
+                                    : 'bg-[#202c33] text-[#e9edef] rounded-tl-none'
+                                }`}>
+                                    {msg.content && <p className="whitespace-pre-wrap leading-tight">{msg.content}</p>}
+                                    <div className="text-[10px] text-right mt-1 opacity-60 flex justify-end items-center gap-1 float-right ml-3">
+                                        {msg.timestamp.toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'})}
+                                    </div>
+                                    <div className="clear-both" />
+                                </div>
                             </div>
-                        </div>
-                    )}
-                    <div ref={chatEndRef} />
+                        ))}
+                        {sending && (
+                            <div className="flex justify-start w-full">
+                                <div className="bg-[#202c33] text-[#e9edef] rounded-lg rounded-tl-none px-3 py-2 text-[13px] shadow-sm italic opacity-70">
+                                    Typing...
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    <div ref={chatEndRef} className="h-4" />
                 </div>
-                <div className="p-2 pb-safe border-t border-white/5 bg-[#09090b] flex items-end gap-2 w-full">
-                    {isRecording ? (
-                        <div className="flex-1 flex items-center gap-3 bg-red-950/40 border border-red-800/40 rounded-[24px] px-4 py-2 min-h-[44px]">
-                            <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
-                            <span className="text-base text-red-300">{formatTime(recordingTime)}</span>
-                            <div className="flex-1 text-right">
-                                <button onClick={stopRecording} className="text-red-400 font-bold p-1"><Square size={20}/></button>
-                            </div>
-                        </div>
+                <div className="p-1.5 pb-safe bg-[#0b141a] flex items-end gap-1.5 w-full shrink-0">
+                    <div className="flex-1 bg-[#2a2f32] rounded-3xl min-h-[44px] max-h-[100px] overflow-y-auto flex items-end px-4 py-2.5 shadow-sm">
+                        <input 
+                            type="text" 
+                            value={inputText}
+                            onChange={e => setInputText(e.target.value)}
+                            onKeyDown={e => e.key === 'Enter' && handleSendText()}
+                            placeholder="Message" 
+                            className="w-full bg-transparent text-[15px] text-zinc-100 outline-none leading-tight"
+                        />
+                    </div>
+                    {inputText ? (
+                        <button onClick={handleSendText} className="w-[44px] h-[44px] rounded-full bg-[#00a884] text-white flex items-center justify-center shrink-0 shadow-md active:scale-95 transition-transform">
+                            <Send size={20} className="ml-0.5" />
+                        </button>
                     ) : (
-                        <>
-                            <div className="flex-1 bg-[#18181b] border border-white/5 rounded-[24px] min-h-[44px] flex items-center px-4 py-2">
-                                <input 
-                                    type="text" 
-                                    value={inputText}
-                                    onChange={e => setInputText(e.target.value)}
-                                    onKeyDown={e => e.key === 'Enter' && handleSendText()}
-                                    placeholder="Message..." 
-                                    className="w-full bg-transparent text-base text-zinc-100 outline-none"
-                                />
-                            </div>
-                            {inputText ? (
-                                <button onClick={handleSendText} className="bg-indigo-500 text-white p-3 rounded-full font-bold active:scale-95 shrink-0 shadow-lg">
-                                    <Send size={20} className="ml-0.5" />
-                                </button>
-                            ) : (
-                                <button onClick={startRecording} className="p-3 text-zinc-400 active:text-white shrink-0">
-                                    <Mic size={24} />
-                                </button>
-                            )}
-                        </>
+                        <button className="w-[44px] h-[44px] rounded-full bg-[#00a884] text-white flex items-center justify-center shrink-0 shadow-md active:scale-95 transition-transform">
+                            <Mic size={20} />
+                        </button>
                     )}
                 </div>
             </div>
