@@ -1,189 +1,3 @@
-import { useState, useEffect, useRef } from 'react';
-import { Search, ChevronLeft, MoreVertical, Paperclip, Image as ImageIcon, FileText, Smile, Mic, Send, MapPin, Phone, Mail, ShoppingBag, User, XCircle, Bot, UserCheck } from 'lucide-react';
-import OrderDetailPage from './OrderDetailPage'; // Assuming this exists for modal
-import AddOrderModal from './AddOrderModal';
-
-interface Conversation {
-    id: number;
-    customer_phone: string;
-    customer_name?: string;
-    status: string;
-    known_slots?: any;
-    updated_at: string;
-}
-
-interface Message {
-    id: number;
-    sender: 'customer' | 'agent' | 'human';
-    type: string;
-    text_content?: string;
-    media_url?: string;
-    created_at: string;
-}
-
-export default function LiveConversations() {
-    const [conversations, setConversations] = useState<Conversation[]>([]);
-    const [activeConvId, setActiveConvId] = useState<number | null>(null);
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [recentOrders, setRecentOrders] = useState<any[]>([]);
-    const [filter, setFilter] = useState<'all'|'unread'|'open'|'closed'>('all');
-    const [search, setSearch] = useState('');
-    const [composeText, setComposeText] = useState('');
-    const [loading, setLoading] = useState(true);
-    const [errorMsg, setErrorMsg] = useState('');
-    
-    // Modals
-    const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
-    const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
-    const [isCreateOrderOpen, setIsCreateOrderOpen] = useState(false);
-    
-    // Profile View State
-    const [showProfile, setShowProfile] = useState(false);
-    
-    const messagesEndRef = useRef<HTMLDivElement>(null);
-
-    // Fetch conversations
-    const loadConversations = async () => {
-        try {
-            const res = await fetch('/api/conversations');
-            const data = await res.json();
-            if (data.data) {
-                setConversations(data.data);
-            } else {
-                setErrorMsg(data.error || 'Failed to fetch conversations');
-            }
-        } catch (e) {
-            console.error(e);
-            setErrorMsg('Network error while fetching conversations');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        loadConversations();
-        const interval = setInterval(loadConversations, 5000);
-        const conversations = conversations.filter((c: any) => {
-        if (filter === 'unread') return c.unread_count && c.unread_count > 0;
-        if (filter === 'open') return c.status === 'bot_active';
-        if (filter === 'closed') return c.status === 'human_takeover';
-        return true;
-    }).filter(c => {
-        if (searchQuery) {
-            const s = searchQuery.toLowerCase();
-            return c.customer_phone.includes(s) || (c.customer_name && c.customer_name.toLowerCase().includes(s)) || (c.known_slots && JSON.stringify(c.known_slots).toLowerCase().includes(s));
-        }
-        return true;
-    });
-
-    return () => clearInterval(interval);
-    }, []);
-
-    // Fetch messages & orders for active conversation
-    useEffect(() => {
-        if (!activeConvId) return;
-        let isFirstLoad = true;
-        const loadActiveData = async () => {
-            try {
-                // Fetch Messages
-                const res = await fetch(`/api/conversations/${activeConvId}/messages`);
-                const data = await res.json();
-                if (data.data) {
-                    setMessages(prev => {
-                        const prevLastMsgId = prev.length > 0 ? prev[prev.length - 1].id : null;
-                        const newLastMsgId = data.data.length > 0 ? data.data[data.data.length - 1].id : null;
-
-                        if (isFirstLoad || prevLastMsgId !== newLastMsgId) {
-                            setTimeout(() => {
-                                messagesEndRef.current?.scrollIntoView({ behavior: isFirstLoad ? 'auto' : 'smooth' });
-                            }, 50);
-                        }
-                        return data.data;
-                    });
-                    isFirstLoad = false;
-                }
-            } catch (e) { console.error(e); }
-        };
-        loadActiveData();
-        const interval = setInterval(loadActiveData, 3000);
-        return () => clearInterval(interval);
-    }, [activeConvId]);
-
-    // Fetch orders when conversation changes
-    useEffect(() => {
-        if (!activeConvId) return;
-        const conv = conversations.find(c => c.id === activeConvId);
-        if (!conv) return;
-        const loadOrders = async () => {
-            try {
-                const res = await fetch(`/api/orders/customers/${encodeURIComponent(conv.customer_phone)}/orders`);
-                const data = await res.json();
-                if (data.success) {
-                    setRecentOrders(data.data);
-                }
-            } catch (e) { console.error(e); }
-        };
-        loadOrders();
-    }, [activeConvId, conversations]);
-
-    const activeConv = conversations.find(c => c.id === activeConvId);
-    let knownSlots = activeConv?.known_slots;
-    if (typeof knownSlots === 'string') {
-        try { knownSlots = JSON.parse(knownSlots); } catch (e) {}
-    }
-    const customerName = activeConv?.customer_name || knownSlots?.name || `Customer ${activeConv?.id || ''}`;
-    
-    const handleSend = async () => {
-        if (!composeText.trim() || !activeConvId) return;
-        const text = composeText;
-        setComposeText('');
-        try {
-            await fetch(`/api/conversations/${activeConvId}/reply`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type: 'text', content: text })
-            });
-            // Instantly append local message
-            setMessages(prev => [...prev, { id: Date.now(), sender: 'human', type: 'text', text_content: text, created_at: new Date().toISOString() }]);
-            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
-    const handleToggleTakeover = async () => {
-        if (!activeConvId) return;
-        const currentConv = conversations.find(c => c.id === activeConvId);
-        const isCurrentlyTakeover = currentConv?.status === 'human_takeover';
-        const newStatus = isCurrentlyTakeover ? 'agent_active' : 'human_takeover';
-
-        try {
-            // Optimistically update conversation state immediately
-            setConversations(prev => prev.map(c => c.id === activeConvId ? { ...c, status: newStatus } : c));
-
-            await fetch(`/api/conversations/${activeConvId}/status`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: newStatus })
-            });
-            loadConversations();
-        } catch (e) {
-            console.error('Failed to update conversation status:', e);
-            loadConversations();
-        }
-    };
-
-    const filteredConvs = conversations.filter((c: any) => {
-        if (filter === 'open' && c.status === 'closed') return false;
-        if (filter === 'closed' && c.status !== 'closed') return false;
-        // Search
-        if (search) {
-            const s = search.toLowerCase();
-            return c.customer_phone.includes(s) || (c.customer_name && c.customer_name.toLowerCase().includes(s)) || (c.known_slots && JSON.stringify(c.known_slots).toLowerCase().includes(s));
-        }
-        return true;
-    });
-
     return (
         <div className="h-full w-full bg-[#030712] text-zinc-100 flex font-sans overflow-hidden">
             
@@ -210,13 +24,13 @@ export default function LiveConversations() {
                     <div className="flex-1 overflow-y-auto custom-scrollbar relative">
                         {loading ? (
                             <div className="p-8 text-center text-zinc-500 text-sm">Loading conversations...</div>
-                        ) : conversations.length === 0 ? (
+                        ) : filteredConversations.length === 0 ? (
                             <div className="p-8 text-center text-zinc-500 text-sm flex flex-col items-center">
                                 <MessageSquare size={32} className="mb-3 text-zinc-700" />
                                 <p>No conversations found</p>
                             </div>
                         ) : (
-                            conversations.map(conv => (
+                            filteredConversations.map(conv => (
                                 <div 
                                     key={conv.id} 
                                     onClick={() => { setActiveConvId(conv.id); setShowProfile(false); }}
@@ -229,7 +43,7 @@ export default function LiveConversations() {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex justify-between items-start mb-1">
-                                            <h4 className="font-bold text-sm text-zinc-100 truncate">{conv.customer_name || conv.customer_phone}</h4>
+                                            <h4 className="font-bold text-sm text-zinc-100 truncate">{conv.customer_name || conv.phone_number}</h4>
                                             {conv.last_message_at && (
                                                 <span className="text-[10px] text-zinc-500 shrink-0">{new Date(conv.last_message_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                                             )}
@@ -265,8 +79,8 @@ export default function LiveConversations() {
                                 {/* Chat Messages */}
                                 <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar bg-[#030712]">
                                     {messages.map((msg, idx) => {
-                                        const isCustomer = msg.sender === 'customer';
-                                        const isAgent = msg.sender === 'agent';
+                                        const isCustomer = msg.direction === 'inbound';
+                                        const isAgent = msg.direction === 'agent';
                                         
                                         return (
                                             <div key={msg.id || idx} className={`flex flex-col mb-4 ${isCustomer ? 'items-start' : 'items-end'}`}>
@@ -388,10 +202,10 @@ export default function LiveConversations() {
                     <div className="flex-1 overflow-y-auto w-full custom-scrollbar pt-2 pb-[85px]">
                         {loading ? (
                             <div className="p-8 text-center text-zinc-500 text-sm">Loading chats...</div>
-                        ) : conversations.length === 0 ? (
+                        ) : filteredConversations.length === 0 ? (
                             <div className="p-8 text-center text-zinc-500 text-sm">No chats found</div>
                         ) : (
-                            conversations.map(conv => (
+                            filteredConversations.map(conv => (
                                 <div 
                                     key={conv.id} 
                                     onClick={() => { setActiveConvId(conv.id); setShowProfile(false); }}
@@ -402,7 +216,7 @@ export default function LiveConversations() {
                                     </div>
                                     <div className="flex-1 min-w-0 flex flex-col justify-center">
                                         <div className="flex justify-between items-center mb-0.5">
-                                            <h4 className="font-bold text-base text-zinc-100 truncate pr-2">{conv.customer_name || conv.customer_phone}</h4>
+                                            <h4 className="font-bold text-base text-zinc-100 truncate pr-2">{conv.customer_name || conv.phone_number}</h4>
                                             {conv.last_message_at && (
                                                 <span className="text-xs text-zinc-500 shrink-0">{new Date(conv.last_message_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                                             )}
@@ -443,8 +257,8 @@ export default function LiveConversations() {
 
                         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-[#030712]">
                             {messages.map((msg, idx) => {
-                                const isCustomer = msg.sender === 'customer';
-                                const isAgent = msg.sender === 'agent';
+                                const isCustomer = msg.direction === 'inbound';
+                                const isAgent = msg.direction === 'agent';
                                 
                                 return (
                                     <div key={msg.id || idx} className={`flex flex-col mb-4 ${isCustomer ? 'items-start' : 'items-end'}`}>

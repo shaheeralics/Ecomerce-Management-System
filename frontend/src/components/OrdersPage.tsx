@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { 
     Search, Filter, 
     CheckCircle, Clock, Truck, XCircle,
-    ShoppingBag, CreditCard, Box, Activity, Plus, Trash2, MoreVertical
+    ShoppingBag, CreditCard, Box, Activity, Plus, Trash2, MoreVertical, ChevronLeft
 } from 'lucide-react';
 import AddOrderModal from './AddOrderModal';
 import OrderDetailPage from './OrderDetailPage';
@@ -114,323 +114,171 @@ export default function OrdersPage() {
     };
 
     const getStatusColor = (status: string) => {
-        const s = status.toLowerCase();
-        if (s === 'delivered') return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
-        if (s === 'shipped' || s === 'processing' || s === 'confirmed') return 'text-blue-400 bg-blue-400/10 border-blue-400/20';
-        if (s === 'cancelled' || s === 'trashed') return 'text-red-400 bg-red-400/10 border-red-400/20';
-        return 'text-amber-400 bg-amber-400/10 border-amber-400/20';
+        const s = status?.toLowerCase() || '';
+        if (s === 'delivered') return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+        if (s === 'shipped' || s === 'processing' || s === 'confirmed') return 'text-blue-400 bg-blue-500/10 border-blue-500/20';
+        if (s === 'cancelled' || s === 'trashed') return 'text-red-400 bg-red-500/10 border-red-500/20';
+        return 'text-amber-400 bg-amber-500/10 border-amber-500/20';
     };
 
+    // Render Full Screen Mobile Native UI if selectedOrder or isAddOrderOpen
+    if (isAddOrderOpen || selectedOrder) {
+        return (
+            <div className="flex flex-col w-full h-[100dvh] md:h-full bg-[#030712] absolute inset-0 z-50 animate-in slide-in-from-right duration-200">
+                <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center justify-between px-4 shrink-0 shadow-sm">
+                    <button 
+                        onClick={() => { setIsAddOrderOpen(false); setSelectedOrder(null); setOrderToEdit(null); }} 
+                        className="text-indigo-400 active:opacity-50 p-2 -m-2 flex items-center gap-1"
+                    >
+                        <ChevronLeft size={24} /> <span className="text-base font-semibold md:hidden">Back</span>
+                    </button>
+                    <h1 className="text-base font-bold text-white hidden md:block">{selectedOrder ? `Order #${selectedOrder.id}` : (orderToEdit ? 'Edit Order' : 'New Order')}</h1>
+                    <div className="w-10"></div> {/* Spacer for center alignment */}
+                </div>
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                    {selectedOrder ? (
+                        <OrderDetailPage orderId={selectedOrder.id} onBack={() => setSelectedOrder(null)} onOrderUpdated={fetchOrders} />
+                    ) : (
+                        <AddOrderModal 
+                            isOpen={isAddOrderOpen} 
+                            onClose={() => { setIsAddOrderOpen(false); setOrderToEdit(null); }} 
+                            onSuccess={fetchOrders} 
+                            editOrder={orderToEdit}
+                            
+                        />
+                    )}
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="space-y-6 pb-10 relative">
-
-            {/* ===== ORDER DETAIL VIEW ===== */}
-            {selectedOrder && (
-                <OrderDetailPage
-                    orderId={selectedOrder.id}
-                    onBack={() => { setSelectedOrder(null); fetchOrders(); }}
-                    onOrderUpdated={fetchOrders}
-                />
-            )}
-
-            {/* ===== ORDERS LIST VIEW ===== */}
-            {!selectedOrder && (
-                <>
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-4 pb-4 border-b border-teal-900/30 print:hidden">
-                        <div>
-                            <h3 className="text-base md:text-lg md:text-2xl font-bold text-slate-100 tracking-tight">Orders</h3>
-                            <p className="text-slate-400 text-xs mt-1">Manage customer orders, status, payment, delivery and receipts.</p>
-                        </div>
-                        <div className="flex gap-3">
-                            <button onClick={() => { setOrderToEdit(null); setIsAddOrderOpen(true); }} className="bg-teal-600 hover:bg-teal-500 text-white px-4 py-2 rounded-xl font-bold text-xs transition-colors flex items-center gap-2 shadow-lg shadow-teal-600/20">
-                                <Plus size={16} /> Add New Order
-                            </button>
-                            <button onClick={fetchOrders} className="bg-[#09181E] border border-teal-900/40 text-teal-400 hover:text-white px-4 py-2 rounded-xl font-semibold text-xs transition-colors flex items-center gap-2">
-                                <Activity size={16} /> Refresh
-                            </button>
-                        </div>
+        <div className="h-full w-full bg-[#030712] flex flex-col relative overflow-hidden font-sans">
+            {/* Desktop Filters Header (Hidden on Mobile for cleaner direct list) */}
+            <div className="hidden md:flex p-4 md:p-6 pb-2 items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                    <h1 className="text-xl font-bold text-white hidden md:block">Orders</h1>
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-zinc-500" size={16} />
+                        <input 
+                            type="text" 
+                            placeholder="Search orders..." 
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                            className="bg-[#09090b] border border-white/5 rounded-xl pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-white/20 w-48 transition-all"
+                        />
                     </div>
+                    <select 
+                        value={statusFilter}
+                        onChange={e => setStatusFilter(e.target.value)}
+                        className="bg-[#09090b] border border-white/5 rounded-xl px-4 py-2 text-sm text-white focus:outline-none appearance-none"
+                    >
+                        <option value="all">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <button 
+                    onClick={() => setIsAddOrderOpen(true)}
+                    className="bg-white text-black hover:bg-zinc-200 px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2"
+                >
+                    <Plus size={16} /> New Order
+                </button>
+            </div>
 
-                    {/* Summary Cards */}
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 print:hidden">
-                        <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-2 md:p-4 flex flex-col justify-between shadow-lg">
-                            <div className="flex justify-between items-start mb-2">
-                                <div className="p-2 bg-teal-900/20 rounded-lg text-teal-400"><ShoppingBag size={18} /></div>
-                            </div>
-                            <div>
-                                <h4 className="text-base md:text-xl font-bold text-slate-100">{stats.total}</h4>
-                                <p className="text-[10px] text-slate-400 font-medium">Total Orders</p>
-                            </div>
-                        </div>
-                        <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-2 md:p-4 flex flex-col justify-between shadow-lg">
-                            <div className="flex justify-between items-start mb-2">
-                                <div className="p-2 bg-emerald-900/20 rounded-lg text-emerald-400"><Activity size={18} /></div>
-                            </div>
-                            <div>
-                                <h4 className="text-base md:text-xl font-bold text-slate-100">{formatCurrency(stats.revenue || 0)}</h4>
-                                <p className="text-[10px] text-slate-400 font-medium">Total Revenue</p>
-                            </div>
-                        </div>
-                        <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-2 md:p-4 flex flex-col justify-between shadow-lg">
-                            <div className="flex justify-between items-start mb-2">
-                                <div className="p-2 bg-amber-900/20 rounded-lg text-amber-400"><Clock size={18} /></div>
-                            </div>
-                            <div>
-                                <h4 className="text-base md:text-xl font-bold text-slate-100">{stats.pending}</h4>
-                                <p className="text-[10px] text-slate-400 font-medium">Pending</p>
-                            </div>
-                        </div>
-                        <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-2 md:p-4 flex flex-col justify-between shadow-lg">
-                            <div className="flex justify-between items-start mb-2">
-                                <div className="p-2 bg-blue-900/20 rounded-lg text-blue-400"><Truck size={18} /></div>
-                            </div>
-                            <div>
-                                <h4 className="text-base md:text-xl font-bold text-slate-100">{stats.processing}</h4>
-                                <p className="text-[10px] text-slate-400 font-medium">Processing</p>
-                            </div>
-                        </div>
-                        <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-2 md:p-4 flex flex-col justify-between shadow-lg">
-                            <div className="flex justify-between items-start mb-2">
-                                <div className="p-2 bg-emerald-900/20 rounded-lg text-emerald-400"><CheckCircle size={18} /></div>
-                            </div>
-                            <div>
-                                <h4 className="text-base md:text-xl font-bold text-slate-100">{stats.delivered}</h4>
-                                <p className="text-[10px] text-slate-400 font-medium">Delivered</p>
-                            </div>
-                        </div>
-                        <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-2 md:p-4 flex flex-col justify-between shadow-lg">
-                            <div className="flex justify-between items-start mb-2">
-                                <div className="p-2 bg-red-900/20 rounded-lg text-red-400"><XCircle size={18} /></div>
-                            </div>
-                            <div>
-                                <h4 className="text-base md:text-xl font-bold text-slate-100">{stats.cancelled}</h4>
-                                <p className="text-[10px] text-slate-400 font-medium">Cancelled</p>
-                            </div>
-                        </div>
-                    </div>
+            {/* Mobile Sticky Add Order Button (Instead of top header) */}
+            <button 
+                onClick={() => setIsAddOrderOpen(true)}
+                className="md:hidden fixed bottom-24 right-4 w-14 h-14 bg-indigo-500 rounded-full flex items-center justify-center text-white shadow-[0_8px_30px_rgb(99,102,241,0.4)] z-40 active:scale-95 transition-transform"
+            >
+                <Plus size={28} strokeWidth={2.5} />
+            </button>
 
-                    {/* Filter Bar */}
-                    <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl p-2 md:p-4 shadow-lg flex flex-wrap gap-4 items-center print:hidden">
-                        <div className="flex-1 min-w-[200px] relative">
-                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                            <input 
-                                type="text" 
-                                placeholder="Search order #, name, phone..." 
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full bg-[#050D10] border border-teal-900/50 rounded-xl pl-9 pr-4 py-2 text-xs md:text-sm text-slate-100 outline-none focus:ring-2 focus:ring-teal-500 transition-all"
-                            />
-                        </div>
-                        <div className="flex gap-4">
-                            <div className="flex items-center gap-2 bg-[#050D10] border border-teal-900/50 rounded-xl px-3 py-2">
-                                <Filter size={14} className="text-teal-400" />
-                                <select 
-                                    value={statusFilter}
-                                    onChange={(e) => setStatusFilter(e.target.value)}
-                                    className="bg-transparent text-xs md:text-sm text-slate-200 outline-none cursor-pointer"
-                                >
-                                    <option value="all" className="bg-[#050D10] text-slate-200">All Status</option>
-                                    <option value="pending" className="bg-[#050D10] text-slate-200">Pending</option>
-                                    <option value="confirmed" className="bg-[#050D10] text-slate-200">Confirmed</option>
-                                    <option value="processing" className="bg-[#050D10] text-slate-200">Processing</option>
-                                    <option value="shipped" className="bg-[#050D10] text-slate-200">Shipped</option>
-                                    <option value="delivered" className="bg-[#050D10] text-slate-200">Delivered</option>
-                                    <option value="cancelled" className="bg-[#050D10] text-slate-200">Cancelled</option>
-                                    <option value="trashed" className="bg-[#050D10] text-slate-200">Trashed</option>
-                                </select>
-                            </div>
-                            <div className="flex items-center gap-2 bg-[#050D10] border border-teal-900/50 rounded-xl px-3 py-2">
-                                <CreditCard size={14} className="text-teal-400" />
-                                <select 
-                                    value={paymentFilter}
-                                    onChange={(e) => setPaymentFilter(e.target.value)}
-                                    className="bg-transparent text-xs md:text-sm text-slate-200 outline-none cursor-pointer"
-                                >
-                                    <option value="all" className="bg-[#050D10] text-slate-200">All Payments</option>
-                                    <option value="pending" className="bg-[#050D10] text-slate-200">Pending</option>
-                                    <option value="paid" className="bg-[#050D10] text-slate-200">Paid</option>
-                                    <option value="cod" className="bg-[#050D10] text-slate-200">COD</option>
-                                </select>
-                            </div>
-                            <button 
-                                onClick={() => { setSearchTerm(''); setStatusFilter('all'); setPaymentFilter('all'); }}
-                                className="text-xs text-slate-400 hover:text-teal-400 font-semibold px-2 transition-colors"
-                            >
-                                Clear Filters
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Orders Table */}
-                    <div className="bg-[#09181E] border border-teal-900/40 rounded-2xl shadow-xl overflow-hidden print:hidden">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left whitespace-nowrap">
-                                <thead>
-                                    <tr className="bg-[#050D10]/50 border-b border-teal-900/30">
-                                        <th className="px-6 py-4 text-[10px] font-bold text-teal-500 uppercase tracking-wider">Order #</th>
-                                        <th className="px-6 py-4 text-[10px] font-bold text-teal-500 uppercase tracking-wider">Customer</th>
-                                        <th className="px-6 py-4 text-[10px] font-bold text-teal-500 uppercase tracking-wider">Items</th>
-                                        <th className="px-6 py-4 text-[10px] font-bold text-teal-500 uppercase tracking-wider">Total</th>
-                                        <th className="px-6 py-4 text-[10px] font-bold text-teal-500 uppercase tracking-wider">Payment</th>
-                                        <th className="px-6 py-4 text-[10px] font-bold text-teal-500 uppercase tracking-wider">Status</th>
-                                        <th className="px-6 py-4 text-[10px] font-bold text-teal-500 uppercase tracking-wider">Date</th>
-                                        <th className="px-6 py-4 text-[10px] font-bold text-teal-500 uppercase tracking-wider text-right">Actions</th>
+            {/* Desktop Table View */}
+            <div className="hidden md:block flex-1 overflow-auto p-6 pt-2 custom-scrollbar">
+                <div className="bg-[#09090b] rounded-2xl border border-white/5 overflow-hidden">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="bg-[#18181b] border-b border-white/5 text-xs uppercase tracking-wider text-zinc-500 font-bold">
+                                <th className="px-6 py-4">Order Info</th>
+                                <th className="px-6 py-4">Customer</th>
+                                <th className="px-6 py-4">Amount</th>
+                                <th className="px-6 py-4">Status</th>
+                                <th className="px-6 py-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-white/5">
+                            {loading ? (
+                                <tr><td colSpan={5} className="text-center py-10 text-zinc-500">Loading...</td></tr>
+                            ) : filteredOrders.length === 0 ? (
+                                <tr><td colSpan={5} className="text-center py-10 text-zinc-500">No orders found.</td></tr>
+                            ) : (
+                                filteredOrders.map(order => (
+                                    <tr key={order.id} className="hover:bg-[#18181b] transition-colors group cursor-pointer" onClick={() => setSelectedOrder(order)}>
+                                        <td className="px-6 py-4">
+                                            <div className="font-bold text-white">#{order.id}</div>
+                                            <div className="text-xs text-zinc-500 mt-1">{new Date(order.created_at).toLocaleDateString()}</div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="text-sm font-semibold text-zinc-200">{order.customer_name}</div>
+                                            <div className="text-xs text-zinc-500">{order.customer_phone}</div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="text-sm font-bold text-white">{formatCurrency(calculateOrderTotals(order).totalPayable)}</div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusColor(order.status)}`}>
+                                                {order.status}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <button onClick={(e) => { e.stopPropagation(); setSelectedOrder(order); }} className="text-indigo-400 hover:text-indigo-300 text-xs font-bold px-3 py-1.5 bg-indigo-500/10 rounded-lg">View</button>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody className="divide-y divide-teal-900/20">
-                                    {loading ? (
-                                        <tr>
-                                            <td colSpan={8} className="px-6 py-12 text-center text-slate-500">
-                                                <Activity size={24} className="mx-auto mb-2 animate-spin text-teal-500" />
-                                                Loading orders...
-                                            </td>
-                                        </tr>
-                                    ) : filteredOrders.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={8} className="px-6 py-16 text-center">
-                                                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-teal-900/20 text-teal-500 mb-4">
-                                                    <ShoppingBag size={28} />
-                                                </div>
-                                                <h4 className="text-base md:text-lg font-bold text-slate-200 mb-1">No Orders Found</h4>
-                                                <p className="text-xs md:text-sm text-slate-500">Try adjusting your filters or search term.</p>
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        filteredOrders.map(order => (
-                                            <tr 
-                                                key={order.id} 
-                                                onClick={() => setSelectedOrder(order)}
-                                                className="hover:bg-teal-900/10 transition-colors cursor-pointer group"
-                                            >
-                                                <td className="px-6 py-4">
-                                                    <span className="font-mono text-xs md:text-sm font-semibold text-teal-400">#{order.id}</span>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-full bg-teal-900/40 border border-teal-700/50 flex items-center justify-center text-teal-300 font-bold text-xs uppercase shadow-inner">
-                                                            {order.customer_name ? order.customer_name.charAt(0) : '?'}
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-xs md:text-sm font-bold text-slate-200 group-hover:text-white transition-colors">{order.customer_name || 'Unknown'}</p>
-                                                            <p className="text-[11px] text-slate-500">{order.customer_phone}</p>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-2">
-                                                        {(() => {
-                                                            let orderItems: any[] = [];
-                                                            try { orderItems = typeof order.items === 'string' ? JSON.parse(order.items) : (order.items || []); } catch(e) {}
-                                                            if (orderItems.length === 0) {
-                                                                orderItems = [{
-                                                                    title: order.product_title || order.custom_product_name || 'Custom Product Request',
-                                                                    main_image_url: order.main_image_url
-                                                                }];
-                                                            }
-                                                            const firstItem = orderItems[0];
-                                                            return (
-                                                                <>
-                                                                    {firstItem.main_image_url ? (
-                                                                        <img src={firstItem.main_image_url} alt="product" className="w-8 h-8 rounded bg-[#050D10] object-cover border border-teal-900/30" />
-                                                                    ) : (
-                                                                        <div className="w-8 h-8 rounded bg-teal-900/20 border border-teal-900/30 flex items-center justify-center text-teal-600"><Box size={14} /></div>
-                                                                    )}
-                                                                    <div>
-                                                                        <p className="text-xs text-slate-300 max-w-[150px] truncate">{firstItem.title}</p>
-                                                                        <p className="text-[10px] text-slate-500">{orderItems.length} Item{orderItems.length !== 1 && 's'}</p>
-                                                                    </div>
-                                                                </>
-                                                            );
-                                                        })()}
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <p className="text-xs md:text-sm font-bold text-slate-200">{formatCurrency(calculateOrderTotals(order).totalPayable)}</p>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex flex-col">
-                                                        <span className="text-xs text-slate-300 capitalize">{order.payment_method || 'COD'}</span>
-                                                        <span className={`text-[10px] font-semibold ${order.payment_status?.toLowerCase() === 'paid' ? 'text-emerald-400' : 'text-amber-400'}`}>
-                                                            {order.payment_status || 'Pending'}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getStatusColor(order.status)}`}>
-                                                        {order.status}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <p className="text-xs text-slate-300">{new Date(order.created_at).toLocaleDateString()}</p>
-                                                    <p className="text-[10px] text-slate-500">{new Date(order.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
-                                                </td>
-                                                <td className="px-6 py-4 text-right relative">
-                                                    <button 
-                                                        onClick={(e) => { e.stopPropagation(); setOpenDropdownId(openDropdownId === order.id ? null : order.id); }}
-                                                        className="text-slate-400 hover:text-teal-400 transition-colors p-2 rounded-lg hover:bg-teal-900/40"
-                                                    >
-                                                        <MoreVertical size={18} />
-                                                    </button>
-                                                    {openDropdownId === order.id && (
-                                                        <div 
-                                                            className="absolute right-8 top-10 z-50 w-36 bg-[#09181E] border border-teal-900/50 rounded-xl shadow-2xl py-1 overflow-hidden" 
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        >
-                                                            <button 
-                                                                onClick={() => { setOpenDropdownId(null); setSelectedOrder(order); }}
-                                                                className="w-full text-left px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-teal-900/30 hover:text-teal-400 transition-colors"
-                                                            >
-                                                                View Details
-                                                            </button>
-                                                            <button 
-                                                                onClick={() => { setOpenDropdownId(null); setOrderToEdit(order); setIsAddOrderOpen(true); }}
-                                                                className="w-full text-left px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-teal-900/30 hover:text-teal-400 transition-colors"
-                                                            >
-                                                                Edit
-                                                            </button>
-                                                            {order.status?.toLowerCase() === 'trashed' ? (
-                                                                <>
-                                                                    <button 
-                                                                        onClick={() => { setOpenDropdownId(null); updateOrderStatus(order.id, 'Pending'); }}
-                                                                        className="w-full text-left px-4 py-2 text-xs font-semibold text-emerald-400 hover:bg-emerald-900/20 transition-colors flex items-center justify-between"
-                                                                    >
-                                                                        Restore
-                                                                    </button>
-                                                                    <button 
-                                                                        onClick={() => { setOpenDropdownId(null); deleteOrder(order.id); }}
-                                                                        className="w-full text-left px-4 py-2 text-xs font-bold text-red-500 hover:bg-red-900/30 transition-colors flex items-center justify-between"
-                                                                    >
-                                                                        Delete <Trash2 size={12} />
-                                                                    </button>
-                                                                </>
-                                                            ) : (
-                                                                <button 
-                                                                    onClick={() => handleMoveToTrash(order.id)}
-                                                                    className="w-full text-left px-4 py-2 text-xs font-semibold text-red-400 hover:bg-red-900/20 transition-colors flex items-center justify-between"
-                                                                >
-                                                                    Trash <Trash2 size={12} />
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-                    <AddOrderModal 
-                        isOpen={isAddOrderOpen} 
-                        onClose={() => { setIsAddOrderOpen(false); setOrderToEdit(null); }} 
-                        onSuccess={fetchOrders} 
-                        editOrder={orderToEdit}
-                    />
-                </>
-            )}
+            {/* Mobile Direct List View */}
+            <div className="md:hidden flex-1 overflow-y-auto pb-[85px] px-4 pt-4 custom-scrollbar space-y-3">
+                {loading ? (
+                    <div className="text-center py-10 text-zinc-500 text-sm">Loading orders...</div>
+                ) : filteredOrders.length === 0 ? (
+                    <div className="text-center py-10 text-zinc-500 text-sm">No orders yet. Tap + to add.</div>
+                ) : (
+                    filteredOrders.map(order => (
+                        <div 
+                            key={order.id} 
+                            onClick={() => setSelectedOrder(order)}
+                            className="bg-[#09090b] rounded-2xl p-4 border border-white/5 active:bg-white/5 transition-colors flex flex-col gap-3"
+                        >
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <h4 className="font-bold text-white text-base">#{order.id}</h4>
+                                    <p className="text-xs text-zinc-500">{new Date(order.created_at).toLocaleDateString()}</p>
+                                </div>
+                                <span className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${getStatusColor(order.status)}`}>
+                                    {order.status}
+                                </span>
+                            </div>
+                            
+                            <div className="flex justify-between items-end border-t border-white/5 pt-3">
+                                <div>
+                                    <p className="font-semibold text-zinc-300 text-sm">{order.customer_name}</p>
+                                    <p className="text-xs text-zinc-500">{order.customer_phone}</p>
+                                </div>
+                                <p className="font-bold text-white text-base">{formatCurrency(calculateOrderTotals(order).totalPayable)}</p>
+                            </div>
+                        </div>
+                    ))
+                )}
+            </div>
         </div>
     );
 }

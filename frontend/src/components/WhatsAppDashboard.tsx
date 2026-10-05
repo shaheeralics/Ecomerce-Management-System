@@ -1521,7 +1521,7 @@ const WhatsAppDashboard = () => {
         if (product.video_url) setVideoPreviewUrl(product.video_url);
         else setVideoPreviewUrl(null);
 
-        if (product.voice_note_url) setAudioPreviewUrl(product.voice_note_url);
+        if (product.voice_note_url as string) setAudioPreviewUrl(product.voice_note_url as string);
         else setAudioPreviewUrl(null);
 
         setActivePhase(1);
@@ -1796,7 +1796,16 @@ const WhatsAppDashboard = () => {
                                                                 <p className="text-[9px] text-zinc-500 uppercase font-semibold">Price</p>
                                                                 <p className="text-sm font-bold text-white">Rs {product.starting_price}</p>
                                                             </div>
-                                                            <div className="flex gap-1">
+                                                            <div className="flex gap-1 items-center">
+                                                                {product.voice_note_url && (
+                                                                    <button 
+                                                                        onClick={(e) => { e.stopPropagation(); const a = new Audio(product.voice_note_url as string); a.play(); }} 
+                                                                        className="w-7 h-7 rounded-full bg-indigo-500/10 hover:bg-indigo-500/20 flex items-center justify-center text-indigo-400 transition-colors mr-1"
+                                                                        title="Play Voice Note"
+                                                                    >
+                                                                        <Play size={12} className="fill-current" />
+                                                                    </button>
+                                                                )}
                                                                 <button onClick={() => handleEdit(product)} className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-zinc-400 transition-colors">
                                                                     <Edit3 size={12} />
                                                                 </button>
@@ -1977,21 +1986,45 @@ const WhatsAppDashboard = () => {
                                             const allImages = getProductAllImages(product);
                                             const currentImgUrl = allImages[0] || product.main_image_url;
                                             return (
-                                                <div key={product.id} className="bg-[#09090b] border border-white/5 rounded-2xl p-3 flex gap-4 items-center relative active:bg-white/5 transition-colors">
-                                                    <div className="w-20 h-20 rounded-xl bg-[#18181b] shrink-0 overflow-hidden relative">
-                                                        {currentImgUrl ? <img src={currentImgUrl} className="w-full h-full object-cover" /> : <Camera size={20} className="text-zinc-700 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />}
-                                                    </div>
-                                                    <div className="flex-1 min-w-0 flex flex-col justify-between h-20 py-0.5">
-                                                        <div>
-                                                            <h4 className="font-bold text-zinc-100 text-base truncate leading-tight">{product.title}</h4>
-                                                            <p className="text-xs text-zinc-500 truncate mt-1">{product.brand} • {product.gender}</p>
+                                                <div key={product.id} className="bg-[#09090b] border border-white/5 rounded-2xl p-3 flex flex-col gap-3 relative shadow-sm">
+                                                    <div className="flex gap-4">
+                                                        <div className="w-24 h-24 rounded-xl bg-[#18181b] shrink-0 overflow-hidden relative">
+                                                            {currentImgUrl ? <img src={currentImgUrl} className="w-full h-full object-cover" /> : <Camera size={24} className="text-zinc-700 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />}
                                                         </div>
-                                                        <div className="flex items-end justify-between mt-auto">
-                                                            <p className="text-base font-bold text-white tracking-tight">Rs {product.starting_price}</p>
-                                                            <div className="flex gap-4 pr-1">
-                                                                <button onClick={() => { handleEdit(product); setActiveMobilePage('add-product'); }} className="text-zinc-400 p-2 -m-2"><Edit3 size={18} /></button>
-                                                                <button onClick={() => handleDelete(product.id)} className="text-red-400 p-2 -m-2"><Trash2 size={18} /></button>
+                                                        <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
+                                                            <div>
+                                                                <h4 className="font-bold text-zinc-100 text-base leading-tight line-clamp-2">{product.title}</h4>
+                                                                <p className="text-xs text-zinc-500 truncate mt-1">{product.brand} • {product.gender}</p>
                                                             </div>
+                                                            <div className="mt-auto pt-2">
+                                                                <p className="text-lg font-bold text-white tracking-tight">Rs {product.starting_price}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    {/* Voice & Action Buttons Row */}
+                                                    <div className="flex items-center justify-between border-t border-white/5 pt-3 mt-1">
+                                                        {product.voice_note_url ? (
+                                                            <button 
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    const audio = new Audio(product.voice_note_url as string);
+                                                                    audio.play();
+                                                                }}
+                                                                className="flex items-center gap-2 bg-indigo-500/10 text-indigo-400 px-4 py-2 rounded-full text-xs font-bold active:bg-indigo-500/20"
+                                                            >
+                                                                <Play size={14} className="fill-current" /> Play Voice
+                                                            </button>
+                                                        ) : (
+                                                            <div className="text-[10px] text-zinc-600 font-medium px-2">No Voice Note</div>
+                                                        )}
+                                                        <div className="flex items-center gap-2">
+                                                            <button onClick={() => { handleEdit(product); setActiveMobilePage('add-product'); }} className="bg-white/5 text-zinc-300 px-4 py-2 rounded-full text-xs font-bold active:bg-white/10 flex items-center gap-1.5">
+                                                                <Edit3 size={14} /> Edit
+                                                            </button>
+                                                            <button onClick={() => handleDelete(product.id)} className="bg-red-500/10 text-red-400 w-8 h-8 rounded-full active:bg-red-500/20 flex items-center justify-center">
+                                                                <Trash2 size={14} />
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 </div>
