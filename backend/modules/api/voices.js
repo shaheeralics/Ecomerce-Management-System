@@ -27,25 +27,40 @@ router.post('/transcribe', upload.single('audio'), async (req, res) => {
             return res.status(400).json({ success: false, error: 'No audio file or voice URL provided' });
         }
 
-        const [settingsRows] = await db.execute('SELECT llm_api_key FROM api_settings WHERE id = 1');
-        const apiKey = settingsRows[0]?.llm_api_key || process.env.LLM_API_KEY;
-        if (!apiKey) return res.status(400).json({ success: false, error: 'LLM API Key not configured. Please go to Settings and add your Gemini API Key.' });
+        const openAiKey = process.env.OPENAI_API_KEY;
+        if (!openAiKey) return res.status(400).json({ success: false, error: 'OPENAI_API_KEY not configured in .env' });
 
-        const ai = new GoogleGenAI({ apiKey });
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: [
-                {
-                    inlineData: {
-                        data: audioBuffer.toString("base64"),
-                        mimeType: mimeType
-                    }
-                },
-                "You are an expert transcriptionist. Please transcribe exactly what is being said in this audio file. Do not add any conversational filler, markdown formatting, or introductory text. If the audio is in Urdu/Hindi, transcribe it accurately using roman script or native script based on the context. Only output the transcription text."
-            ]
-        });
+        const OpenAI = require('openai');
+        const openai = new OpenAI({ apiKey: openAiKey });
 
-        res.json({ success: true, transcription: response.text.trim() });
+        const fs = require('fs');
+        const path = require('path');
+        const uploadsDir = path.join(__dirname, '../../uploads');
+        if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+        
+        let ext = '.wav';
+        if (mimeType.includes('ogg')) ext = '.ogg';
+        else if (mimeType.includes('webm')) ext = '.webm';
+
+        const tmpFilePath = path.join(uploadsDir, `tmp_transcribe_${Date.now()}${ext}`);
+        fs.writeFileSync(tmpFilePath, audioBuffer);
+
+        try {
+            const transcriptionResponse = await openai.audio.transcriptions.create({
+                file: fs.createReadStream(tmpFilePath),
+                model: 'whisper-1',
+                response_format: 'text',
+                prompt: 'If the audio is in Urdu/Hindi, transcribe it accurately using roman script or native script based on the context.'
+            });
+
+            const transcriptText = typeof transcriptionResponse === 'string' 
+                ? transcriptionResponse 
+                : (transcriptionResponse.text || '');
+
+            res.json({ success: true, transcription: transcriptText.trim() });
+        } finally {
+            if (fs.existsSync(tmpFilePath)) fs.unlinkSync(tmpFilePath);
+        }
     } catch (err) {
         console.error('Transcription error:', err);
         res.status(500).json({ success: false, error: 'Transcription failed' });
