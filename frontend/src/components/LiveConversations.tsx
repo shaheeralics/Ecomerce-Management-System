@@ -2,8 +2,6 @@ import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { Search, ChevronLeft, MoreVertical, Paperclip, Image as ImageIcon, FileText, Smile, Mic, Send, MapPin, Phone, Mail, ShoppingBag, User, XCircle, Bot, UserCheck, MessageSquare, Video, Plus, Play, Pause, Trash2 } from 'lucide-react';
 import OrderDetailPage from './OrderDetailPage'; // Assuming this exists for modal
 import AddOrderModal from './AddOrderModal';
-// @ts-ignore
-import MicRecorder from 'mic-recorder-to-mp3';
 
 interface Conversation { [key: string]: any }
 
@@ -27,7 +25,12 @@ const MobileChatInput = ({ onSend, disabled }: { onSend: (type: string, content:
     const timerRef = useRef<number | null>(null);
 
     useEffect(() => {
-        setRecorder(new MicRecorder({ bitRate: 128 }));
+        const GlobalMicRecorder = (window as any).MicRecorder;
+        if (GlobalMicRecorder) {
+            setRecorder(new GlobalMicRecorder({ bitRate: 128 }));
+        } else {
+            console.error('MicRecorder is not loaded from CDN');
+        }
     }, []);
 
     const startRecording = async () => {
