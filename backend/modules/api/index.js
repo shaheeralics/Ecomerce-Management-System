@@ -73,14 +73,7 @@ router.post('/conversations/:id/reply', async (req, res) => {
         if (type === 'text') {
             await metaApi.sendTextMessage(phone, content);
         } else {
-            let waType = type;
-            let filename = null;
-            // WebM audio (saved as .ogg) from browser is rejected by Meta as 'audio'. Send as document to guarantee delivery on Hostinger.
-            if (type === 'audio') {
-                waType = 'document';
-                filename = 'Voice_Note.ogg';
-            }
-            await metaApi.sendMediaMessage(phone, waType, mediaUrl, content, filename);
+            await metaApi.sendMediaMessage(phone, type, mediaUrl, content);
         }
         
         // Ensure status is human_takeover

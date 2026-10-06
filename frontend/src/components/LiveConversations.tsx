@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { Search, ChevronLeft, MoreVertical, Paperclip, Image as ImageIcon, FileText, Smile, Mic, Send, MapPin, Phone, Mail, ShoppingBag, User, XCircle, Bot, UserCheck, MessageSquare, Video, Plus, Play, Pause, Trash2 } from 'lucide-react';
 import OrderDetailPage from './OrderDetailPage'; // Assuming this exists for modal
 import AddOrderModal from './AddOrderModal';
+// @ts-ignore
+import MicRecorder from 'mic-recorder-to-mp3';
 
 interface Conversation { [key: string]: any }
 
@@ -20,32 +22,18 @@ const MobileChatInput = ({ onSend, disabled }: { onSend: (type: string, content:
     const [isRecording, setIsRecording] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
+    const [recorder, setRecorder] = useState<any>(null);
     
-    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-    const audioChunksRef = useRef<Blob[]>([]);
     const timerRef = useRef<number | null>(null);
-    const streamRef = useRef<MediaStream | null>(null);
+
+    useEffect(() => {
+        setRecorder(new MicRecorder({ bitRate: 128 }));
+    }, []);
 
     const startRecording = async () => {
+        if (!recorder) return;
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            streamRef.current = stream;
-            
-            const preferredMime = MediaRecorder.isTypeSupported('audio/ogg; codecs=opus') 
-                ? 'audio/ogg; codecs=opus' 
-                : MediaRecorder.isTypeSupported('audio/webm; codecs=opus')
-                ? 'audio/webm; codecs=opus'
-                : 'audio/webm';
-
-            const recorder = new MediaRecorder(stream, { mimeType: preferredMime });
-            mediaRecorderRef.current = recorder;
-            audioChunksRef.current = [];
-
-            recorder.ondataavailable = (e) => {
-                if (e.data.size > 0) audioChunksRef.current.push(e.data);
-            };
-
-            recorder.start();
+            await recorder.start();
             setIsRecording(true);
             setIsPaused(false);
             setRecordingTime(0);
@@ -60,25 +48,21 @@ const MobileChatInput = ({ onSend, disabled }: { onSend: (type: string, content:
     };
 
     const stopRecording = (cancel: boolean = false) => {
-        if (mediaRecorderRef.current && isRecording) {
-            mediaRecorderRef.current.onstop = () => {
-                const tracks = streamRef.current?.getTracks() || [];
-                tracks.forEach(track => track.stop());
-                
+        if (recorder && isRecording) {
+            recorder.stop().getMp3().then(([buffer, blob]: any) => {
                 if (!cancel) {
-                    const mimeType = mediaRecorderRef.current?.mimeType || 'audio/webm';
-                    const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
-                    const file = new File([audioBlob], 'voice_note.ogg', { type: 'audio/ogg' });
+                    const file = new File(buffer, 'voice_note.mp3', {
+                        type: blob.type || 'audio/mp3',
+                        lastModified: Date.now()
+                    });
+                    // We send it as mp3, meta API accepts mp3 audio perfectly!
                     onSend('audio', '', file);
                 }
-                
                 setIsRecording(false);
                 setIsPaused(false);
                 setRecordingTime(0);
-                audioChunksRef.current = [];
-            };
-            mediaRecorderRef.current.stop();
-            if (timerRef.current) clearInterval(timerRef.current);
+                if (timerRef.current) clearInterval(timerRef.current);
+            }).catch((e: any) => console.log(e));
         }
     };
 
