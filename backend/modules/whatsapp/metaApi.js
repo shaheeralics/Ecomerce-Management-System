@@ -49,7 +49,10 @@ const sendMediaMessage = async (toPhone, type, mediaUrl, caption = '', filename 
         type: type,
         url: mediaUrl
     };
-    if (caption) {
+    if (type === 'audio') {
+        payload.voice = true;
+    }
+    if (caption && type !== 'audio') {
         payload.caption = caption;
     }
     if (filename) {
