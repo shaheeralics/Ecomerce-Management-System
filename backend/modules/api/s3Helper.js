@@ -1,37 +1,6 @@
 const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const path = require('path');
-const { PassThrough } = require('stream');
 require('dotenv').config();
-
-let ffmpeg = null;
-try {
-    ffmpeg = require('fluent-ffmpeg');
-    const ffmpegStatic = require('ffmpeg-static');
-    ffmpeg.setFfmpegPath(ffmpegStatic);
-} catch (e) {
-    console.log('FFmpeg not installed. Audio conversion will be skipped.');
-}
-
-async function convertAudioToOggOpus(inputBuffer) {
-    if (!ffmpeg) throw new Error("ffmpeg not available");
-    return new Promise((resolve, reject) => {
-        const inputStream = new PassThrough();
-        inputStream.end(inputBuffer);
-
-        const chunks = [];
-        const outputStream = new PassThrough();
-
-        outputStream.on('data', chunk => chunks.push(chunk));
-        outputStream.on('end', () => resolve(Buffer.concat(chunks)));
-        outputStream.on('error', reject);
-
-        ffmpeg(inputStream)
-            .audioCodec('libopus')
-            .format('ogg')
-            .on('error', (err) => reject(err))
-            .pipe(outputStream, { end: true });
-    });
-}
 
 const s3Client = new S3Client({
     region: process.env.ORACLE_S3_REGION || 'ap-mumbai-1',
@@ -53,14 +22,6 @@ async function uploadToOracleS3(file) {
     let contentType = file.mimetype;
     if (ext.toLowerCase() === '.ogg') {
         contentType = 'audio/ogg; codecs=opus';
-        try {
-            console.log('Converting audio buffer to actual OGG Opus format...');
-            file.buffer = await convertAudioToOggOpus(file.buffer);
-            console.log('Audio conversion successful!');
-        } catch (e) {
-            console.error('Audio conversion failed:', e);
-            // Fallback to original buffer if conversion fails
-        }
     }
 
     const command = new PutObjectCommand({

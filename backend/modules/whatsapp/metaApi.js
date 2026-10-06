@@ -42,7 +42,7 @@ const sendTextMessage = async (toPhone, text) => {
     });
 };
 
-const sendMediaMessage = async (toPhone, type, mediaUrl, caption = '') => {
+const sendMediaMessage = async (toPhone, type, mediaUrl, caption = '', filename = null) => {
     // type can be 'image', 'video', 'audio', 'document'
     let payload = {
         to: toPhone,
@@ -51,6 +51,9 @@ const sendMediaMessage = async (toPhone, type, mediaUrl, caption = '') => {
     };
     if (caption) {
         payload.caption = caption;
+    }
+    if (filename) {
+        payload.filename = filename;
     }
     return sendWhatsAppMessage(payload);
 };

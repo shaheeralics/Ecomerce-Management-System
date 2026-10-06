@@ -2,14 +2,14 @@ async function test() {
     const lovableDomain = 'https://ecodevsil.lovable.app';
     const bridgeSecret = 'PawandaBridge2026!';
 
-    // Fake URL that exists on the web (sample webm)
-    // using a webm url from somewhere
-    const mediaUrl = 'https://upload.wikimedia.org/wikipedia/commons/4/4b/Apple_pie.webm';
+    // Fake URL that exists on the web (sample webm or mp3)
+    const mediaUrl = 'https://www.w3schools.com/html/horse.ogg';
 
     const payload = {
         to: '+923145607065', 
         type: 'document',
-        url: mediaUrl
+        url: mediaUrl,
+        filename: 'VoiceNote_Test.ogg'
     };
 
     const response = await fetch(`${lovableDomain}/api/public/whatsapp/send`, {
