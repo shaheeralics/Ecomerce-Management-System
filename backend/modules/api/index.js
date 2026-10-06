@@ -73,12 +73,7 @@ router.post('/conversations/:id/reply', async (req, res) => {
         if (type === 'text') {
             await metaApi.sendTextMessage(phone, content);
         } else {
-            let waType = type;
-            // WebM audio (saved as .ogg) from browser is rejected by Meta as 'audio'. Send as document to guarantee delivery.
-            if (type === 'audio') {
-                waType = 'document';
-            }
-            await metaApi.sendMediaMessage(phone, waType, mediaUrl, content);
+            await metaApi.sendMediaMessage(phone, type, mediaUrl, content);
         }
         
         // Ensure status is human_takeover

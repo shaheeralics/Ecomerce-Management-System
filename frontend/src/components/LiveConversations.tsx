@@ -30,7 +30,14 @@ const MobileChatInput = ({ onSend, disabled }: { onSend: (type: string, content:
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             streamRef.current = stream;
-            const recorder = new MediaRecorder(stream);
+            
+            const preferredMime = MediaRecorder.isTypeSupported('audio/ogg; codecs=opus') 
+                ? 'audio/ogg; codecs=opus' 
+                : MediaRecorder.isTypeSupported('audio/webm; codecs=opus')
+                ? 'audio/webm; codecs=opus'
+                : 'audio/webm';
+
+            const recorder = new MediaRecorder(stream, { mimeType: preferredMime });
             mediaRecorderRef.current = recorder;
             audioChunksRef.current = [];
 
@@ -59,7 +66,8 @@ const MobileChatInput = ({ onSend, disabled }: { onSend: (type: string, content:
                 tracks.forEach(track => track.stop());
                 
                 if (!cancel) {
-                    const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                    const mimeType = mediaRecorderRef.current?.mimeType || 'audio/webm';
+                    const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
                     const file = new File([audioBlob], 'voice_note.ogg', { type: 'audio/ogg' });
                     onSend('audio', '', file);
                 }
