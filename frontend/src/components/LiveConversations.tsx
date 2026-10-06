@@ -67,16 +67,7 @@ const MobileChatInput = ({ onSend, disabled }: { onSend: (type: string, content:
     };
 
     const pauseResumeRecording = () => {
-        if (!mediaRecorderRef.current) return;
-        if (isPaused) {
-            mediaRecorderRef.current.resume();
-            setIsPaused(false);
-            timerRef.current = setInterval(() => setRecordingTime(prev => prev + 1), 1000);
-        } else {
-            mediaRecorderRef.current.pause();
-            setIsPaused(true);
-            if (timerRef.current) clearInterval(timerRef.current);
-        }
+        // Pausing is not supported with mic-recorder-to-mp3 easily
     };
 
     const formatTime = (seconds: number) => {
