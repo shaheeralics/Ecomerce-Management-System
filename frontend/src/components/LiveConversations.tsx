@@ -453,8 +453,19 @@ export default function LiveConversations() {
                                         }`}>
                                             {msg.text_content && <p className="whitespace-pre-wrap break-words break-all">{msg.text_content}</p>}
                                             {msg.media_url && (
-                                                <div className="mt-2 rounded-lg overflow-hidden">
-                                                    {msg.type === 'image' ? <img src={msg.media_url} className="w-full h-auto max-h-60 object-cover" /> : <a href={msg.media_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline text-sm break-all">Media File</a>}
+                                                <div className="mt-2 rounded-lg overflow-hidden border border-white/10">
+                                                    {msg.type === 'image' ? <img src={msg.media_url} className="w-full h-auto max-h-60 object-cover" /> 
+                                                    : (msg.type === 'video' || msg.media_url.includes('.mp4')) ? (
+                                                        <video controls className="w-full max-w-[250px] rounded-lg outline-none" preload="metadata">
+                                                            <source src={msg.media_url} type="video/mp4" />
+                                                        </video>
+                                                    )
+                                                    : (msg.type === 'audio' || msg.media_url.includes('.ogg') || msg.media_url.includes('.mp3')) ? (
+                                                        <div className="bg-[#09090b] rounded-xl p-2 border border-white/5 shadow-inner">
+                                                            <audio controls preload="metadata" className="w-full max-w-[250px] h-10 outline-none"><source src={msg.media_url} /></audio>
+                                                        </div>
+                                                    )
+                                                    : <a href={msg.media_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline text-sm break-all">Media File</a>}
                                                 </div>
                                             )}
                                         </div>
