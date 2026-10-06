@@ -1,5 +1,6 @@
 // @ts-nocheck
 import VoiceAssetsTab from './VoiceAssetsTab';
+import PreRecordedVoicesTab from './PreRecordedVoicesTab';
 import DesktopWhatsAppDashboard from './DesktopWhatsAppDashboard';
 import MobileVoiceEditor from './MobileVoiceEditor';
 import AnalyticsPage from './AnalyticsPage';
@@ -1853,7 +1854,7 @@ const WhatsAppDashboard = () => {
                         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
                             {(activeMobilePage as any) === 'analytics' && <AnalyticsPage />}
                             {(activeMobilePage as any) === 'policy' && <VoiceAssetsTab category="policy" title="Policy Voices" description="" />}
-                            {(activeMobilePage as any) === 'prerecorded' && <VoiceAssetsTab category="prerecorded" title="Pre recorded voices" description="" />}
+                            {(activeMobilePage as any) === 'prerecorded' && <PreRecordedVoicesTab title="Pre recorded voices" description="" />}
                             {(activeMobilePage as any) === 'ai-agent' && <AIAgentPanel />}
                         </div>
                     </div>
