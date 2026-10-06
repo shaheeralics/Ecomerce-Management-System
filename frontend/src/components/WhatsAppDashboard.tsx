@@ -1690,7 +1690,19 @@ const WhatsAppDashboard = () => {
                 {activeMobilePage === 'main' && (
                     <div className="flex flex-col h-full w-full absolute inset-0 animate-in fade-in duration-200">
                         {/* Mobile Header */}
-                        
+                        <div className="pt-2 bg-[#09090b]/95 backdrop-blur-xl border-b border-white/5 shrink-0 z-50">
+                            {subTab === 'products' && (
+                                <div className="px-4 py-3 flex items-center justify-between gap-3">
+                                    <h1 className="text-xl font-bold tracking-tight text-white">Catalog</h1>
+                                    <div className="flex-1 flex justify-end">
+                                        <div className="relative w-full max-w-[200px]">
+                                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                                            <input type="text" placeholder="Search products..." className="bg-[#18181b] text-sm text-white rounded-full pl-9 pr-4 py-2 w-full outline-none border border-white/5 focus:border-indigo-500/50 transition-all" />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                         
                         {/* Mobile Feed */}
                         <div className="flex-1 overflow-y-auto pb-[85px] pt-4 px-4">

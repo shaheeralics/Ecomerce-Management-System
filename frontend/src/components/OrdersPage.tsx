@@ -247,6 +247,24 @@ export default function OrdersPage() {
             </div>
 
             {/* Mobile Direct List View */}
+            <div className="md:hidden pt-2 bg-[#09090b]/95 backdrop-blur-xl border-b border-white/5 shrink-0 z-50">
+                <div className="px-4 py-3 flex items-center justify-between gap-3">
+                    <h1 className="text-xl font-bold tracking-tight text-white">Orders</h1>
+                    <div className="flex-1 flex justify-end">
+                        <div className="relative w-full max-w-[200px]">
+                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                            <input 
+                                type="text" 
+                                placeholder="Search orders..." 
+                                value={searchTerm}
+                                onChange={e => setSearchTerm(e.target.value)}
+                                className="bg-[#18181b] text-sm text-white rounded-full pl-9 pr-4 py-2 w-full outline-none border border-white/5 focus:border-indigo-500/50 transition-all" 
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div className="md:hidden flex-1 overflow-y-auto pb-[85px] px-4 pt-4 custom-scrollbar space-y-3">
                 {loading ? (
                     <div className="text-center py-10 text-zinc-500 text-sm">Loading orders...</div>
