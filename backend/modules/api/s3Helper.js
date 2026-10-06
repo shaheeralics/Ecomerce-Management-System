@@ -20,7 +20,9 @@ async function uploadToOracleS3(file) {
     const filename = `prod_${file.fieldname}_${Date.now()}_${Math.random().toString(36).substring(2, 8)}${ext}`;
     
     let contentType = file.mimetype;
-    if (ext.toLowerCase() === '.ogg') {
+    if (ext.toLowerCase() === '.mp3') {
+        contentType = 'audio/mpeg';
+    } else if (ext.toLowerCase() === '.ogg') {
         contentType = 'audio/ogg; codecs=opus';
     }
 
