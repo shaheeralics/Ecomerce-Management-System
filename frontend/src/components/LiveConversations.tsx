@@ -623,8 +623,8 @@ export default function LiveConversations() {
                                                             <source src={msg.media_url} type="video/mp4" />
                                                         </video>
                                                     )
-                                                    : (msg.type === 'audio' || msg.media_url.includes('.ogg') || msg.media_url.includes('.mp3')) ? (
-                                                        <div className="bg-[#09090b] rounded-xl p-2 border border-white/5 shadow-inner">
+                                                    : (msg.type === 'audio' || msg.media_url.includes('.ogg') || msg.media_url.includes('.mp3') || msg.media_url.includes('.webm')) ? (
+                                                        <div className="bg-[#09090b] rounded-xl p-2 border border-white/5 shadow-inner min-w-[200px] flex items-center justify-center">
                                                             <audio controls preload="metadata" className="w-full max-w-[250px] h-10 outline-none"><source src={msg.media_url} /></audio>
                                                         </div>
                                                     )
