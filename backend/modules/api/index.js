@@ -1,7 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../../db');
+const multer = require('multer');
+const { uploadToOracleS3 } = require('./s3Helper');
 
+const upload = multer({ 
+    storage: multer.memoryStorage(), 
+    limits: { fileSize: 50 * 1024 * 1024 } 
+});
 // Get all products
 router.get('/products', async (req, res) => {
     try {
@@ -139,5 +145,18 @@ router.use('/db-proxy', dbProxyRoutes);
 router.use('/lovable-webhook', lovableWebhookRoutes);
 router.use('/agent-test', agentTestRoutes);
 router.use('/transcribe', transcribeRoutes);
+
+// General media upload endpoint
+router.post('/upload', upload.single('file'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+        const folder = req.body.folder || 'chat_media';
+        const url = await uploadToOracleS3(req.file, folder);
+        res.json({ success: true, url });
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: 'Upload failed' });
+    }
+});
 
 module.exports = router;

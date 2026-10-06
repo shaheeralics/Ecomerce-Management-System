@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, ChevronLeft, MoreVertical, Paperclip, Image as ImageIcon, FileText, Smile, Mic, Send, MapPin, Phone, Mail, ShoppingBag, User, XCircle, Bot, UserCheck, MessageSquare, Video, Plus } from 'lucide-react';
+import { Search, ChevronLeft, MoreVertical, Paperclip, Image as ImageIcon, FileText, Smile, Mic, Send, MapPin, Phone, Mail, ShoppingBag, User, XCircle, Bot, UserCheck, MessageSquare, Video, Plus, Play, Pause, Trash2 } from 'lucide-react';
 import OrderDetailPage from './OrderDetailPage'; // Assuming this exists for modal
 import AddOrderModal from './AddOrderModal';
 
@@ -13,6 +13,146 @@ interface Message {
     media_url?: string;
     created_at: string;
 }
+
+
+const MobileChatInput = ({ onSend, disabled }: { onSend: (type: string, content: string, mediaFile?: File) => void, disabled?: boolean }) => {
+    const [text, setText] = useState('');
+    const [isRecording, setIsRecording] = useState(false);
+    const [isPaused, setIsPaused] = useState(false);
+    const [recordingTime, setRecordingTime] = useState(0);
+    
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const audioChunksRef = useRef<Blob[]>([]);
+    const timerRef = useRef<number | null>(null);
+    const streamRef = useRef<MediaStream | null>(null);
+
+    const startRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            streamRef.current = stream;
+            const recorder = new MediaRecorder(stream);
+            mediaRecorderRef.current = recorder;
+            audioChunksRef.current = [];
+
+            recorder.ondataavailable = (e) => {
+                if (e.data.size > 0) audioChunksRef.current.push(e.data);
+            };
+
+            recorder.start();
+            setIsRecording(true);
+            setIsPaused(false);
+            setRecordingTime(0);
+
+            timerRef.current = setInterval(() => {
+                setRecordingTime(prev => prev + 1);
+            }, 1000);
+        } catch (err) {
+            console.error('Microphone access denied:', err);
+            alert('Microphone access is required to send voice notes.');
+        }
+    };
+
+    const stopRecording = (cancel: boolean = false) => {
+        if (mediaRecorderRef.current && isRecording) {
+            mediaRecorderRef.current.onstop = () => {
+                const tracks = streamRef.current?.getTracks() || [];
+                tracks.forEach(track => track.stop());
+                
+                if (!cancel) {
+                    const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                    const file = new File([audioBlob], 'voice_note.webm', { type: 'audio/webm' });
+                    onSend('audio', '', file);
+                }
+                
+                setIsRecording(false);
+                setIsPaused(false);
+                setRecordingTime(0);
+                audioChunksRef.current = [];
+            };
+            mediaRecorderRef.current.stop();
+            if (timerRef.current) clearInterval(timerRef.current);
+        }
+    };
+
+    const pauseResumeRecording = () => {
+        if (!mediaRecorderRef.current) return;
+        if (isPaused) {
+            mediaRecorderRef.current.resume();
+            setIsPaused(false);
+            timerRef.current = setInterval(() => setRecordingTime(prev => prev + 1), 1000);
+        } else {
+            mediaRecorderRef.current.pause();
+            setIsPaused(true);
+            if (timerRef.current) clearInterval(timerRef.current);
+        }
+    };
+
+    const formatTime = (seconds: number) => {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m}:${s.toString().padStart(2, '0')}`;
+    };
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            const type = file.type.startsWith('image/') ? 'image' : file.type.startsWith('video/') ? 'video' : 'document';
+            onSend(type, '', file);
+        }
+    };
+
+    if (isRecording) {
+        return (
+            <div className="p-3 bg-[#09090b] border-t border-white/5 flex items-center justify-between gap-3 shrink-0 w-full">
+                <button onClick={() => stopRecording(true)} className="p-3 bg-red-500/10 text-red-500 rounded-full hover:bg-red-500/20 active:scale-95 transition-all">
+                    <Trash2 size={20} />
+                </button>
+                <div className="flex items-center gap-2 text-red-500 animate-pulse font-mono">
+                    <Mic size={18} />
+                    <span>{formatTime(recordingTime)}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <button onClick={pauseResumeRecording} className="p-3 bg-zinc-800 text-white rounded-full hover:bg-zinc-700 active:scale-95 transition-all">
+                        {isPaused ? <Play size={20} /> : <Pause size={20} />}
+                    </button>
+                    <button onClick={() => stopRecording(false)} className="p-3 bg-emerald-500 text-white rounded-full hover:bg-emerald-600 active:scale-95 transition-all shadow-lg shadow-emerald-500/20">
+                        <Send size={20} className="-ml-0.5" />
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="p-3 bg-[#09090b] border-t border-white/5 flex items-center gap-2 shrink-0 w-full">
+            <label className="p-2 text-zinc-400 hover:text-white cursor-pointer active:scale-95 transition-transform">
+                <Paperclip size={22} />
+                <input type="file" className="hidden" onChange={handleFileSelect} disabled={disabled} accept="image/*,video/*,application/pdf" />
+            </label>
+            <div className="flex-1 bg-[#18181b] border border-white/10 rounded-[24px] min-h-[44px] flex items-center px-4 py-2 focus-within:ring-1 focus-within:ring-white/20 transition-all">
+                <input 
+                    type="text" 
+                    value={text} 
+                    onChange={e => setText(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && text.trim() && (onSend('text', text), setText(''))}
+                    placeholder="Message..."
+                    disabled={disabled}
+                    className="w-full bg-transparent text-white text-base outline-none placeholder:text-zinc-500"
+                />
+            </div>
+            {text.trim() ? (
+                <button onClick={() => { onSend('text', text); setText(''); }} className="p-3 bg-indigo-500 text-white rounded-full shrink-0 active:scale-95 transition-transform shadow-lg shadow-indigo-500/30">
+                    <Send size={20} className="ml-0.5" />
+                </button>
+            ) : (
+                <button onClick={startRecording} disabled={disabled} className="p-3 bg-emerald-500 text-white rounded-full shrink-0 active:scale-95 transition-transform shadow-lg shadow-emerald-500/20">
+                    <Mic size={20} />
+                </button>
+            )}
+        </div>
+    );
+};
+
 
 export default function LiveConversations() {
     const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -133,6 +273,59 @@ export default function LiveConversations() {
         }
     };
 
+    
+    const handleSendAdvanced = async (type: string, content: string, file?: File) => {
+        if (!activeConvId) return;
+        
+        let mediaUrl = '';
+        if (file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('folder', 'chat_media');
+            
+            try {
+                const uploadRes = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const uploadData = await uploadRes.json();
+                if (uploadData.success && uploadData.url) {
+                    mediaUrl = uploadData.url;
+                } else {
+                    alert('Failed to upload media');
+                    return;
+                }
+            } catch (err) {
+                console.error('Upload error', err);
+                alert('Network error while uploading');
+                return;
+            }
+        }
+
+        try {
+            await fetch(`/api/conversations/${activeConvId}/reply`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type, content, mediaUrl })
+            });
+            
+            setMessages(prev => [...prev, { 
+                id: Date.now(), 
+                sender: 'human', 
+                type, 
+                text_content: content, 
+                media_url: mediaUrl,
+                created_at: new Date().toISOString() 
+            }]);
+            
+            setTimeout(() => {
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, 50);
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
     const handleToggleTakeover = async () => {
         if (!activeConvId) return;
         const currentConv = conversations.find(c => c.id === activeConvId);
@@ -246,8 +439,8 @@ export default function LiveConversations() {
                                 </div>
 
                                 {/* Chat Messages */}
-                                <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar bg-[#030712]">
-                                    {messages.map((msg, idx) => {
+                                <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 custom-scrollbar bg-[#030712] flex flex-col-reverse">
+                                    {[...messages].reverse().map((msg, idx) => {
                                         const isCustomer = msg.sender === 'customer';
                                         const isAgent = msg.sender === 'agent';
                                         
@@ -289,32 +482,7 @@ export default function LiveConversations() {
                                 </div>
 
                                 {/* Chat Input Box */}
-                                <div className="p-4 border-t border-white/5 bg-[#09090b]">
-                                    <div className="flex items-center gap-2">
-                                        <button className="text-zinc-500 hover:text-white p-2 transition-colors"><Paperclip size={18} /></button>
-                                        
-                                        <div className="flex-1 bg-[#18181b] border border-white/5 rounded-full px-4 py-3 flex items-center gap-2 focus-within:ring-1 focus-within:ring-white/20">
-                                            <input 
-                                                type="text" 
-                                                value={composeText}
-                                                onChange={e => setComposeText(e.target.value)}
-                                                onKeyDown={e => e.key === 'Enter' && handleSend()}
-                                                placeholder="Message..." 
-                                                className="w-full bg-transparent text-sm text-zinc-100 outline-none"
-                                            />
-                                        </div>
-                                        
-                                        {composeText ? (
-                                            <button onClick={handleSend} className="bg-white hover:bg-zinc-200 text-black p-3 rounded-full font-bold transition-all shadow-lg shadow-white/10">
-                                                <Send size={18} />
-                                            </button>
-                                        ) : (
-                                            <button className="bg-[#18181b] border border-white/5 hover:bg-white/10 text-white p-3 rounded-full font-bold transition-all">
-                                                <Mic size={18} />
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
+                                <MobileChatInput onSend={handleSendAdvanced} />
                             </div>
 
                             {/* Profile Pane */}
@@ -432,13 +600,17 @@ export default function LiveConversations() {
                                 </div>
                             </div>
                             <div className="flex items-center pr-2">
-                                <button className="p-2 text-zinc-400"><Phone size={20} /></button>
-                                <button className="p-2 text-zinc-400"><Video size={20} /></button>
+                                <button 
+                                    onClick={handleToggleTakeover} 
+                                    className={`p-2 flex items-center justify-center rounded-full transition-all ${activeConv?.status === 'human_takeover' ? 'text-zinc-400 bg-white/5' : 'text-emerald-400 bg-emerald-500/10'}`}
+                                >
+                                    <Bot size={20} />
+                                </button>
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar bg-[#030712]">
-                            {messages.map((msg, idx) => {
+                        <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 custom-scrollbar bg-[#030712] flex flex-col-reverse">
+                            {[...messages].reverse().map((msg, idx) => {
                                 const isCustomer = msg.sender === 'customer';
                                 const isAgent = msg.sender === 'agent';
                                 
@@ -480,28 +652,7 @@ export default function LiveConversations() {
                         </div>
 
                         {/* Mobile Keyboard / Input area */}
-                        <div className="p-2 pb-safe border-t border-white/5 bg-[#09090b] flex items-end gap-2 w-full">
-                            <button className="p-3 text-zinc-400 active:text-white shrink-0"><Plus size={24} /></button>
-                            <div className="flex-1 bg-[#18181b] border border-white/5 rounded-[24px] min-h-[44px] flex items-center px-4 py-2">
-                                <input 
-                                    type="text" 
-                                    value={composeText}
-                                    onChange={e => setComposeText(e.target.value)}
-                                    onKeyDown={e => e.key === 'Enter' && handleSend()}
-                                    placeholder="Message" 
-                                    className="w-full bg-transparent text-base text-zinc-100 outline-none"
-                                />
-                            </div>
-                            {composeText ? (
-                                <button onClick={handleSend} className="bg-indigo-500 text-white p-3 rounded-full font-bold active:scale-95 shrink-0 shadow-lg shadow-indigo-500/30">
-                                    <Send size={20} className="ml-0.5" />
-                                </button>
-                            ) : (
-                                <button className="p-3 text-zinc-400 active:text-white shrink-0">
-                                    <Mic size={24} />
-                                </button>
-                            )}
-                        </div>
+                        <MobileChatInput onSend={handleSendAdvanced} />
                     </div>
                 )}
 
