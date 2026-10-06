@@ -245,7 +245,9 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
                         <ChevronLeft size={24} />
                     </button>
                     <h2 className="text-lg font-bold text-slate-100">
-                        {editId ? 'Edit Policy Voice' : 'Add Policy Voice'}
+                        {editId 
+                            ? (category === 'prerecorded' ? 'Edit Voice Asset' : 'Edit Policy Voice') 
+                            : (category === 'prerecorded' ? 'Add Voice Asset' : 'Add Policy Voice')}
                     </h2>
                     <button onClick={submitVoice} className="text-teal-400 hover:text-teal-300 font-bold flex items-center gap-1 text-sm">
                         <Save size={16} /> Save
