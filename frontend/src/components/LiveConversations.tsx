@@ -77,7 +77,7 @@ export default function LiveConversations() {
 
                         if (isFirstLoad || prevLastMsgId !== newLastMsgId) {
                             setTimeout(() => {
-                                messagesEndRef.current?.scrollIntoView({ behavior: isFirstLoad ? 'auto' : 'smooth' });
+                                messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
                             }, 50);
                         }
                         return data.data;
@@ -260,7 +260,7 @@ export default function LiveConversations() {
                                                             ? 'bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-tr-sm' 
                                                             : 'bg-white text-black rounded-tr-sm font-medium'
                                                 }`}>
-                                                    {msg.text_content && <p>{msg.text_content}</p>}
+                                                    {msg.text_content && <p className="whitespace-pre-wrap break-words break-all">{msg.text_content}</p>}
                                                     {msg.media_url && (
                                                         <div className="mt-2 rounded-lg overflow-hidden border border-white/10">
                                                             {msg.type === 'image' ? <img src={msg.media_url} className="w-full h-auto max-h-48 object-cover" /> 
@@ -451,7 +451,7 @@ export default function LiveConversations() {
                                                     ? 'bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-tr-sm' 
                                                     : 'bg-white text-black rounded-tr-sm font-medium'
                                         }`}>
-                                            {msg.text_content && <p>{msg.text_content}</p>}
+                                            {msg.text_content && <p className="whitespace-pre-wrap break-words break-all">{msg.text_content}</p>}
                                             {msg.media_url && (
                                                 <div className="mt-2 rounded-lg overflow-hidden">
                                                     {msg.type === 'image' ? <img src={msg.media_url} className="w-full h-auto max-h-60 object-cover" /> : <a href={msg.media_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline text-sm break-all">Media File</a>}
