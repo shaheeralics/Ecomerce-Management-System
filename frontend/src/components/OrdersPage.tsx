@@ -154,7 +154,7 @@ export default function OrdersPage() {
     }
 
     return (
-        <div className="h-full w-full bg-[#030712] flex flex-col relative overflow-hidden font-sans">
+        <div className="fixed inset-0 h-[100dvh] w-full bg-[#030712] flex flex-col overflow-hidden font-sans overscroll-none">
             {/* Desktop Filters Header (Hidden on Mobile for cleaner direct list) */}
             <div className="hidden md:flex p-4 md:p-6 pb-2 items-center justify-between gap-4">
                 <div className="flex items-center gap-3">

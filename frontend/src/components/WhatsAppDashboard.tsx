@@ -1675,7 +1675,7 @@ const WhatsAppDashboard = () => {
     };
 
     return (
-        <div className="h-[100dvh] w-full bg-[#030712] text-zinc-100 flex overflow-hidden font-sans selection:bg-indigo-500/30">
+        <div className="fixed inset-0 h-[100dvh] w-full bg-[#030712] text-zinc-100 flex overflow-hidden font-sans selection:bg-indigo-500/30 overscroll-none">
             {/* ======================================= */}
             {/* ========== DESKTOP VIEW =============== */}
             <div className="hidden md:block w-full h-full relative overflow-hidden">

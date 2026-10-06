@@ -168,7 +168,7 @@ export default function LiveConversations() {
     });
 
     return (
-        <div className="h-full min-h-[100dvh] w-full bg-[#030712] text-zinc-100 flex font-sans overflow-hidden">
+        <div className="fixed inset-0 h-[100dvh] w-full bg-[#030712] text-zinc-100 flex font-sans overflow-hidden overscroll-none">
             
             {/* ======================================= */}
             {/* ========== DESKTOP VIEW =============== */}
