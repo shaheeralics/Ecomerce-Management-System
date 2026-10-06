@@ -420,7 +420,7 @@ const WhatsAppDashboard = () => {
             const formData = new FormData();
             formData.append('audio', audioBlob, 'voice-note.webm');
             
-            // Call the real backend transcribe API powered by Gemini/OpenAI
+            // Call the backend transcribe API
             const res = await fetch('/api/transcribe', { 
                 method: 'POST', 
                 body: formData 
@@ -434,7 +434,7 @@ const WhatsAppDashboard = () => {
             }
         } catch (err: any) {
             console.error('Transcription error:', err);
-            setTranscriptionText(`Error: ${err.message || 'Failed to transcribe via OpenAI API'}`);
+            setTranscriptionText(`Error: ${err.message || 'Failed to transcribe audio'}`);
         } finally {
             setIsTranscribing(false);
         }
@@ -2352,7 +2352,7 @@ const WhatsAppDashboard = () => {
                             <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mb-6 shadow-xl shadow-emerald-900/20">
                                 {isTranscribing ? <Loader2 size={40} className="text-emerald-400 animate-spin" /> : <FileText size={40} className="text-emerald-400" />}
                             </div>
-                            <h2 className="text-xl font-bold text-white mb-2">{isTranscribing ? "Gemini API Listening..." : "Voice to Text"}</h2>
+                            <h2 className="text-xl font-bold text-white mb-2">{isTranscribing ? "Transcribing audio..." : "Voice to Text"}</h2>
                             
                             <div className="w-full bg-[#18181b] rounded-3xl p-1 border border-white/10 shadow-inner relative group mt-8">
                                 <textarea 
