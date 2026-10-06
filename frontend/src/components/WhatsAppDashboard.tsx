@@ -106,6 +106,7 @@ async function audioBufferToOggBlob(buffer: AudioBuffer): Promise<Blob> {
 
 const WhatsAppDashboard = () => {
     const [subTab, setSubTab] = useState<'products' | 'conversations' | 'policy' | 'prerecorded' | 'orders' | 'analytics' | 'ai-agent'>('products');
+    const [searchQuery, setSearchQuery] = useState('');
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(false);
@@ -1697,7 +1698,7 @@ const WhatsAppDashboard = () => {
                                     <div className="flex-1 flex justify-end">
                                         <div className="relative w-full max-w-[200px]">
                                             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
-                                            <input type="text" placeholder="Search products..." className="bg-[#18181b] text-sm text-white rounded-full pl-9 pr-4 py-2 w-full outline-none border border-white/5 focus:border-indigo-500/50 transition-all" />
+                                            <input type="text" placeholder="Search products..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="bg-[#18181b] text-sm text-white rounded-full pl-9 pr-4 py-2 w-full outline-none border border-white/5 focus:border-indigo-500/50 transition-all" />
                                         </div>
                                     </div>
                                 </div>
@@ -1713,54 +1714,60 @@ const WhatsAppDashboard = () => {
                                     ) : products.length === 0 ? (
                                         <div className="text-center text-zinc-500 py-10 text-sm">No products listed. Tap + to add.</div>
                                     ) : (
-                                        products.map(product => {
-                                            const allImages = getProductAllImages(product);
-                                            const currentImgUrl = allImages[0] || product.main_image_url;
-                                            return (
-                                                <div key={product.id} className="bg-[#09090b] border border-white/5 rounded-2xl p-3 flex flex-col gap-3 relative shadow-sm">
-                                                    <div className="flex gap-4">
-                                                        <div className="w-24 h-24 rounded-xl bg-[#18181b] shrink-0 overflow-hidden relative">
-                                                            {currentImgUrl ? <img src={currentImgUrl} className="w-full h-full object-cover" /> : <Camera size={24} className="text-zinc-700 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />}
-                                                        </div>
-                                                        <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
-                                                            <div>
-                                                                <h4 className="font-bold text-zinc-100 text-base leading-tight line-clamp-2">{product.title}</h4>
-                                                                <p className="text-xs text-zinc-500 truncate mt-1">{product.brand} • {product.gender}</p>
+                                        (() => {
+                                            const filteredProducts = products.filter(p => p.title?.toLowerCase().includes(searchQuery.toLowerCase()) || p.brand?.toLowerCase().includes(searchQuery.toLowerCase()));
+                                            if (filteredProducts.length === 0) {
+                                                return <div className="text-center text-zinc-500 py-10 text-sm">No products match your search.</div>;
+                                            }
+                                            return filteredProducts.map(product => {
+                                                const allImages = getProductAllImages(product);
+                                                const currentImgUrl = allImages[0] || product.main_image_url;
+                                                return (
+                                                    <div key={product.id} className="bg-[#09090b] border border-white/5 rounded-2xl p-3 flex flex-col gap-3 relative shadow-sm">
+                                                        <div className="flex gap-4">
+                                                            <div className="w-24 h-24 rounded-xl bg-[#18181b] shrink-0 overflow-hidden relative">
+                                                                {currentImgUrl ? <img src={currentImgUrl} className="w-full h-full object-cover" /> : <Camera size={24} className="text-zinc-700 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />}
                                                             </div>
-                                                            <div className="mt-auto pt-2">
-                                                                <p className="text-lg font-bold text-white tracking-tight">Rs {product.starting_price}</p>
+                                                            <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
+                                                                <div>
+                                                                    <h4 className="font-bold text-zinc-100 text-base leading-tight line-clamp-2">{product.title}</h4>
+                                                                    <p className="text-xs text-zinc-500 truncate mt-1">{product.brand} • {product.gender}</p>
+                                                                </div>
+                                                                <div className="mt-auto pt-2">
+                                                                    <p className="text-lg font-bold text-white tracking-tight">Rs {product.starting_price}</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        {/* Voice & Action Buttons Row */}
+                                                        <div className="flex items-center justify-between border-t border-white/5 pt-3 mt-1">
+                                                            {product.voice_note_url ? (
+                                                                <button 
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        const audio = new Audio(product.voice_note_url as string);
+                                                                        audio.play();
+                                                                    }}
+                                                                    className="flex items-center gap-2 bg-indigo-500/10 text-indigo-400 px-4 py-2 rounded-full text-xs font-bold active:bg-indigo-500/20"
+                                                                >
+                                                                    <Play size={14} className="fill-current" /> Play Voice
+                                                                </button>
+                                                            ) : (
+                                                                <div className="text-[10px] text-zinc-600 font-medium px-2">No Voice Note</div>
+                                                            )}
+                                                            <div className="flex items-center gap-2">
+                                                                <button onClick={() => { handleEdit(product); setActiveMobilePage('add-product'); }} className="bg-white/5 text-zinc-300 px-4 py-2 rounded-full text-xs font-bold active:bg-white/10 flex items-center gap-1.5">
+                                                                    <Edit3 size={14} /> Edit
+                                                                </button>
+                                                                <button onClick={() => handleDelete(product.id)} className="bg-red-500/10 text-red-400 w-8 h-8 rounded-full active:bg-red-500/20 flex items-center justify-center">
+                                                                    <Trash2 size={14} />
+                                                                </button>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    
-                                                    {/* Voice & Action Buttons Row */}
-                                                    <div className="flex items-center justify-between border-t border-white/5 pt-3 mt-1">
-                                                        {product.voice_note_url ? (
-                                                            <button 
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    const audio = new Audio(product.voice_note_url as string);
-                                                                    audio.play();
-                                                                }}
-                                                                className="flex items-center gap-2 bg-indigo-500/10 text-indigo-400 px-4 py-2 rounded-full text-xs font-bold active:bg-indigo-500/20"
-                                                            >
-                                                                <Play size={14} className="fill-current" /> Play Voice
-                                                            </button>
-                                                        ) : (
-                                                            <div className="text-[10px] text-zinc-600 font-medium px-2">No Voice Note</div>
-                                                        )}
-                                                        <div className="flex items-center gap-2">
-                                                            <button onClick={() => { handleEdit(product); setActiveMobilePage('add-product'); }} className="bg-white/5 text-zinc-300 px-4 py-2 rounded-full text-xs font-bold active:bg-white/10 flex items-center gap-1.5">
-                                                                <Edit3 size={14} /> Edit
-                                                            </button>
-                                                            <button onClick={() => handleDelete(product.id)} className="bg-red-500/10 text-red-400 w-8 h-8 rounded-full active:bg-red-500/20 flex items-center justify-center">
-                                                                <Trash2 size={14} />
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })
+                                                );
+                                            });
+                                        })()
                                     )}
                                 </div>
                             )}

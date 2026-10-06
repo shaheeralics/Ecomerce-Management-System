@@ -375,7 +375,7 @@ export default function LiveConversations() {
                             <div className="flex-1 flex justify-end">
                                 <div className="relative w-full max-w-[200px]">
                                     <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
-                                    <input type="text" placeholder="Search chats..." className="bg-[#18181b] text-sm text-white rounded-full pl-9 pr-4 py-2 w-full outline-none border border-white/5 focus:border-indigo-500/50 transition-all" />
+                                    <input type="text" placeholder="Search chats..." value={search} onChange={e => setSearch(e.target.value)} className="bg-[#18181b] text-sm text-white rounded-full pl-9 pr-4 py-2 w-full outline-none border border-white/5 focus:border-indigo-500/50 transition-all" />
                                 </div>
                             </div>
                         </div>
