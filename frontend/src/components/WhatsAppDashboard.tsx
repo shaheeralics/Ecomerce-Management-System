@@ -1845,7 +1845,9 @@ const WhatsAppDashboard = () => {
                                 <ChevronLeft size={24} />
                             </button>
                             <h1 className="text-lg font-bold tracking-tight text-white capitalize w-full text-center">
-                                {(activeMobilePage as string).replace('-', ' ')}
+                                {activeMobilePage === 'policy' ? 'Policy Voices' : 
+                                 activeMobilePage === 'prerecorded' ? 'Pre-Recorded Voices' :
+                                 (activeMobilePage as string).replace('-', ' ')}
                             </h1>
                         </div>
                         <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">

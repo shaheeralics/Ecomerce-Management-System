@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
     Mic, Play, Pause, Trash2, Edit3, Plus, ChevronLeft, Save, X, RotateCcw, ArrowRight
 } from 'lucide-react';
+import MobileVoiceEditor from './MobileVoiceEditor';
 
 interface VoiceAssetsTabProps {
     category?: 'policy' | 'prerecorded';
@@ -21,10 +22,12 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
     
     // Opus Recorder States
     const [isRecording, setIsRecording] = useState(false);
+    const [isPaused, setIsPaused] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
     const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
     const [audioPreviewUrl, setAudioPreviewUrl] = useState<string | null>(null);
     const [recorder, setRecorder] = useState<any>(null);
+    const [isEditingVoice, setIsEditingVoice] = useState(false);
     
     const timerRef = useRef<number | null>(null);
 
@@ -70,6 +73,8 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
         setActiveTab('details');
         setRecordingTime(0);
         setIsRecording(false);
+        setIsPaused(false);
+        setIsEditingVoice(false);
         if (timerRef.current) clearInterval(timerRef.current);
     };
 
@@ -114,8 +119,10 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
 
             await recorder.start();
             setIsRecording(true);
+            setIsPaused(false);
             setRecordingTime(0);
 
+            if (timerRef.current) clearInterval(timerRef.current);
             timerRef.current = window.setInterval(() => {
                 setRecordingTime(prev => prev + 1);
             }, 1000);
@@ -125,10 +132,30 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
         }
     };
 
+    const pauseRecording = () => {
+        if (recorder && isRecording && !isPaused) {
+            recorder.pause();
+            setIsPaused(true);
+            if (timerRef.current) clearInterval(timerRef.current);
+        }
+    };
+
+    const resumeRecording = () => {
+        if (recorder && isRecording && isPaused) {
+            recorder.resume();
+            setIsPaused(false);
+            if (timerRef.current) clearInterval(timerRef.current);
+            timerRef.current = window.setInterval(() => {
+                setRecordingTime(prev => prev + 1);
+            }, 1000);
+        }
+    };
+
     const stopRecording = () => {
         if (recorder && isRecording) {
             recorder.stop();
             setIsRecording(false);
+            setIsPaused(false);
             if (timerRef.current) clearInterval(timerRef.current);
         }
     };
@@ -192,6 +219,24 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
     };
 
     if (viewState === 'edit') {
+        if (isEditingVoice) {
+            return (
+                <div className="flex flex-col h-full w-full bg-[#050D10] absolute inset-0 z-50">
+                    <MobileVoiceEditor 
+                        audioBlob={audioBlob} 
+                        onSave={(editedBlob) => {
+                            setAudioBlob(editedBlob);
+                            if (audioPreviewUrl && audioPreviewUrl.startsWith('blob:')) URL.revokeObjectURL(audioPreviewUrl);
+                            setAudioPreviewUrl(URL.createObjectURL(editedBlob));
+                            setIsEditingVoice(false);
+                            backgroundTranscribe(editedBlob);
+                        }} 
+                        onCancel={() => setIsEditingVoice(false)} 
+                    />
+                </div>
+            );
+        }
+
         return (
             <div className="flex flex-col h-full w-full bg-[#050D10] absolute inset-0 z-50">
                 {/* Header */}
@@ -258,7 +303,6 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
                         <div className="flex flex-col items-center justify-center h-full space-y-8">
                             <div className="text-center">
                                 <h3 className="text-slate-200 font-bold mb-2">Voice Recording</h3>
-                                <p className="text-xs text-slate-400 px-4">Record the audio that will be sent as a native WhatsApp Voice Note.</p>
                             </div>
 
                             {!isRecording && !audioPreviewUrl && (
@@ -272,10 +316,16 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
 
                             {isRecording && (
                                 <div className="flex flex-col items-center gap-6">
-                                    <div className="text-3xl font-mono text-red-400 animate-pulse font-bold">
+                                    <div className={`text-3xl font-mono ${isPaused ? 'text-amber-400' : 'text-red-400 animate-pulse'} font-bold`}>
                                         {formatTimer(recordingTime)}
                                     </div>
                                     <div className="flex items-center gap-4">
+                                        <button
+                                            onClick={isPaused ? resumeRecording : pauseRecording}
+                                            className="w-14 h-14 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center"
+                                        >
+                                            {isPaused ? <Play size={24} className="ml-1" /> : <Pause size={24} />}
+                                        </button>
                                         <button
                                             onClick={stopRecording}
                                             className="w-16 h-16 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center border-2 border-red-500"
@@ -291,16 +341,22 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
                                     <div className="bg-[#0A181D] border border-teal-900/50 rounded-2xl p-4">
                                         <audio src={audioPreviewUrl} controls className="w-full h-10 custom-audio-player" />
                                     </div>
-                                    <div className="flex items-center justify-center gap-4">
+                                    <div className="flex flex-wrap items-center justify-center gap-3">
                                         <button
                                             onClick={startRecording}
-                                            className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-sm font-semibold transition-colors"
+                                            className="flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-sm font-semibold transition-colors"
                                         >
                                             <RotateCcw size={16} /> Retake
                                         </button>
                                         <button
+                                            onClick={() => setIsEditingVoice(true)}
+                                            className="flex items-center gap-1.5 px-4 py-2 bg-indigo-900/40 hover:bg-indigo-900/60 border border-indigo-500/30 text-indigo-300 rounded-lg text-sm font-semibold transition-colors"
+                                        >
+                                            <Edit3 size={16} /> Edit
+                                        </button>
+                                        <button
                                             onClick={submitVoice}
-                                            className="flex items-center gap-2 px-6 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg text-sm font-bold shadow-lg shadow-teal-900/50 transition-colors"
+                                            className="flex items-center gap-1.5 px-6 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg text-sm font-bold shadow-lg shadow-teal-900/50 transition-colors"
                                         >
                                             <Save size={16} /> Submit
                                         </button>
@@ -323,14 +379,9 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
     }
 
     return (
-        <div className="h-full relative flex flex-col max-w-lg mx-auto bg-[#050D10]">
-            {/* Header */}
-            <div className="pt-6 px-4 pb-4">
-                <h1 className="text-2xl font-bold text-slate-100">Policy Voices</h1>
-            </div>
-
+        <div className="h-full relative flex flex-col w-full">
             {/* Content List */}
-            <div className="flex-1 overflow-y-auto px-4 pb-24 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto pt-4 px-4 pb-24 custom-scrollbar">
                 {loading ? (
                     <div className="flex justify-center py-10"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-teal-500"></div></div>
                 ) : voices.length === 0 ? (
