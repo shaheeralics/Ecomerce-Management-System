@@ -432,9 +432,9 @@ const WhatsAppDashboard = () => {
             } else {
                 throw new Error(data.error || 'Failed to transcribe');
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error('Transcription error:', err);
-            setTranscriptionText("Failed to transcribe via OpenAI API.");
+            setTranscriptionText(`Error: ${err.message || 'Failed to transcribe via OpenAI API'}`);
         } finally {
             setIsTranscribing(false);
         }
