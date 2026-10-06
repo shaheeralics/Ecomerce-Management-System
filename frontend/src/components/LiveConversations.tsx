@@ -30,7 +30,9 @@ const MobileChatInput = ({ onSend, disabled }: { onSend: (type: string, content:
         if (OpusRecorder) {
             const rec = new OpusRecorder({
                 encoderPath: '/encoderWorker.min.js',
-                encoderSampleRate: 48000,
+                encoderSampleRate: 16000,
+                originalSampleRateOverride: 16000,
+                numberOfChannels: 1, // Mono
                 maxFramesPerPage: 40,
                 encoderApplication: 2048 // Voice
             });
