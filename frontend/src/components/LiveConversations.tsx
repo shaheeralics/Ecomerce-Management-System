@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { Search, ChevronLeft, MoreVertical, Paperclip, Image as ImageIcon, FileText, Smile, Mic, Send, MapPin, Phone, Mail, ShoppingBag, User, XCircle, Bot, UserCheck, MessageSquare, Video, Plus, Play, Pause, Trash2 } from 'lucide-react';
 import OrderDetailPage from './OrderDetailPage'; // Assuming this exists for modal
 import AddOrderModal from './AddOrderModal';
@@ -164,6 +164,10 @@ export default function LiveConversations() {
     const [composeText, setComposeText] = useState('');
     const [loading, setLoading] = useState(true);
     const [errorMsg, setErrorMsg] = useState('');
+
+    useLayoutEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+    }, [messages]);
     
     // Modals
     const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
@@ -211,17 +215,7 @@ export default function LiveConversations() {
                 const res = await fetch(`/api/conversations/${activeConvId}/messages`);
                 const data = await res.json();
                 if (data.data) {
-                    setMessages(prev => {
-                        const prevLastMsgId = prev.length > 0 ? prev[prev.length - 1].id : null;
-                        const newLastMsgId = data.data.length > 0 ? data.data[data.data.length - 1].id : null;
-
-                        if (isFirstLoad || prevLastMsgId !== newLastMsgId) {
-                            setTimeout(() => {
-                                messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
-                            }, 50);
-                        }
-                        return data.data;
-                    });
+                    setMessages(data.data);
                     isFirstLoad = false;
                 }
             } catch (e) { console.error(e); }
@@ -361,12 +355,9 @@ export default function LiveConversations() {
     });
 
     return (
-        <div className="fixed inset-0 h-[100dvh] w-full bg-[#030712] text-zinc-100 flex font-sans overflow-hidden overscroll-none">
-            
-            {/* ======================================= */}
-            {/* ========== DESKTOP VIEW =============== */}
-            {/* ======================================= */}
-            <div className="hidden md:flex w-full h-full relative">
+        <div className="h-full flex flex-col bg-[#09090b] text-white font-sans overflow-hidden">
+            {/* Desktop View (hidden on mobile) */}
+            <div className="hidden md:flex h-full border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
                 {/* Left Pane - Chat List */}
                 <div className="w-[350px] border-r border-white/5 bg-[#09090b] flex flex-col shrink-0 h-full">
                     <div className="p-4 border-b border-white/5 bg-[#09090b] z-10">
@@ -439,8 +430,8 @@ export default function LiveConversations() {
                                 </div>
 
                                 {/* Chat Messages */}
-                                <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 custom-scrollbar bg-[#030712] flex flex-col-reverse">
-                                    {[...messages].reverse().map((msg, idx) => {
+                                <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 custom-scrollbar bg-[#030712] flex flex-col">
+                                    {messages.map((msg, idx) => {
                                         const isCustomer = msg.sender === 'customer';
                                         const isAgent = msg.sender === 'agent';
                                         
@@ -609,8 +600,8 @@ export default function LiveConversations() {
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 custom-scrollbar bg-[#030712] flex flex-col-reverse">
-                            {[...messages].reverse().map((msg, idx) => {
+                        <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 custom-scrollbar bg-[#030712] flex flex-col">
+                            {messages.map((msg, idx) => {
                                 const isCustomer = msg.sender === 'customer';
                                 const isAgent = msg.sender === 'agent';
                                 
