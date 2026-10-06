@@ -1,13 +1,11 @@
 // @ts-nocheck
 import VoiceAssetsTab from './VoiceAssetsTab';
-import DesktopWhatsAppDashboard from './DesktopWhatsAppDashboard';
-import MobileVoiceEditor from './MobileVoiceEditor';
 import AnalyticsPage from './AnalyticsPage';
 import LiveConversations from './LiveConversations';
 import OrdersPage from './OrdersPage';
 import AIAgentPanel from './AIAgentPanel';
 import React, { useState, useEffect, useRef } from 'react';
-import { Package, ShieldAlert, Mic2, MessageSquare, Settings, Plus, Trash2, Edit3, Camera, Video, Mic, ShoppingCart, BarChart, Square, Play, Pause, Volume2, CheckCircle, X, Upload, Download, StopCircle, SkipBack, SkipForward, Save, LayoutDashboard, Database, RefreshCw, Tag, DollarSign, Box, FileAudio, Loader2, Sparkles, Menu, ChevronLeft, MoreHorizontal, FileText, ChevronRight , ImageIcon } from 'lucide-react';
+import { Package, ShieldAlert, Mic2, MessageSquare, Settings, Plus, Trash2, Edit3, Camera, Video, Mic, ShoppingCart, BarChart, Square, Play, Pause, Volume2, CheckCircle, X, Upload, Download, StopCircle, SkipBack, SkipForward, Save, LayoutDashboard, Database, RefreshCw, Tag, DollarSign, Box, FileAudio, Loader2, Sparkles, Menu, ChevronLeft, MoreHorizontal, FileText, ChevronRight } from 'lucide-react';
 
 const apiGuidanceData = {
     metaToken: {
@@ -153,8 +151,6 @@ const WhatsAppDashboard = () => {
     const [isPaused, setIsPaused] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
     const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
-    const [transcriptionText, setTranscriptionText] = useState("");
-    const [isTranscribing, setIsTranscribing] = useState(false);
     const [audioPreviewUrl, setAudioPreviewUrl] = useState<string | null>(null);
 
     // Refs to avoid React async state closure bugs for Web Audio API Punch-In Overwrite
@@ -412,35 +408,6 @@ const WhatsAppDashboard = () => {
     };
 
     // Voice Note handling (Record, Pause, Resume, Stop & Web Audio Timeline Punch-In Overwrite)
-    
-    const handleTranscribe = async () => {
-        setActiveMobilePage('add-product-voice-transcribe');
-        setIsTranscribing(true);
-        try {
-            if (!audioBlob) throw new Error('No audio recorded.');
-            const formData = new FormData();
-            formData.append('audio', audioBlob, 'voice-note.webm');
-            
-            // Call the backend transcribe API
-            const res = await fetch('/api/transcribe', { 
-                method: 'POST', 
-                body: formData 
-            });
-            const data = await res.json();
-            
-            if (data.success) {
-                setTranscriptionText(data.text);
-            } else {
-                throw new Error(data.error || 'Failed to transcribe');
-            }
-        } catch (err: any) {
-            console.error('Transcription error:', err);
-            setTranscriptionText(`Error: ${err.message || 'Failed to transcribe audio'}`);
-        } finally {
-            setIsTranscribing(false);
-        }
-    };
-
     const startRecording = async (overwriteSeek?: number) => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
@@ -1420,7 +1387,6 @@ const WhatsAppDashboard = () => {
         if (mediaRecorderRef.current && isRecording) {
             mediaRecorderRef.current.stop();
             setIsRecording(false);
-        setIsPaused(false);
             setIsPaused(false);
             if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
             if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
@@ -1677,8 +1643,281 @@ const WhatsAppDashboard = () => {
         <div className="h-[100dvh] w-full bg-[#030712] text-zinc-100 flex overflow-hidden font-sans selection:bg-indigo-500/30">
             {/* ======================================= */}
             {/* ========== DESKTOP VIEW =============== */}
-            <div className="hidden md:block w-full h-full relative overflow-hidden">
-                <DesktopWhatsAppDashboard />
+            {/* ======================================= */}
+            <div className="hidden md:flex w-full h-full relative">
+                {/* Desktop Sidebar */}
+                <div className={`w-64 bg-[#09090b] border-r border-white/5 flex-col transition-all duration-300 z-40 shrink-0 ${isSidebarOpen ? 'ml-0' : '-ml-64'}`}>
+                    <div className="h-16 flex items-center px-6 border-b border-white/5">
+                        <div className="w-8 h-8 rounded-lg bg-white text-black flex items-center justify-center mr-3">
+                            <Package size={18} className="font-bold" />
+                        </div>
+                        <span className="font-bold text-lg tracking-tight text-white">Devsil</span>
+                    </div>
+                    <nav className="flex-1 overflow-y-auto custom-scrollbar py-6 px-3 space-y-1">
+                        {[
+                            { id: 'products', icon: Package, label: 'Catalog' },
+                            { id: 'conversations', icon: MessageSquare, label: 'Chat' },
+                            { id: 'orders', icon: ShoppingCart, label: 'Orders' },
+                            { id: 'analytics', icon: BarChart, label: 'Analytics' },
+                            { id: 'policy', icon: ShieldAlert, label: 'Policies' },
+                            { id: 'prerecorded', icon: Mic2, label: 'Voice Assets' },
+                            { id: 'ai-agent', icon: Sparkles, label: 'AI Agent' }
+                        ].map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => { setSubTab(tab.id as any); setActiveMobilePage('main'); }}
+                                className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all flex items-center gap-3 ${subTab === tab.id 
+                                    ? 'bg-white/10 text-white shadow-sm' 
+                                    : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-200'}`}
+                            >
+                                <tab.icon size={18} className={subTab === tab.id ? 'text-white' : 'text-zinc-500'} />
+                                {tab.label}
+                            </button>
+                        ))}
+                    </nav>
+                </div>
+
+                {/* Main Content Area */}
+                <div className="flex-1 flex flex-col min-w-0 bg-[#030712] relative overflow-hidden">
+                    <div className="h-16 bg-[#030712]/80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-8 z-30 shrink-0">
+                        <div className="flex items-center gap-3">
+                            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-zinc-400 hover:text-white p-2 rounded-lg hover:bg-white/5 transition-all">
+                                <Menu size={18} />
+                            </button>
+                            
+                        </div>
+                        {subTab === 'products' && (
+                            <button 
+                                onClick={() => { resetForm(); setShowAddModal(true); }}
+                                className="bg-white hover:bg-zinc-200 text-black px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2"
+                            >
+                                <Plus size={14} /> <span>New Product</span>
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-8 custom-scrollbar relative">
+                        {subTab === 'products' && (
+                            <div className="max-w-7xl mx-auto">
+                                {loading ? (
+                                    <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div></div>
+                                ) : products.length === 0 ? (
+                                    <div className="border border-dashed border-white/10 rounded-3xl h-64 flex flex-col items-center justify-center text-zinc-500">
+                                        <Package size={40} className="mb-4 text-zinc-700" />
+                                        <p className="font-semibold text-zinc-300">No products listed</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                                        {products.map(product => {
+                                            const allImages = getProductAllImages(product);
+                                            const activeImgIdx = cardActiveImageIndex[product.id] || 0;
+                                            const currentImgUrl = allImages[activeImgIdx] || product.main_image_url;
+
+                                            return (
+                                                <div key={product.id} className="bg-[#09090b] border border-white/5 rounded-3xl overflow-hidden hover:border-white/10 transition-all duration-300 flex flex-col group">
+                                                    <div className="h-52 bg-[#18181b] relative overflow-hidden flex items-center justify-center group-hover:bg-[#27272a] transition-colors">
+                                                        {currentImgUrl ? (
+                                                            <img src={currentImgUrl} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                                        ) : (
+                                                            <Camera size={30} className="text-zinc-700" />
+                                                        )}
+                                                        
+                                                        {/* Status Pill */}
+                                                        <div className="absolute top-3 right-3">
+                                                            {(product.status as any) === 'uploading' ? (
+                                                                <div className="bg-black/60 backdrop-blur-md border border-white/10 rounded-full px-2.5 py-1 flex items-center gap-1.5">
+                                                                    <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
+                                                                    <span className="text-[9px] font-bold text-amber-500 tracking-wider">UPLOADING</span>
+                                                                </div>
+                                                            ) : (
+                                                                <div className={`bg-black/60 backdrop-blur-md border border-white/10 rounded-full px-2.5 py-1 ${product.status === 'available' ? 'text-emerald-400' : 'text-zinc-400'}`}>
+                                                                    <span className="text-[9px] font-bold tracking-wider">{product.status.toUpperCase()}</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+
+                                                        {/* Image dots */}
+                                                        {allImages.length > 1 && (
+                                                            <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1">
+                                                                {allImages.map((_, idx) => (
+                                                                    <div key={idx} onClick={(e) => { e.stopPropagation(); setCardActiveImageIndex(p => ({...p, [product.id]: idx})); }} className={`h-1.5 rounded-full transition-all cursor-pointer ${activeImgIdx === idx ? 'w-4 bg-white' : 'w-1.5 bg-white/30'}`} />
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="p-4 flex-1 flex flex-col justify-between">
+                                                        <div>
+                                                            <h4 className="font-semibold text-zinc-100 text-sm line-clamp-1">{product.title}</h4>
+                                                            <p className="text-[10px] text-zinc-500 mt-1 line-clamp-1">{product.brand} • {product.gender}</p>
+                                                        </div>
+                                                        <div className="mt-4 flex items-end justify-between">
+                                                            <div>
+                                                                <p className="text-[9px] text-zinc-500 uppercase font-semibold">Price</p>
+                                                                <p className="text-sm font-bold text-white">Rs {product.starting_price}</p>
+                                                            </div>
+                                                            <div className="flex gap-1 items-center">
+                                                                {product.voice_note_url && (
+                                                                    <button 
+                                                                        onClick={(e) => { e.stopPropagation(); const a = new Audio(product.voice_note_url as string); a.play(); }} 
+                                                                        className="w-7 h-7 rounded-full bg-indigo-500/10 hover:bg-indigo-500/20 flex items-center justify-center text-indigo-400 transition-colors mr-1"
+                                                                        title="Play Voice Note"
+                                                                    >
+                                                                        <Play size={12} className="fill-current" />
+                                                                    </button>
+                                                                )}
+                                                                <button onClick={() => handleEdit(product)} className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-zinc-400 transition-colors">
+                                                                    <Edit3 size={12} />
+                                                                </button>
+                                                                <button onClick={() => handleDelete(product.id)} className="w-7 h-7 rounded-full bg-red-500/10 hover:bg-red-500/20 flex items-center justify-center text-red-400 transition-colors">
+                                                                    <Trash2 size={12} />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        {subTab === 'conversations' && <LiveConversations />}
+                        {subTab === 'orders' && <OrdersPage />}
+                        {subTab === 'analytics' && <AnalyticsPage />}
+                        {subTab === 'policy' && <VoiceAssetsTab category="policy" title="Policy Voices" description="" />}
+                        {subTab === 'prerecorded' && <VoiceAssetsTab category="prerecorded" title="Pre recorded voices" description="" />}
+                        {subTab === 'ai-agent' && <AIAgentPanel />}
+                    </div>
+
+                    {/* Desktop Side Drawer */}
+                    {showAddModal && (
+                        <div className="fixed inset-0 z-50 flex justify-end">
+                            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowAddModal(false)} />
+                            <div className="w-[600px] bg-[#09090b] h-full flex flex-col relative z-10 shadow-2xl border-l border-white/5 animate-in slide-in-from-right duration-300">
+                                {/* Desktop Add Product Form rendering */}
+                                <div className="h-16 flex items-center justify-between px-6 border-b border-white/5 shrink-0 bg-[#09090b]">
+                                    <h2 className="text-lg font-bold text-white">{editingProduct ? 'Edit Product' : 'New Product'}</h2>
+                                    <button onClick={() => setShowAddModal(false)} className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-zinc-400">
+                                        <X size={16} />
+                                    </button>
+                                </div>
+                                <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                                    <div className="flex gap-2 mb-8">
+                                        {[1, 2, 3].map(step => (
+                                            <div key={step} className={`h-1.5 flex-1 rounded-full ${activePhase >= step ? 'bg-white' : 'bg-white/10'}`} />
+                                        ))}
+                                    </div>
+
+                                    {activePhase === 1 && (
+                                        <div className="space-y-5 animate-in fade-in duration-300">
+                                            <div>
+                                                <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Product Title</label>
+                                                <input type="text" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white focus:border-white/20 focus:ring-1 focus:ring-white/20 outline-none transition-all" placeholder="e.g. Nike Air Max" />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Starting Price</label>
+                                                    <input type="number" value={formData.starting_price} onChange={e => setFormData({ ...formData, starting_price: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Min Price</label>
+                                                    <input type="number" value={formData.minimum_price} onChange={e => setFormData({ ...formData, minimum_price: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none" />
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Brand</label>
+                                                    <input type="text" value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Gender</label>
+                                                    <select value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none appearance-none">
+                                                        <option value="men">Men</option>
+                                                        <option value="women">Women</option>
+                                                        <option value="unisex">Unisex</option>
+                                                        <option value="kids">Kids</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {activePhase === 2 && (
+                                        <div className="space-y-5 animate-in fade-in duration-300">
+                                            <div>
+                                                <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Original Size</label>
+                                                <input type="text" value={formData.size_original} onChange={e => setFormData({ ...formData, size_original: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Color</label>
+                                                <input type="text" value={formData.color} onChange={e => setFormData({ ...formData, color: e.target.value })} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Description / Condition</label>
+                                                <textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} rows={4} className="w-full bg-[#18181b] border border-white/5 rounded-xl px-4 py-3 text-sm text-white outline-none resize-none custom-scrollbar" />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {activePhase === 3 && (
+                                        <div className="space-y-5 animate-in fade-in duration-300">
+                                            <div>
+                                                <label className="block text-xs font-semibold text-zinc-400 mb-2 uppercase tracking-wider">Product Images</label>
+                                                <input type="file" multiple accept="image/*" onChange={handleImageSelect} className="hidden" id="file-images-desk" />
+                                                <label htmlFor="file-images-desk" className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-white/10 rounded-2xl hover:border-white/20 hover:bg-white/5 transition-all cursor-pointer">
+                                                    <Camera size={24} className="text-zinc-500 mb-2" />
+                                                    <span className="text-sm font-semibold text-zinc-300">Tap to upload photos</span>
+                                                </label>
+                                                {productImages && productImages.length > 0 && (
+                                                    <div className="mt-3 flex gap-2 overflow-x-auto custom-scrollbar pb-2">
+                                                        {productImages.map((img, i) => (
+                                                            <div key={i} className="w-16 h-16 rounded-xl bg-[#18181b] shrink-0 border border-white/10 overflow-hidden relative">
+                                                                <img src={img.url} className="w-full h-full object-cover" />
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-semibold text-zinc-400 mb-2 uppercase tracking-wider">Product Video</label>
+                                                <input type="file" accept="video/*" onChange={handleVideoSelect} className="hidden" id="file-video-desk" />
+                                                <label htmlFor="file-video-desk" className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-white/10 rounded-2xl hover:border-white/20 hover:bg-white/5 transition-all cursor-pointer">
+                                                    <Video size={24} className="text-zinc-500 mb-2" />
+                                                    <span className="text-sm font-semibold text-zinc-300">{selectedVideo ? selectedVideo.name : 'Tap to upload video'}</span>
+                                                </label>
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-semibold text-zinc-400 mb-2 uppercase tracking-wider">Voice Pitch Note</label>
+                                                <input type="file" accept="audio/*" onChange={handleAudioFileUpload} className="hidden" id="file-audio-desk" />
+                                                <label htmlFor="file-audio-desk" className="flex flex-col items-center justify-center h-24 border-2 border-dashed border-white/10 rounded-2xl hover:border-white/20 hover:bg-white/5 transition-all cursor-pointer">
+                                                    <Volume2 size={24} className="text-zinc-500 mb-2" />
+                                                    <span className="text-sm font-semibold text-zinc-300">{audioBlob ? 'Audio ready' : 'Upload Audio'}</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="p-6 border-t border-white/5 bg-[#09090b] shrink-0 flex gap-3">
+                                    {activePhase > 1 && (
+                                        <button onClick={() => setActivePhase(p => (p - 1) as 1|2|3)} className="px-6 py-3 rounded-xl bg-[#18181b] text-white font-semibold text-sm hover:bg-white/10 transition-colors">
+                                            Back
+                                        </button>
+                                    )}
+                                    {activePhase < 3 ? (
+                                        <button onClick={() => setActivePhase(p => (p + 1) as 1|2|3)} className="flex-1 px-6 py-3 rounded-xl bg-white text-black font-semibold text-sm hover:bg-zinc-200 transition-colors">
+                                            Continue
+                                        </button>
+                                    ) : (
+                                        <button onClick={handleSubmit} disabled={loading} className="flex-1 px-6 py-3 rounded-xl bg-white text-black font-semibold text-sm hover:bg-zinc-200 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                                            {loading ? <span className="animate-spin h-4 w-4 border-2 border-black border-t-transparent rounded-full"></span> : 'Save Product'}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* ======================================= */}
@@ -1839,154 +2078,36 @@ const WhatsAppDashboard = () => {
                 )}
 
                 {/* 4) ADD PRODUCT MOBILE NATIVE SCREEN (Full screen, no bottom nav) */}
-                                {/* 4) ADD PRODUCT MOBILE NATIVE SCREEN (Stack Navigation) */}
+                {/* 4) ADD PRODUCT MOBILE NATIVE SCREEN (Stack Navigation) */}
                 {activeMobilePage === 'add-product' && (
-                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#030712] z-[70] animate-in slide-in-from-right duration-200">
+                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#030712] z-[70] animate-in slide-in-from-bottom duration-300">
                         <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative">
                             <button onClick={() => setActiveMobilePage('main')} className="absolute left-4 p-2 -m-2 text-indigo-400 active:opacity-50 flex items-center gap-1 z-10">
                                 <ChevronLeft size={24} /> <span className="text-base font-semibold">Cancel</span>
                             </button>
-                            <h1 className="text-lg font-bold text-white w-full text-center">Add Product</h1>
                         </div>
-                        <div className="flex-1 p-4 flex flex-col gap-4 bg-[#030712]">
-                            <button onClick={() => setActiveMobilePage('add-product-text')} className="flex items-center justify-between bg-[#18181b] p-4 rounded-2xl border border-white/5 active:scale-95 transition-transform shadow-lg">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-blue-500/10 text-blue-400 rounded-xl"><FileText size={24} /></div>
-                                    <div className="text-left">
-                                        <h3 className="font-bold text-white text-base">Text Details</h3>
-                                        <p className="text-xs text-zinc-500">Title, price, size, brand</p>
-                                    </div>
-                                </div>
-                                <ChevronRight size={20} className="text-zinc-600" />
-                            </button>
-                            <button onClick={() => setActiveMobilePage('add-product-media')} className="flex items-center justify-between bg-[#18181b] p-4 rounded-2xl border border-white/5 active:scale-95 transition-transform shadow-lg">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl"><ImageIcon size={24} /></div>
-                                    <div className="text-left">
-                                        <h3 className="font-bold text-white text-base">Media Upload</h3>
-                                        <p className="text-xs text-zinc-500">Photos and videos</p>
-                                    </div>
-                                </div>
-                                <ChevronRight size={20} className="text-zinc-600" />
-                            </button>
-                            <button onClick={() => setActiveMobilePage('add-product-voice')} className="flex items-center justify-between bg-[#18181b] p-4 rounded-2xl border border-white/5 active:scale-95 transition-transform shadow-lg">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl"><Mic size={24} /></div>
-                                    <div className="text-left">
-                                        <h3 className="font-bold text-white text-base">Voice Record</h3>
-                                        <p className="text-xs text-zinc-500">Advanced voice note editing</p>
-                                    </div>
-                                </div>
-                                <ChevronRight size={20} className="text-zinc-600" />
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {activeMobilePage === 'add-product-text' && (
-                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#09090b] z-[80] animate-in slide-in-from-right duration-200">
-                        <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative">
-                            <button onClick={() => setActiveMobilePage('add-product')} className="absolute left-4 p-2 -m-2 text-indigo-400 active:opacity-50 flex items-center gap-1 z-10">
-                                <ChevronLeft size={24} /> <span className="text-base font-semibold">Back</span>
-                            </button>
-                            <h1 className="text-lg font-bold text-white w-full text-center">Details</h1>
-                            <button onClick={handleSubmit} disabled={loading} className="absolute right-4 p-2 -m-2 text-emerald-400 active:opacity-50 font-bold text-base z-10">
-                                {loading ? 'Saving' : 'Save'}
-                            </button>
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-4 pb-12 space-y-6 custom-scrollbar">
-                            <div className="space-y-4">
-                                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest pl-2">Basic Info</label>
-                                <div className="bg-[#18181b] rounded-2xl overflow-hidden border border-white/5">
-                                    <input type="text" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-4 py-4 text-base text-white outline-none" placeholder="Product Title" />
-                                    <input type="number" value={formData.starting_price} onChange={e => setFormData({ ...formData, starting_price: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-4 py-4 text-base text-white outline-none" placeholder="Starting Price (Rs)" />
-                                    <input type="number" value={formData.minimum_price} onChange={e => setFormData({ ...formData, minimum_price: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-4 py-4 text-base text-white outline-none" placeholder="Minimum Price (Rs)" />
-                                    <input type="text" value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value })} className="w-full bg-transparent px-4 py-4 text-base text-white outline-none" placeholder="Brand Name" />
-                                </div>
+                        <div className="flex-1 p-6 flex flex-col items-center justify-center bg-gradient-to-b from-[#09090b] to-[#030712]">
+                            <div className="w-24 h-24 bg-indigo-500/10 rounded-full flex items-center justify-center mb-6">
+                                <Mic size={40} className="text-indigo-400" />
                             </div>
-                            <div className="space-y-4">
-                                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest pl-2">Details</label>
-                                <div className="bg-[#18181b] rounded-2xl overflow-hidden border border-white/5">
-                                    <select value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-4 py-4 text-base text-white outline-none appearance-none">
-                                        <option value="men">Men</option>
-                                        <option value="women">Women</option>
-                                        <option value="unisex">Unisex</option>
-                                        <option value="kids">Kids</option>
-                                    </select>
-                                    <input type="text" value={formData.size_original} onChange={e => setFormData({ ...formData, size_original: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-4 py-4 text-base text-white outline-none" placeholder="Size" />
-                                    <input type="text" value={formData.color} onChange={e => setFormData({ ...formData, color: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-4 py-4 text-base text-white outline-none" placeholder="Color" />
-                                    <textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} rows={3} className="w-full bg-transparent px-4 py-4 text-base text-white outline-none resize-none" placeholder="Description / Condition" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {activeMobilePage === 'add-product-media' && (
-                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#09090b] z-[80] animate-in slide-in-from-right duration-200">
-                        <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative">
-                            <button onClick={() => setActiveMobilePage('add-product')} className="absolute left-4 p-2 -m-2 text-indigo-400 active:opacity-50 flex items-center gap-1 z-10">
-                                <ChevronLeft size={24} /> <span className="text-base font-semibold">Back</span>
+                            <h2 className="text-2xl font-bold text-white mb-2 tracking-tight">Smart Add</h2>
+                            <p className="text-sm text-zinc-400 text-center mb-10 max-w-[250px]">
+                                Record a voice note detailing the product's name, price, brand and size. AI will automatically list it!
+                            </p>
+                            
+                            <button 
+                                onClick={() => setActiveMobilePage('add-product-voice')}
+                                className="bg-indigo-600 hover:bg-indigo-500 text-white w-full py-4 rounded-full font-bold shadow-lg shadow-indigo-900/20 active:scale-95 transition-all text-lg flex items-center justify-center gap-2"
+                            >
+                                <Mic size={20} /> Record Voice
                             </button>
-                            <h1 className="text-lg font-bold text-white w-full text-center">Media</h1>
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar pb-12">
-                            <div className="space-y-4">
-                                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest pl-2">Photos</label>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div className="col-span-2">
-                                        <input type="file" multiple accept="image/*" onChange={handleImageSelect} className="hidden" id="file-images-mob" />
-                                        <label htmlFor="file-images-mob" className="flex items-center justify-center gap-3 h-16 bg-[#18181b] border border-white/5 rounded-2xl active:bg-white/5 transition-all cursor-pointer">
-                                            <Camera size={20} className="text-zinc-400" />
-                                            <span className="text-base font-semibold text-zinc-200">Add Photos</span>
-                                        </label>
-                                    </div>
-                                    {productImages && productImages.length > 0 && productImages.map((img, i) => (
-                                        <div key={i} className="aspect-square rounded-2xl bg-[#18181b] border border-white/10 overflow-hidden relative shadow-sm">
-                                            <img src={img.url} className="w-full h-full object-cover" />
-                                            <button onClick={() => setProductImages((prev) => prev.filter((_, idx) => idx !== i))} className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 backdrop-blur text-red-400 flex items-center justify-center">
-                                                <Trash2 size={14} />
-                                            </button>
-                                            <div className="absolute bottom-2 left-2 right-2 flex justify-between">
-                                                <button disabled={i === 0} onClick={() => {
-                                                    const newArr = [...productImages];
-                                                    const temp = newArr[i-1];
-                                                    newArr[i-1] = newArr[i];
-                                                    newArr[i] = temp;
-                                                    setProductImages(newArr);
-                                                }} className="w-8 h-8 rounded-full bg-black/60 backdrop-blur text-white flex items-center justify-center disabled:opacity-30">
-                                                    <ChevronLeft size={14} />
-                                                </button>
-                                                <button disabled={i === productImages.length - 1} onClick={() => {
-                                                    const newArr = [...productImages];
-                                                    const temp = newArr[i+1];
-                                                    newArr[i+1] = newArr[i];
-                                                    newArr[i] = temp;
-                                                    setProductImages(newArr);
-                                                }} className="w-8 h-8 rounded-full bg-black/60 backdrop-blur text-white flex items-center justify-center disabled:opacity-30">
-                                                    <ChevronRight size={14} />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="space-y-4">
-                                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest pl-2">Video</label>
-                                <input type="file" accept="video/*" onChange={handleVideoSelect} className="hidden" id="file-video-mob" />
-                                <label htmlFor="file-video-mob" className="flex items-center justify-center gap-3 h-16 bg-[#18181b] border border-white/5 rounded-2xl active:bg-white/5 transition-all cursor-pointer">
-                                    <Video size={20} className="text-zinc-400" />
-                                    <span className="text-base font-semibold text-zinc-200">{selectedVideo ? 'Video Selected' : 'Add Video'}</span>
-                                </label>
-                                {selectedVideo && (
-                                    <div className="relative mt-2 rounded-2xl overflow-hidden border border-white/10">
-                                        <video src={URL.createObjectURL(selectedVideo)} className="w-full h-auto" controls />
-                                        <button onClick={() => setSelectedVideo(null)} className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 backdrop-blur text-red-400 flex items-center justify-center z-10">
-                                            <Trash2 size={14} />
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
+                            
+                            <button 
+                                onClick={() => setActiveMobilePage('add-product-edit')}
+                                className="mt-4 text-zinc-500 font-bold active:opacity-50 underline underline-offset-4"
+                            >
+                                Enter Manually Instead
+                            </button>
                         </div>
                     </div>
                 )}
@@ -2003,16 +2124,10 @@ const WhatsAppDashboard = () => {
                                 <div className="w-full flex flex-col items-center">
                                     <audio controls src={audioPreviewUrl} className="w-full mb-8 h-12" />
                                     <button 
-                                        onClick={() => setActiveMobilePage('add-product-voice-edit')}
-                                        className="bg-indigo-600 text-white w-full py-4 rounded-full font-bold shadow-lg shadow-indigo-900/30 active:scale-95 transition-all text-lg flex items-center justify-center gap-2 mb-3"
+                                        onClick={() => setActiveMobilePage('add-product-edit')}
+                                        className="bg-emerald-600 text-white w-full py-4 rounded-full font-bold shadow-lg active:scale-95 transition-all text-lg flex items-center justify-center gap-2 mb-4"
                                     >
-                                        <Edit3 size={20} /> Advanced Edit
-                                    </button>
-                                    <button 
-                                        onClick={handleTranscribe}
-                                        className="bg-[#18181b] border border-white/10 text-white w-full py-4 rounded-full font-bold shadow-lg active:scale-95 transition-all text-lg flex items-center justify-center gap-2 mb-4"
-                                    >
-                                        <FileText size={20} className="text-emerald-400" /> Transcribe Voice
+                                        <Edit3 size={20} /> Next: Edit Details
                                     </button>
                                     <button onClick={() => {setAudioBlob(null); setAudioPreviewUrl(null);}} className="text-red-400 font-bold p-4 active:opacity-50">
                                         Retake Audio
@@ -2028,20 +2143,9 @@ const WhatsAppDashboard = () => {
                                     {isRecording ? (
                                         <>
                                             <p className="text-3xl font-mono font-bold text-white mb-8">Recording...</p>
-                                                                                        <div className="flex gap-4 w-full">
-                                                {!isPaused ? (
-                                                    <button onClick={pauseRecording} className="flex-1 bg-amber-500 text-white py-4 rounded-full font-bold text-lg active:scale-95 shadow-lg flex items-center justify-center gap-2">
-                                                        <Pause size={20} /> Pause
-                                                    </button>
-                                                ) : (
-                                                    <button onClick={resumeRecording} className="flex-1 bg-emerald-500 text-white py-4 rounded-full font-bold text-lg active:scale-95 shadow-lg flex items-center justify-center gap-2">
-                                                        <Play size={20} /> Resume
-                                                    </button>
-                                                )}
-                                                <button onClick={stopRecording} className="flex-1 bg-white text-black py-4 rounded-full font-bold text-lg active:scale-95 shadow-lg flex items-center justify-center gap-2">
-                                                    <Square size={20} /> Stop
-                                                </button>
-                                            </div>
+                                            <button onClick={stopRecording} className="bg-white text-black w-full py-4 rounded-full font-bold text-lg active:scale-95 shadow-lg flex items-center justify-center gap-2">
+                                                <Square size={20} /> Stop Recording
+                                            </button>
                                         </>
                                     ) : (
                                         <>
@@ -2057,54 +2161,73 @@ const WhatsAppDashboard = () => {
                     </div>
                 )}
 
-                {activeMobilePage === 'add-product-voice-edit' && (
-                    <MobileVoiceEditor 
-                        audioBlob={audioBlob} 
-                        onCancel={() => setActiveMobilePage('add-product-voice')} 
-                        onSave={(blob) => { setAudioBlob(blob); setAudioPreviewUrl(URL.createObjectURL(blob)); setActiveMobilePage('add-product-voice'); }} 
-                    />
-                )}
-
-                {activeMobilePage === 'add-product-voice-transcribe' && (
-                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#030712] z-[100] animate-in slide-in-from-bottom-2 duration-200">
+                {activeMobilePage === 'add-product-edit' && (
+                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#09090b] z-[90] animate-in slide-in-from-right duration-200">
                         <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative">
-                            <button onClick={() => setActiveMobilePage('add-product-voice')} className="absolute left-4 p-2 -m-2 text-emerald-400 active:opacity-50 flex items-center gap-1 z-10">
+                            <button onClick={() => setActiveMobilePage(audioPreviewUrl ? 'add-product-voice' : 'add-product')} className="absolute left-4 p-2 -m-2 text-indigo-400 active:opacity-50 flex items-center gap-1 z-10">
                                 <ChevronLeft size={24} /> <span className="text-base font-semibold">Back</span>
                             </button>
-                            <h1 className="text-lg font-bold text-white w-full text-center">Transcription</h1>
-                            <button onClick={() => setActiveMobilePage('add-product-voice')} className="absolute right-4 p-2 -m-2 text-indigo-400 font-bold active:opacity-50">
-                                Save
+                            <button onClick={handleSubmit} disabled={loading} className="absolute right-4 p-2 -m-2 text-emerald-400 active:opacity-50 font-bold text-base">
+                                {loading ? 'Saving' : 'Save'}
                             </button>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-4 flex flex-col items-center">
-                            <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mb-6 shadow-xl shadow-emerald-900/20">
-                                {isTranscribing ? <Loader2 size={40} className="text-emerald-400 animate-spin" /> : <FileText size={40} className="text-emerald-400" />}
+                        <div className="flex-1 overflow-y-auto p-4 pb-12 space-y-6">
+                            <div className="space-y-4">
+                                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest pl-2">Basic Info</label>
+                                <div className="bg-[#18181b] rounded-2xl overflow-hidden border border-white/5">
+                                    <input type="text" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-4 py-4 text-base text-white outline-none" placeholder="Product Title" />
+                                    <input type="number" value={formData.starting_price} onChange={e => setFormData({ ...formData, starting_price: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-4 py-4 text-base text-white outline-none" placeholder="Starting Price (Rs)" />
+                                    <input type="number" value={formData.minimum_price} onChange={e => setFormData({ ...formData, minimum_price: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-4 py-4 text-base text-white outline-none" placeholder="Minimum Price (Rs)" />
+                                    <input type="text" value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value })} className="w-full bg-transparent px-4 py-4 text-base text-white outline-none" placeholder="Brand Name" />
+                                </div>
                             </div>
-                            <h2 className="text-xl font-bold text-white mb-2">{isTranscribing ? "Transcribing audio..." : "Voice to Text"}</h2>
-                            
-                            <div className="w-full bg-[#18181b] rounded-3xl p-1 border border-white/10 shadow-inner relative group mt-8">
-                                <textarea 
-                                    value={transcriptionText} 
-                                    onChange={e => setTranscriptionText(e.target.value)}
-                                    disabled={isTranscribing}
-                                    className="w-full h-64 bg-transparent text-white text-lg p-5 outline-none resize-none leading-relaxed font-medium disabled:opacity-50"
-                                    placeholder={isTranscribing ? "Processing audio..." : "Transcription will appear here..."}
-                                />
-                                {!isTranscribing && (
-                                    <div className="absolute top-4 right-4 opacity-30 group-focus-within:opacity-100 transition-opacity">
-                                        <Edit3 size={20} className="text-indigo-400" />
+
+                            <div className="space-y-4">
+                                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest pl-2">Details</label>
+                                <div className="bg-[#18181b] rounded-2xl overflow-hidden border border-white/5">
+                                    <select value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-4 py-4 text-base text-white outline-none appearance-none">
+                                        <option value="men">Men</option>
+                                        <option value="women">Women</option>
+                                        <option value="unisex">Unisex</option>
+                                        <option value="kids">Kids</option>
+                                    </select>
+                                    <input type="text" value={formData.size_original} onChange={e => setFormData({ ...formData, size_original: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-4 py-4 text-base text-white outline-none" placeholder="Size" />
+                                    <input type="text" value={formData.color} onChange={e => setFormData({ ...formData, color: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-4 py-4 text-base text-white outline-none" placeholder="Color" />
+                                    <textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} rows={3} className="w-full bg-transparent px-4 py-4 text-base text-white outline-none resize-none" placeholder="Description / Condition" />
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest pl-2">Media</label>
+                                <div className="grid grid-cols-3 gap-3">
+                                    <div className="col-span-3">
+                                        <input type="file" multiple accept="image/*" onChange={handleImageSelect} className="hidden" id="file-images-mob" />
+                                        <label htmlFor="file-images-mob" className="flex items-center justify-center gap-3 h-16 bg-[#18181b] border border-white/5 rounded-2xl active:bg-white/5 transition-all cursor-pointer">
+                                            <Camera size={20} className="text-zinc-400" />
+                                            <span className="text-base font-semibold text-zinc-200">Add Photos</span>
+                                        </label>
+                                        {productImages && productImages.length > 0 && (
+                                            <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
+                                                {productImages.map((img, i) => (
+                                                    <div key={i} className="w-20 h-20 rounded-xl bg-[#18181b] shrink-0 border border-white/10 overflow-hidden relative">
+                                                        <img src={img.url} className="w-full h-full object-cover" />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
-                                )}
+                                    <div className="col-span-3">
+                                        <input type="file" accept="video/*" onChange={handleVideoSelect} className="hidden" id="file-video-mob" />
+                                        <label htmlFor="file-video-mob" className="flex items-center justify-center gap-3 h-16 bg-[#18181b] border border-white/5 rounded-2xl active:bg-white/5 transition-all cursor-pointer">
+                                            <Video size={20} className="text-zinc-400" />
+                                            <span className="text-base font-semibold text-zinc-200">{selectedVideo ? 'Video Selected' : 'Add Video'}</span>
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
-                            {!isTranscribing && (
-                                <p className="text-xs text-zinc-600 mt-4 font-semibold uppercase tracking-widest flex items-center gap-1">
-                                    <CheckCircle size={12} className="text-emerald-500" /> Auto-saving enabled
-                                </p>
-                            )}
                         </div>
                     </div>
                 )}
-
             </div>
 
             {/* Global Media Preview */}
