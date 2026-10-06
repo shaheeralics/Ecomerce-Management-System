@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Square, Mic, Edit3, Scissors, ZoomIn, ZoomOut, Minimize2, ChevronLeft, Check, Move, Trash2 } from 'lucide-react';
+import { Play, Pause, Square, Mic, Edit3, Scissors, ZoomIn, ZoomOut, Minimize2, ChevronLeft, Check, Move, Trash2, Undo2 } from 'lucide-react';
 
 interface AudioTrackClip {
     id: string;
@@ -32,6 +32,23 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
     const [audioDuration, setAudioDuration] = useState(0);
     const [seekTime, setSeekTime] = useState(0);
     const [audioPreviewUrl, setAudioPreviewUrl] = useState<string | null>(null);
+
+    // History for Undo
+    const [history, setHistory] = useState<{main: AudioTrackClip[], vo: AudioTrackClip[], dur: number}[]>([]);
+
+    const saveToHistory = () => {
+        setHistory(prev => [...prev, { main: [...mainClips], vo: [...voiceoverClips], dur: audioDuration }]);
+    };
+
+    const handleUndo = () => {
+        if (history.length === 0) return;
+        const last = history[history.length - 1];
+        setMainClips(last.main);
+        setVoiceoverClips(last.vo);
+        setAudioDuration(last.dur);
+        setHistory(prev => prev.slice(0, -1));
+        autoMixPreview(last.main, last.vo, last.dur);
+    };
 
     const timelineScrollRef = useRef<HTMLDivElement | null>(null);
     const timelineTrackRef = useRef<HTMLDivElement | null>(null);
@@ -269,6 +286,7 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
     };
 
     const splitClipAtPlayhead = () => {
+        saveToHistory();
         const time = seekTime;
         if (selectedTrack === 'main') {
             const clipIdx = mainClips.findIndex(c => !c.isDeleted && c.start < time && c.end > time);
@@ -297,6 +315,7 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
 
     const deleteSelectedClip = () => {
         if (!selectedClipId) return;
+        saveToHistory();
         if (selectedTrack === 'main') {
             const updated = mainClips.map(c => c.id === selectedClipId ? { ...c, isDeleted: true } : c);
             setMainClips(updated);
@@ -368,6 +387,7 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
                         const newVoClip: AudioTrackClip = {
                             id: `vo-${Date.now()}`, track: 'voiceover', start: voStart, end: voEnd, sourceStart: 0, buffer: newAudioBuf
                         };
+                        saveToHistory();
                         const updatedVOs = [...voiceoverClips, newVoClip];
                         setVoiceoverClips(updatedVOs);
                         setSelectedClipId(newVoClip.id);
@@ -464,6 +484,7 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
 
     const handleClipMove = (e: React.TouchEvent | React.MouseEvent, clip: AudioTrackClip) => {
         e.stopPropagation();
+        saveToHistory();
         setSelectedClipId(clip.id);
         setSelectedTrack(clip.track);
         
@@ -515,6 +536,7 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
 
     const handleClipTrim = (e: React.TouchEvent | React.MouseEvent, clip: AudioTrackClip, side: 'start'|'end') => {
         e.stopPropagation();
+        saveToHistory();
         setSelectedClipId(clip.id);
         setSelectedTrack(clip.track);
         
@@ -657,6 +679,10 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
                                 <Trash2 size={16} />
                             </button>
                             
+                            <button onClick={handleUndo} disabled={history.length === 0} className="ml-1 bg-teal-900/50 text-teal-300 w-9 h-9 rounded-full flex items-center justify-center shadow disabled:opacity-30 active:scale-95">
+                                <Undo2 size={16} />
+                            </button>
+                            
                             <div className="flex flex-col ml-1 bg-teal-950/50 rounded-lg p-0.5 border border-teal-900/40">
                                 <button onClick={() => setTimelineZoom(z => Math.min(5, z + 0.5))} className="p-1 text-teal-300"><ZoomIn size={14} /></button>
                                 <button onClick={() => setTimelineZoom(z => Math.max(1, z - 0.5))} className="p-1 text-teal-300"><ZoomOut size={14} /></button>
@@ -703,6 +729,12 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
                                         </div>
                                     );
                                 })}
+
+                                {isTimelineRecording && overwriteSeekRef.current !== null && overwriteSeekRef.current !== undefined && (
+                                    <div className="absolute top-0 bottom-0 bg-red-950/80 border-x-2 border-red-500/80 flex items-center justify-center pointer-events-none z-15" style={{ left: `${(overwriteSeekRef.current / Math.max(audioDuration, seekTime)) * 100}%`, width: `${((seekTime - overwriteSeekRef.current) / Math.max(audioDuration, seekTime)) * 100}%` }}>
+                                        <span className="text-[8px] font-bold text-red-300 uppercase tracking-tight bg-black/80 px-1 py-0.5 rounded truncate">Muted</span>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Track 2: Voice-Over */}
@@ -724,6 +756,11 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
                                         </div>
                                     );
                                 })}
+
+                                {isTimelineRecording && overwriteSeekRef.current !== null && overwriteSeekRef.current !== undefined && (
+                                    <div className="absolute top-1 bottom-1 rounded-lg border-2 bg-amber-500/40 border-amber-400 border-dashed flex items-center justify-between px-2 transition-all z-10 overflow-hidden pointer-events-none" style={{ left: `${(overwriteSeekRef.current / Math.max(audioDuration, seekTime)) * 100}%`, width: `${((seekTime - overwriteSeekRef.current) / Math.max(audioDuration, seekTime)) * 100}%` }}>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Playhead */}
