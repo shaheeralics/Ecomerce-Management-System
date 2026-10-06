@@ -21,15 +21,27 @@ const MobileChatInput = ({ onSend, disabled }: { onSend: (type: string, content:
     const [isPaused, setIsPaused] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
     const [recorder, setRecorder] = useState<any>(null);
+    const [recordedData, setRecordedData] = useState<Uint8Array | null>(null);
     
     const timerRef = useRef<number | null>(null);
 
     useEffect(() => {
-        const GlobalMicRecorder = (window as any).MicRecorder;
-        if (GlobalMicRecorder) {
-            setRecorder(new GlobalMicRecorder({ bitRate: 128 }));
+        const OpusRecorder = (window as any).Recorder;
+        if (OpusRecorder) {
+            const rec = new OpusRecorder({
+                encoderPath: '/encoderWorker.min.js',
+                encoderSampleRate: 48000,
+                maxFramesPerPage: 40,
+                encoderApplication: 2048 // Voice
+            });
+            
+            rec.ondataavailable = (typedArray: Uint8Array) => {
+                setRecordedData(typedArray);
+            };
+            
+            setRecorder(rec);
         } else {
-            console.error('MicRecorder is not loaded from CDN');
+            console.error('OpusRecorder is not loaded from CDN');
         }
     }, []);
 
@@ -40,6 +52,7 @@ const MobileChatInput = ({ onSend, disabled }: { onSend: (type: string, content:
             setIsRecording(true);
             setIsPaused(false);
             setRecordingTime(0);
+            setRecordedData(null);
 
             timerRef.current = setInterval(() => {
                 setRecordingTime(prev => prev + 1);
@@ -52,20 +65,27 @@ const MobileChatInput = ({ onSend, disabled }: { onSend: (type: string, content:
 
     const stopRecording = (cancel: boolean = false) => {
         if (recorder && isRecording) {
-            recorder.stop().getMp3().then(([buffer, blob]: any) => {
-                if (!cancel) {
-                    const file = new File(buffer, 'voice_note.mp3', {
-                        type: blob.type || 'audio/mp3',
-                        lastModified: Date.now()
-                    });
-                    // We send it as mp3, meta API accepts mp3 audio perfectly!
-                    onSend('audio', '', file);
-                }
+            recorder.onstop = () => {
+                if (timerRef.current) clearInterval(timerRef.current);
                 setIsRecording(false);
                 setIsPaused(false);
                 setRecordingTime(0);
-                if (timerRef.current) clearInterval(timerRef.current);
-            }).catch((e: any) => console.log(e));
+                
+                // wait for ondataavailable to trigger and set recordedData
+                setTimeout(() => {
+                    setRecordedData((currentData) => {
+                        if (!cancel && currentData) {
+                            const file = new File([currentData as any], 'voice_note.ogg', {
+                                type: 'audio/ogg; codecs=opus',
+                                lastModified: Date.now()
+                            });
+                            onSend('audio', '', file);
+                        }
+                        return null; // clear it
+                    });
+                }, 100);
+            };
+            recorder.stop();
         }
     };
 
