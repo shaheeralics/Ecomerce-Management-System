@@ -16,7 +16,7 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
     
     const [viewState, setViewState] = useState<'list' | 'edit'>('list');
     const [editId, setEditId] = useState<number | null>(null);
-    const [activeTab, setActiveTab] = useState<'details' | 'voice'>('details');
+    const [activeTab, setActiveTab] = useState<'details' | 'voice' | 'transcription'>('details');
 
     const [formData, setFormData] = useState({ title: '', usage_instructions: '', transcription: '' });
     
@@ -252,8 +252,8 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
                     </button>
                 </div>
 
-                {/* Mobile Tabs in 2 Columns */}
-                <div className="grid grid-cols-2 border-b border-teal-900/30 bg-[#050D10]">
+                {/* Mobile Tabs in 3 Columns */}
+                <div className="grid grid-cols-3 border-b border-teal-900/30 bg-[#050D10]">
                     <button 
                         onClick={() => setActiveTab('details')}
                         className={`py-3 text-sm font-semibold transition-colors ${activeTab === 'details' ? 'text-teal-400 border-b-2 border-teal-400' : 'text-slate-500'}`}
@@ -266,11 +266,17 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
                     >
                         Recording
                     </button>
+                    <button 
+                        onClick={() => setActiveTab('transcription')}
+                        className={`py-3 text-sm font-semibold transition-colors ${activeTab === 'transcription' ? 'text-teal-400 border-b-2 border-teal-400' : 'text-slate-500'}`}
+                    >
+                        Transcription
+                    </button>
                 </div>
 
                 {/* Tab Content */}
                 <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-                    {activeTab === 'details' ? (
+                    {activeTab === 'details' && (
                         <div className="space-y-5">
                             <div>
                                 <label className="block text-xs font-semibold text-slate-300 mb-1.5">Voice Title</label>
@@ -299,7 +305,9 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
                                 Next: Record Voice <ArrowRight size={18} />
                             </button>
                         </div>
-                    ) : (
+                    )}
+                    
+                    {activeTab === 'voice' && (
                         <div className="flex flex-col items-center justify-center h-full space-y-8">
                             <div className="text-center">
                                 <h3 className="text-slate-200 font-bold mb-2">Voice Recording</h3>
@@ -364,13 +372,20 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
                                 </div>
                             )}
 
-                            {/* Auto Transcribed Text (Read Only) */}
-                            {formData.transcription && (
-                                <div className="w-full max-w-sm mt-4 p-3 bg-teal-950/20 border border-teal-900/30 rounded-xl">
-                                    <p className="text-[10px] text-teal-500 font-bold uppercase tracking-wider mb-1">Auto-Transcription</p>
-                                    <p className="text-xs text-slate-300 italic">"{formData.transcription}"</p>
-                                </div>
-                            )}
+                        </div>
+                    )}
+
+                    {activeTab === 'transcription' && (
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">Transcribed Text</label>
+                                <textarea 
+                                    value={formData.transcription} 
+                                    onChange={e => setFormData({ ...formData, transcription: e.target.value })} 
+                                    className="w-full bg-[#0A181D] border border-teal-900/50 rounded-xl px-4 py-3 text-sm text-slate-100 h-48 outline-none resize-none focus:border-teal-500 transition-colors" 
+                                    placeholder="Voice will be transcribed here automatically in background. You can manually edit it if AI made a mistake." 
+                                />
+                            </div>
                         </div>
                     )}
                 </div>
@@ -410,8 +425,8 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
                                 {voice.voice_url && (
                                     <audio src={voice.voice_url} controls className="w-full h-8 custom-audio-player" />
                                 )}
-                                <div className="text-xs text-slate-400 line-clamp-2">
-                                    <span className="text-teal-600 font-semibold">When: </span>{voice.usage_instructions || 'None'}
+                                <div className="text-xs text-slate-400 line-clamp-2 italic">
+                                    "{voice.transcription || 'No transcription available.'}"
                                 </div>
                             </div>
                         ))}
