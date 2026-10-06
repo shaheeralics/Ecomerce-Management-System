@@ -60,7 +60,7 @@ const MobileChatInput = ({ onSend, disabled }: { onSend: (type: string, content:
                 
                 if (!cancel) {
                     const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-                    const file = new File([audioBlob], 'voice_note.webm', { type: 'audio/webm' });
+                    const file = new File([audioBlob], 'voice_note.ogg', { type: 'audio/ogg' });
                     onSend('audio', '', file);
                 }
                 
