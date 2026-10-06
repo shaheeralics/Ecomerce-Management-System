@@ -420,8 +420,8 @@ const WhatsAppDashboard = () => {
             const formData = new FormData();
             formData.append('audio', audioBlob, 'voice-note.webm');
             
-            // Call the real backend transcribe API powered by Gemini
-            const res = await fetch('http://localhost:3000/api/transcribe', { 
+            // Call the real backend transcribe API powered by Gemini/OpenAI
+            const res = await fetch('/api/transcribe', { 
                 method: 'POST', 
                 body: formData 
             });
