@@ -392,6 +392,8 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
         } catch (err) {}
     };
 
+    const timelineRecordTimerRef = useRef<number | null>(null);
+
     const stopRecording = () => {
         if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
             mediaRecorderRef.current.stop();
@@ -399,6 +401,7 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
         setIsRecording(false);
         setIsTimelineRecording(false);
         if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+        if (timelineRecordTimerRef.current) clearInterval(timelineRecordTimerRef.current);
     };
 
     const startTimelineRecording = () => {
@@ -408,6 +411,26 @@ export default function MobileVoiceEditor({ audioBlob, onSave, onCancel }: Mobil
         }
         setIsTimelineRecording(true);
         startRecording(seekTime);
+
+        let elapsed = 0;
+        const initialSeek = seekTime;
+        if (timelineRecordTimerRef.current) clearInterval(timelineRecordTimerRef.current);
+        timelineRecordTimerRef.current = window.setInterval(() => {
+            elapsed += 0.1;
+            const newTime = initialSeek + elapsed;
+            setSeekTime(newTime);
+            if (newTime > audioDuration) setAudioDuration(newTime);
+            
+            if (timelineScrollRef.current && timelineTrackRef.current) {
+                const scrollContainer = timelineScrollRef.current;
+                const trackWidth = timelineTrackRef.current.scrollWidth;
+                const playheadX = (newTime / Math.max(audioDuration, newTime)) * trackWidth;
+                const containerWidth = scrollContainer.clientWidth;
+                if (playheadX > scrollContainer.scrollLeft + containerWidth - 50) {
+                    scrollContainer.scrollLeft = playheadX - containerWidth + 80;
+                }
+            }
+        }, 100);
     };
 
     const handleTimelineTouch = (e: React.TouchEvent | React.MouseEvent) => {
