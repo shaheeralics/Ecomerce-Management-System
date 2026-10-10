@@ -1,7 +1,6 @@
 // @ts-nocheck
 import VoiceAssetsTab from './VoiceAssetsTab';
 import PreRecordedVoicesTab from './PreRecordedVoicesTab';
-import DesktopWhatsAppDashboard from './DesktopWhatsAppDashboard';
 import MobileVoiceEditor from './MobileVoiceEditor';
 import AnalyticsPage from './AnalyticsPage';
 import LiveConversations from './LiveConversations';
@@ -1676,23 +1675,56 @@ const WhatsAppDashboard = () => {
     };
 
     return (
-        <div className="fixed inset-0 h-[100dvh] w-full bg-[#030712] text-zinc-100 flex overflow-hidden font-sans selection:bg-indigo-500/30 overscroll-none">
+        <div className="fixed inset-0 h-[100dvh] w-full bg-[#030712] text-zinc-100 flex flex-col overflow-hidden font-sans selection:bg-indigo-500/30 overscroll-none">
             {/* ======================================= */}
-            {/* ========== DESKTOP VIEW =============== */}
-            <div className="hidden md:block w-full h-full relative overflow-hidden">
-                <DesktopWhatsAppDashboard />
+            {/* ========== DESKTOP TOP NAV ============ */}
+            {/* ======================================= */}
+            <div className="hidden md:flex flex-col items-center justify-center pt-6 pb-2 bg-[#09090b] border-b border-white/5 shrink-0">
+                <img src="/devsil-logo.png" alt="Devsil Logo" className="h-10 object-contain mb-2" />
+                <h1 className="text-lg font-bold text-indigo-400 tracking-wide uppercase mb-6">Ecomerce Management System</h1>
+                
+                <div className="flex items-center gap-3 overflow-x-auto custom-scrollbar w-full max-w-6xl px-4 justify-center">
+                    {[
+                        { id: 'products', label: 'Products', icon: Package },
+                        { id: 'conversations', label: 'Live Chat', icon: MessageSquare },
+                        { id: 'orders', label: 'Orders', icon: ShoppingCart },
+                        { id: 'analytics', label: 'Analytics', icon: BarChart },
+                        { id: 'policy', label: 'Policy Voices', icon: ShieldAlert },
+                        { id: 'prerecorded', label: 'Pre-recorded', icon: Mic2 },
+                        { id: 'ai-agent', label: 'AI Agent', icon: Sparkles }
+                    ].map(tab => {
+                        const isActive = subTab === tab.id || activeMobilePage === tab.id;
+                        return (
+                            <button 
+                                key={tab.id}
+                                onClick={() => { 
+                                    setSubTab(tab.id as any); 
+                                    setActiveMobilePage(tab.id as any === 'products' || tab.id as any === 'conversations' || tab.id as any === 'orders' ? 'main' : tab.id as any); 
+                                }}
+                                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold transition-all ${
+                                    isActive 
+                                    ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' 
+                                    : 'text-zinc-400 hover:bg-white/5 border border-transparent'
+                                }`}
+                            >
+                                <tab.icon size={18} />
+                                <span className="text-sm">{tab.label}</span>
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
 
             {/* ======================================= */}
-            {/* ========== MOBILE VIEW ================ */}
+            {/* ========== MAIN CONTENT =============== */}
             {/* ======================================= */}
-            <div className="md:hidden flex flex-col w-full h-full relative bg-[#030712] overflow-hidden">
+            <div className="flex flex-col w-full h-full relative bg-[#030712] overflow-hidden">
                 
                 {/* 1) MAIN TABS SCREEN */}
                 {activeMobilePage === 'main' && (
                     <div className="flex flex-col h-full w-full absolute inset-0 animate-in fade-in duration-200">
-                        {/* Mobile Header */}
-                        <div className="pt-2 bg-[#09090b]/95 backdrop-blur-xl border-b border-white/5 shrink-0 z-50">
+                        {/* Mobile Header (Hidden on Desktop) */}
+                        <div className="md:hidden pt-2 bg-[#09090b]/95 backdrop-blur-xl border-b border-white/5 shrink-0 z-50">
                             {subTab === 'products' && (
                                 <div className="px-4 py-3 flex items-center justify-between gap-3">
                                     <h1 className="text-xl font-bold tracking-tight text-white">Catalog</h1>
@@ -1706,10 +1738,30 @@ const WhatsAppDashboard = () => {
                             )}
                         </div>
                         
-                        {/* Mobile Feed */}
-                        <div className="flex-1 overflow-y-auto pb-[85px] pt-4 px-4">
+                        {/* Feed */}
+                        <div className="flex-1 overflow-y-auto pb-[85px] md:pb-6 pt-4 px-4 w-full max-w-6xl mx-auto custom-scrollbar">
                             {subTab === 'products' && (
-                                <div className="flex flex-col space-y-4">
+                                <div className="flex flex-col w-full h-full">
+                                    {/* Desktop Search & Add Button (Hidden on Mobile) */}
+                                    <div className="hidden md:flex justify-between items-center mb-6 w-full">
+                                        <div className="relative w-[300px]">
+                                            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                                            <input 
+                                                type="text" 
+                                                value={searchQuery}
+                                                onChange={e => setSearchQuery(e.target.value)}
+                                                placeholder="Search products..." 
+                                                className="pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-indigo-500/50 w-full transition-all"
+                                            />
+                                        </div>
+                                        <button 
+                                            onClick={() => { resetForm(); setActiveMobilePage('add-product'); }}
+                                            className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-indigo-600/20 transition-all"
+                                        >
+                                            <Plus size={20} /> Add Product
+                                        </button>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                     {loading ? (
                                         <div className="flex items-center justify-center h-32"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div></div>
                                     ) : products.length === 0 ? (
@@ -1787,8 +1839,8 @@ const WhatsAppDashboard = () => {
                             </button>
                         )}
 
-                        {/* iOS Bottom Navigation */}
-                        <div className="fixed bottom-0 left-0 right-0 h-[70px] bg-[#09090b]/95 backdrop-blur-xl border-t border-white/5 flex items-center justify-around z-50 px-2 pb-safe shadow-2xl">
+                        {/* iOS Bottom Navigation (Hidden on Desktop) */}
+                        <div className="md:hidden fixed bottom-0 left-0 right-0 h-[70px] bg-[#09090b]/95 backdrop-blur-xl border-t border-white/5 flex items-center justify-around z-50 px-2 pb-safe shadow-2xl">
                             {[
                                 { id: 'products', icon: Package, label: 'Products' },
                                 { id: 'conversations', icon: MessageSquare, label: 'Chat' },
@@ -1804,14 +1856,23 @@ const WhatsAppDashboard = () => {
                     </div>
                 )}
 
-                {/* 2) MORE MENU SCREEN (Full Screen Independent View) */}
+                {/* Desktop Global Content Pages (Like Analytics, Policy, etc) rendered when they are selected via Top Nav */}
+                <div className="hidden md:block absolute inset-0 bg-[#030712] z-40">
+                    <div className="flex-1 overflow-y-auto p-6 w-full max-w-6xl mx-auto h-full custom-scrollbar">
+                        {(activeMobilePage as any) === 'analytics' && <AnalyticsPage />}
+                        {(activeMobilePage as any) === 'policy' && <VoiceAssetsTab category="policy" title="Policy Voices" description="" />}
+                        {(activeMobilePage as any) === 'prerecorded' && <PreRecordedVoicesTab title="Pre recorded voices" description="" />}
+                        {(activeMobilePage as any) === 'ai-agent' && <AIAgentPanel />}
+                    </div>
+                </div>
+
+                {/* 2) MORE MENU SCREEN (Full Screen Independent View - Hidden on Desktop) */}
                 {activeMobilePage === 'more-menu' && (
-                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#030712] z-50 animate-in slide-in-from-right duration-200">
+                    <div className="md:hidden flex flex-col h-full w-full absolute inset-0 bg-[#030712] z-50 animate-in slide-in-from-right duration-200">
                         <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative">
                             <button onClick={() => setActiveMobilePage('main')} className="absolute left-4 p-2 -m-2 text-indigo-400 active:opacity-50 flex items-center gap-1">
                                 <ChevronLeft size={24} /> <span className="text-base font-semibold">Back</span>
                             </button>
-                            
                         </div>
                         <div className="flex-1 overflow-y-auto p-4 space-y-4">
                             <div className="bg-[#09090b] rounded-2xl border border-white/5 overflow-hidden">
@@ -1840,7 +1901,7 @@ const WhatsAppDashboard = () => {
 
                 {/* 3) SUB-SCREENS (Like Policy, AI Agent) from More Menu */}
                 {['analytics', 'ai-agent', 'policy', 'prerecorded'].includes(activeMobilePage as string) && (
-                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#030712] z-[60] animate-in slide-in-from-right duration-200">
+                    <div className="md:hidden flex flex-col h-full w-full absolute inset-0 bg-[#030712] z-[60] animate-in slide-in-from-right duration-200">
                         <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative">
                             <button onClick={() => setActiveMobilePage('more-menu')} className="absolute left-4 p-2 -m-2 text-indigo-400 active:opacity-50 flex items-center gap-1 z-10">
                                 <ChevronLeft size={24} />
@@ -1860,17 +1921,17 @@ const WhatsAppDashboard = () => {
                     </div>
                 )}
 
-                {/* 4) ADD PRODUCT MOBILE NATIVE SCREEN (Full screen, no bottom nav) */}
-                                {/* 4) ADD PRODUCT MOBILE NATIVE SCREEN (Stack Navigation) */}
+                {/* 4) ADD PRODUCT MOBILE NATIVE SCREEN (Stack Navigation) */}
                 {activeMobilePage === 'add-product' && (
-                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#030712] z-[70] animate-in slide-in-from-right duration-200">
-                        <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative">
-                            <button onClick={() => setActiveMobilePage('main')} className="absolute left-4 p-2 -m-2 text-indigo-400 active:opacity-50 flex items-center gap-1 z-10">
-                                <ChevronLeft size={24} /> <span className="text-base font-semibold">Cancel</span>
-                            </button>
-                            <h1 className="text-lg font-bold text-white w-full text-center">Add Product</h1>
-                        </div>
-                        <div className="flex-1 p-4 flex flex-col gap-4 bg-[#030712]">
+                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#030712] md:bg-black/80 z-[70] animate-in slide-in-from-right duration-200 md:items-center md:pt-10">
+                        <div className="w-full h-full md:h-[80vh] md:max-w-xl flex flex-col bg-[#030712] md:border md:border-white/10 md:rounded-3xl md:shadow-2xl md:overflow-hidden relative">
+                            <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative">
+                                <button onClick={() => setActiveMobilePage('main')} className="absolute left-4 p-2 -m-2 text-indigo-400 active:opacity-50 flex items-center gap-1 z-10">
+                                    <ChevronLeft size={24} /> <span className="text-base font-semibold">Cancel</span>
+                                </button>
+                                <h1 className="text-lg font-bold text-white w-full text-center">Add Product</h1>
+                            </div>
+                            <div className="flex-1 p-4 flex flex-col gap-4 bg-[#030712]">
                             <button onClick={() => setActiveMobilePage('add-product-text')} className="flex items-center justify-between bg-[#18181b] p-4 rounded-2xl border border-white/5 active:scale-95 transition-transform shadow-lg">
                                 <div className="flex items-center gap-4">
                                     <div className="p-3 bg-blue-500/10 text-blue-400 rounded-xl"><FileText size={24} /></div>
@@ -1906,17 +1967,18 @@ const WhatsAppDashboard = () => {
                 )}
 
                 {activeMobilePage === 'add-product-text' && (
-                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#09090b] z-[80] animate-in slide-in-from-right duration-200">
-                        <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative">
-                            <button onClick={() => setActiveMobilePage('add-product')} className="absolute left-4 p-2 -m-2 text-indigo-400 active:opacity-50 flex items-center gap-1 z-10">
-                                <ChevronLeft size={24} /> <span className="text-base font-semibold">Back</span>
-                            </button>
-                            <h1 className="text-lg font-bold text-white w-full text-center">Details</h1>
-                            <button onClick={handleSubmit} disabled={loading} className="absolute right-4 p-2 -m-2 text-emerald-400 active:opacity-50 font-bold text-base z-10">
-                                {loading ? 'Saving' : 'Save'}
-                            </button>
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-4 pb-12 space-y-6 custom-scrollbar">
+                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#030712] md:bg-black/80 z-[80] animate-in slide-in-from-right duration-200 md:items-center md:pt-10">
+                        <div className="w-full h-full md:h-[80vh] md:max-w-xl flex flex-col bg-[#030712] md:border md:border-white/10 md:rounded-3xl md:shadow-2xl md:overflow-hidden relative">
+                            <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative z-10">
+                                <button onClick={() => setActiveMobilePage('add-product')} className="absolute left-4 p-2 -m-2 text-indigo-400 active:opacity-50 flex items-center gap-1 z-10">
+                                    <ChevronLeft size={24} /> <span className="text-base font-semibold">Back</span>
+                                </button>
+                                <h1 className="text-lg font-bold text-white w-full text-center">Details</h1>
+                                <button onClick={handleSubmit} disabled={loading} className="absolute right-4 p-2 -m-2 text-emerald-400 active:opacity-50 font-bold text-base z-10">
+                                    {loading ? 'Saving' : 'Save'}
+                                </button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto p-4 pb-12 space-y-6 custom-scrollbar">
                             <div className="space-y-4">
                                 <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest pl-2">Basic Info</label>
                                 <div className="bg-[#18181b] rounded-2xl overflow-hidden border border-white/5">
@@ -1945,14 +2007,15 @@ const WhatsAppDashboard = () => {
                 )}
 
                 {activeMobilePage === 'add-product-media' && (
-                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#09090b] z-[80] animate-in slide-in-from-right duration-200">
-                        <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative">
-                            <button onClick={() => setActiveMobilePage('add-product')} className="absolute left-4 p-2 -m-2 text-indigo-400 active:opacity-50 flex items-center gap-1 z-10">
-                                <ChevronLeft size={24} /> <span className="text-base font-semibold">Back</span>
-                            </button>
-                            <h1 className="text-lg font-bold text-white w-full text-center">Media</h1>
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar pb-12">
+                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#030712] md:bg-black/80 z-[80] animate-in slide-in-from-right duration-200 md:items-center md:pt-10">
+                        <div className="w-full h-full md:h-[80vh] md:max-w-xl flex flex-col bg-[#030712] md:border md:border-white/10 md:rounded-3xl md:shadow-2xl md:overflow-hidden relative">
+                            <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative z-10">
+                                <button onClick={() => setActiveMobilePage('add-product')} className="absolute left-4 p-2 -m-2 text-indigo-400 active:opacity-50 flex items-center gap-1 z-10">
+                                    <ChevronLeft size={24} /> <span className="text-base font-semibold">Back</span>
+                                </button>
+                                <h1 className="text-lg font-bold text-white w-full text-center">Media</h1>
+                            </div>
+                            <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar pb-12">
                             <div className="space-y-4">
                                 <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest pl-2">Photos</label>
                                 <div className="grid grid-cols-2 gap-3">
@@ -2011,16 +2074,21 @@ const WhatsAppDashboard = () => {
                             </div>
                         </div>
                     </div>
+                            </div>
+                        </div>
+                    </div>
                 )}
 
                 {activeMobilePage === 'add-product-voice' && (
-                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#030712] z-[80] animate-in slide-in-from-right duration-200">
-                        <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative">
-                            <button onClick={() => setActiveMobilePage('add-product')} className="absolute left-4 p-2 -m-2 text-indigo-400 active:opacity-50 flex items-center gap-1 z-10">
-                                <ChevronLeft size={24} /> <span className="text-base font-semibold">Back</span>
-                            </button>
-                        </div>
-                        <div className="flex-1 p-6 flex flex-col items-center justify-center">
+                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#030712] md:bg-black/80 z-[80] animate-in slide-in-from-right duration-200 md:items-center md:pt-10">
+                        <div className="w-full h-full md:h-[80vh] md:max-w-xl flex flex-col bg-[#030712] md:border md:border-white/10 md:rounded-3xl md:shadow-2xl md:overflow-hidden relative">
+                            <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative z-10">
+                                <button onClick={() => setActiveMobilePage('add-product')} className="absolute left-4 p-2 -m-2 text-indigo-400 active:opacity-50 flex items-center gap-1 z-10">
+                                    <ChevronLeft size={24} /> <span className="text-base font-semibold">Back</span>
+                                </button>
+                                <h1 className="text-lg font-bold text-white w-full text-center">Voice Record</h1>
+                            </div>
+                            <div className="flex-1 p-6 flex flex-col items-center justify-center custom-scrollbar">
                             {audioPreviewUrl ? (
                                 <div className="w-full flex flex-col items-center">
                                     <audio controls src={audioPreviewUrl} className="w-full mb-8 h-12" />
@@ -2076,25 +2144,31 @@ const WhatsAppDashboard = () => {
                                 </div>
                             )}
                         </div>
+                        </div>
                     </div>
                 )}
 
                 {activeMobilePage === 'add-product-voice-edit' && (
-                    <MobileVoiceEditor 
-                        audioBlob={audioBlob} 
-                        onCancel={() => setActiveMobilePage('add-product-voice')} 
-                        onSave={(blob) => { setAudioBlob(blob); setAudioPreviewUrl(URL.createObjectURL(blob)); setActiveMobilePage('add-product-voice'); }} 
-                    />
+                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#030712] md:bg-black/80 z-[90] md:items-center md:pt-10">
+                        <div className="w-full h-full md:h-[80vh] md:max-w-xl bg-[#030712] md:border md:border-white/10 md:rounded-3xl md:shadow-2xl relative overflow-hidden">
+                            <MobileVoiceEditor 
+                                audioBlob={audioBlob} 
+                                onCancel={() => setActiveMobilePage('add-product-voice')} 
+                                onSave={(blob) => { setAudioBlob(blob); setAudioPreviewUrl(URL.createObjectURL(blob)); setActiveMobilePage('add-product-voice'); }} 
+                            />
+                        </div>
+                    </div>
                 )}
 
                 {activeMobilePage === 'add-product-voice-transcribe' && (
-                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#030712] z-[100] animate-in slide-in-from-bottom-2 duration-200">
-                        <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative">
-                            <button onClick={() => setActiveMobilePage('add-product-voice')} className="absolute left-4 p-2 -m-2 text-emerald-400 active:opacity-50 flex items-center gap-1 z-10">
-                                <ChevronLeft size={24} /> <span className="text-base font-semibold">Back</span>
-                            </button>
-                            <h1 className="text-lg font-bold text-white w-full text-center">Transcription</h1>
-                            <button onClick={() => setActiveMobilePage('add-product-voice')} className="absolute right-4 p-2 -m-2 text-indigo-400 font-bold active:opacity-50">
+                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#030712] md:bg-black/80 z-[100] animate-in slide-in-from-bottom-2 duration-200 md:items-center md:pt-10">
+                        <div className="w-full h-full md:h-[80vh] md:max-w-xl flex flex-col bg-[#030712] md:border md:border-white/10 md:rounded-3xl md:shadow-2xl md:overflow-hidden relative">
+                            <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative z-10">
+                                <button onClick={() => setActiveMobilePage('add-product-voice')} className="absolute left-4 p-2 -m-2 text-emerald-400 active:opacity-50 flex items-center gap-1 z-10">
+                                    <ChevronLeft size={24} /> <span className="text-base font-semibold">Back</span>
+                                </button>
+                                <h1 className="text-lg font-bold text-white w-full text-center">Transcription</h1>
+                                <button onClick={() => setActiveMobilePage('add-product-voice')} className="absolute right-4 p-2 -m-2 text-indigo-400 font-bold active:opacity-50 z-10">
                                 Save
                             </button>
                         </div>
@@ -2123,6 +2197,10 @@ const WhatsAppDashboard = () => {
                                     <CheckCircle size={12} className="text-emerald-500" /> Auto-saving enabled
                                 </p>
                             )}
+                        </div>
+                    </div>
+                            )}
+                        </div>
                         </div>
                     </div>
                 )}
