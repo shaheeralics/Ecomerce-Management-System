@@ -238,7 +238,8 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
         }
 
         return (
-            <div className="flex flex-col md:flex-row h-full w-full bg-[#050D10] absolute inset-0 z-50">
+            <div className="flex w-full h-full absolute inset-0 bg-[#050D10] z-50 md:justify-center">
+                <div className="flex flex-col md:flex-row w-full md:max-w-6xl h-full border-x border-teal-900/30 bg-[#050D10]">
                 {/* Mobile Header & Tabs */}
                 <div className="md:hidden flex flex-col w-full">
                     <div className="flex items-center justify-between p-4 border-b border-teal-900/30 bg-[#0B1E26]">
@@ -427,6 +428,7 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
                         </div>
                     )}
                 </div>
+            </div>
             </div>
             </div>
         );

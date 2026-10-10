@@ -2249,8 +2249,9 @@ const WhatsAppDashboard = () => {
 
                 {/* 5) DESKTOP ADD PRODUCT SCREEN */}
                 {activeMobilePage.startsWith('add-product') && (
-                    <div className="hidden md:flex flex-row w-full h-full absolute inset-0 bg-[#030712] z-50">
-                        {/* Left Side Panel */}
+                    <div className="hidden md:flex w-full h-full absolute inset-0 bg-[#030712] z-50 justify-center">
+                        <div className="flex flex-row w-full max-w-6xl h-full border-x border-white/5">
+                            {/* Left Side Panel */}
                         <div className="w-64 border-r border-white/5 bg-[#09090b] flex flex-col p-6 shrink-0 shadow-xl z-10">
                             <div className="mb-8">
                                 <button onClick={() => { setActiveMobilePage('main'); resetForm(); }} className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors font-semibold mb-6">
@@ -2502,6 +2503,7 @@ const WhatsAppDashboard = () => {
                                 </div>
                             </div>
                         </div>
+                    </div>
                     </div>
                 )}
 
