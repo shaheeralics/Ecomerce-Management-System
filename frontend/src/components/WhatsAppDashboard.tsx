@@ -105,10 +105,10 @@ async function audioBufferToOggBlob(buffer: AudioBuffer): Promise<Blob> {
 }
 
 
+const getInitialSubTab = () => (localStorage.getItem('activeSubTab') as any) || 'products';
+
 const WhatsAppDashboard = () => {
-    const [subTab, setSubTab] = useState<'products' | 'conversations' | 'policy' | 'prerecorded' | 'orders' | 'analytics' | 'ai-agent'>(() => {
-        return (localStorage.getItem('activeSubTab') as any) || 'products';
-    });
+    const [subTab, setSubTab] = useState<'products' | 'conversations' | 'policy' | 'prerecorded' | 'orders' | 'analytics' | 'ai-agent'>(getInitialSubTab);
 
     useEffect(() => {
         localStorage.setItem('activeSubTab', subTab);
@@ -120,7 +120,11 @@ const WhatsAppDashboard = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
-    const [activeMobilePage, setActiveMobilePage] = useState<"main" | "add-product" | "more-menu" | "analytics" | "policy" | "prerecorded" | "ai-agent">("main");
+    const [activeMobilePage, setActiveMobilePage] = useState<"main" | "add-product" | "more-menu" | "analytics" | "policy" | "prerecorded" | "ai-agent">(() => {
+        const initial = getInitialSubTab();
+        if (initial === 'policy' || initial === 'prerecorded' || initial === 'ai-agent') return initial;
+        return 'main';
+    });
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
     // Multi-phase stepper state (Phase 1: Details, Phase 2: Media Images & Video, Phase 3: Voice Note Pitch)
