@@ -106,7 +106,14 @@ async function audioBufferToOggBlob(buffer: AudioBuffer): Promise<Blob> {
 
 
 const WhatsAppDashboard = () => {
-    const [subTab, setSubTab] = useState<'products' | 'conversations' | 'policy' | 'prerecorded' | 'orders' | 'analytics' | 'ai-agent'>('products');
+    const [subTab, setSubTab] = useState<'products' | 'conversations' | 'policy' | 'prerecorded' | 'orders' | 'analytics' | 'ai-agent'>(() => {
+        return (localStorage.getItem('activeSubTab') as any) || 'products';
+    });
+
+    useEffect(() => {
+        localStorage.setItem('activeSubTab', subTab);
+    }, [subTab]);
+
     const [searchQuery, setSearchQuery] = useState('');
     const [viewMode, setViewMode] = useState<'grid'|'list'>('list');
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
