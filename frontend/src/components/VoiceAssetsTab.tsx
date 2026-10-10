@@ -15,8 +15,14 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
     const [voices, setVoices] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     
-    const [viewState, setViewState] = useState<'list' | 'edit'>('list');
+    const [viewState, setViewState] = useState<'list' | 'edit'>(() => {
+        return (localStorage.getItem(`voiceAssetsTab_viewState_${category}`) as any) || 'list';
+    });
     const [editId, setEditId] = useState<number | null>(null);
+
+    useEffect(() => {
+        localStorage.setItem(`voiceAssetsTab_viewState_${category}`, viewState);
+    }, [viewState, category]);
     const [activeTab, setActiveTab] = useState<'details' | 'voice' | 'transcription'>('details');
 
     const [formData, setFormData] = useState({ title: '', usage_instructions: '', transcription: '' });

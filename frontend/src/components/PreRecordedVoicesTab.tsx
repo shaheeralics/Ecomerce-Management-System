@@ -15,8 +15,14 @@ export default function PreRecordedVoicesTab({ title }: PreRecordedVoicesTabProp
     const [voices, setVoices] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     
-    const [viewState, setViewState] = useState<'list' | 'edit'>('list');
+    const [viewState, setViewState] = useState<'list' | 'edit'>(() => {
+        return (localStorage.getItem(`preRecordedVoicesTab_viewState`) as any) || 'list';
+    });
     const [editId, setEditId] = useState<number | null>(null);
+
+    useEffect(() => {
+        localStorage.setItem(`preRecordedVoicesTab_viewState`, viewState);
+    }, [viewState]);
     const [activeTab, setActiveTab] = useState<'details' | 'voice' | 'transcription'>('details');
 
     const [formData, setFormData] = useState({ title: '', usage_instructions: '', transcription: '' });
