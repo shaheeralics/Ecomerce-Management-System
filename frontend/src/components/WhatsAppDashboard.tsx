@@ -1824,8 +1824,7 @@ const WhatsAppDashboard = () => {
                                                                     <button 
                                                                         onClick={(e) => {
                                                                             e.stopPropagation();
-                                                                            const audio = new Audio(product.voice_note_url as string);
-                                                                            audio.play();
+                                                                            setActiveMediaPreview({ type: 'audio', url: product.voice_note_url as string, title: product.title });
                                                                         }}
                                                                         className={`flex-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 py-2.5 rounded-xl font-bold text-xs md:text-sm flex items-center justify-center gap-2 transition-colors border border-indigo-500/10 ${!isGrid && 'px-4 flex-none'}`}
                                                                     >
@@ -1834,7 +1833,10 @@ const WhatsAppDashboard = () => {
                                                                 )}
                                                                 {product.video_url && (
                                                                     <button 
-                                                                        onClick={() => setActiveMediaPreview({ type: 'video', url: product.video_url as string })}
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            setActiveMediaPreview({ type: 'video', url: product.video_url as string, title: product.title });
+                                                                        }}
                                                                         className={`flex-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 py-2.5 rounded-xl font-bold text-xs md:text-sm flex items-center justify-center gap-2 transition-colors border border-emerald-500/10 ${!isGrid && 'px-4 flex-none'}`}
                                                                     >
                                                                         <Video size={16} /> <span className={!isGrid ? 'hidden lg:inline' : ''}>View Video</span>
@@ -2512,21 +2514,31 @@ const WhatsAppDashboard = () => {
 
             {/* Global Media Preview */}
             {activeMediaPreview && (
-                <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4" onClick={() => setActiveMediaPreview(null)}>
-                    <div className="bg-[#09090b] border border-white/10 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
-                        <div className="p-4 flex justify-end absolute top-0 right-0 z-10">
-                            <button onClick={() => setActiveMediaPreview(null)} className="w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center backdrop-blur-md">
-                                <X size={16} />
+                <div className="fixed inset-0 z-[110] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4" onClick={() => setActiveMediaPreview(null)}>
+                    <div className="bg-[#09090b] border border-white/10 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col" onClick={e => e.stopPropagation()}>
+                        <div className="p-5 border-b border-white/5 flex items-center justify-between shrink-0 bg-[#18181b]">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-zinc-300 shadow-inner border border-white/10">
+                                    {activeMediaPreview.type === 'video' ? <Video size={20} /> : <Volume2 size={20} />}
+                                </div>
+                                <h3 className="text-xl font-bold text-white truncate max-w-md">{activeMediaPreview.title || 'Media Preview'}</h3>
+                            </div>
+                            <button onClick={() => setActiveMediaPreview(null)} className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white flex items-center justify-center transition-all shrink-0 active:scale-95 shadow-sm">
+                                <X size={20} />
                             </button>
                         </div>
-                        {activeMediaPreview.type === 'video' ? (
-                            <video src={activeMediaPreview.url} controls autoPlay className="w-full max-h-[80vh] object-contain" />
-                        ) : (
-                            <div className="p-10 text-center space-y-6">
-                                <Volume2 size={48} className="text-white mx-auto" />
-                                <CustomAudioPlayer src={activeMediaPreview.url} autoPlay className="w-full max-w-sm mx-auto" />
-                            </div>
-                        )}
+                        <div className="flex-1 bg-black/40 flex items-center justify-center p-6 md:p-10 relative">
+                            {activeMediaPreview.type === 'video' ? (
+                                <video src={activeMediaPreview.url} controls autoPlay className="w-full max-h-[60vh] rounded-2xl object-contain shadow-2xl ring-1 ring-white/10" />
+                            ) : (
+                                <div className="text-center space-y-6 w-full flex flex-col items-center justify-center py-12">
+                                    <div className="w-32 h-32 rounded-full bg-indigo-500/10 flex items-center justify-center shadow-[0_0_60px_rgba(99,102,241,0.15)] mb-4 animate-pulse">
+                                        <Volume2 size={48} className="text-indigo-400" />
+                                    </div>
+                                    <CustomAudioPlayer src={activeMediaPreview.url} autoPlay className="w-full max-w-sm mx-auto h-12 shadow-xl ring-1 ring-white/5" />
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}
