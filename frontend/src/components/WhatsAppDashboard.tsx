@@ -1718,7 +1718,7 @@ const WhatsAppDashboard = () => {
             {/* ======================================= */}
             {/* ========== MAIN CONTENT =============== */}
             {/* ======================================= */}
-            <div className="flex flex-col w-full h-full relative bg-[#030712] overflow-hidden">
+            <div className="flex-1 flex flex-col w-full relative bg-[#030712] overflow-hidden">
                 
                 {/* 1) MAIN TABS SCREEN */}
                 {activeMobilePage === 'main' && (
