@@ -1754,12 +1754,6 @@ const WhatsAppDashboard = () => {
                                                 className="pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-indigo-500/50 w-full transition-all"
                                             />
                                         </div>
-                                        <button 
-                                            onClick={() => { resetForm(); setActiveMobilePage('add-product'); }}
-                                            className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-indigo-600/20 transition-all"
-                                        >
-                                            <Plus size={20} /> Add Product
-                                        </button>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                     {loading ? (
@@ -1830,14 +1824,18 @@ const WhatsAppDashboard = () => {
                             {subTab === 'orders' && <OrdersPage />}
                         </div>
 
-                        {/* Mobile FAB */}
+                        {/* Mobile & Desktop FAB Container */}
                         {subTab === 'products' && (
-                            <button 
-                                onClick={() => { resetForm(); setActiveMobilePage('add-product'); }}
-                                className="fixed bottom-[85px] right-4 w-14 h-14 bg-indigo-500 rounded-full flex items-center justify-center text-white shadow-[0_8px_30px_rgb(99,102,241,0.4)] z-40 active:scale-95 transition-transform"
-                            >
-                                <Plus size={28} strokeWidth={2.5} />
-                            </button>
+                            <div className="fixed bottom-[85px] md:bottom-8 left-0 right-0 pointer-events-none z-40 flex justify-center px-4">
+                                <div className="w-full max-w-6xl flex justify-end relative">
+                                    <button 
+                                        onClick={() => { resetForm(); setActiveMobilePage('add-product'); }}
+                                        className="pointer-events-auto w-14 h-14 bg-indigo-500 rounded-full flex items-center justify-center text-white shadow-[0_8px_30px_rgb(99,102,241,0.4)] hover:scale-105 active:scale-95 transition-transform"
+                                    >
+                                        <Plus size={28} strokeWidth={2.5} />
+                                    </button>
+                                </div>
+                            </div>
                         )}
 
                         {/* iOS Bottom Navigation (Hidden on Desktop) */}
@@ -1926,7 +1924,7 @@ const WhatsAppDashboard = () => {
 
                 {/* 4) ADD PRODUCT MOBILE NATIVE SCREEN (Stack Navigation) */}
                 {activeMobilePage === 'add-product' && (
-                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#030712] md:bg-black/80 z-[70] animate-in slide-in-from-right duration-200 md:items-center md:pt-10">
+                    <div className="md:hidden flex flex-col h-full w-full absolute inset-0 bg-[#030712] md:bg-black/80 z-[70] animate-in slide-in-from-right duration-200 md:items-center md:pt-10">
                         <div className="w-full h-full md:h-[80vh] md:max-w-xl flex flex-col bg-[#030712] md:border md:border-white/10 md:rounded-3xl md:shadow-2xl md:overflow-hidden relative">
                             <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative">
                                 <button onClick={() => setActiveMobilePage('main')} className="absolute left-4 p-2 -m-2 text-indigo-400 active:opacity-50 flex items-center gap-1 z-10">
@@ -1971,7 +1969,7 @@ const WhatsAppDashboard = () => {
                 )}
 
                 {activeMobilePage === 'add-product-text' && (
-                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#030712] md:bg-black/80 z-[80] animate-in slide-in-from-right duration-200 md:items-center md:pt-10">
+                    <div className="md:hidden flex flex-col h-full w-full absolute inset-0 bg-[#030712] md:bg-black/80 z-[80] animate-in slide-in-from-right duration-200 md:items-center md:pt-10">
                         <div className="w-full h-full md:h-[80vh] md:max-w-xl flex flex-col bg-[#030712] md:border md:border-white/10 md:rounded-3xl md:shadow-2xl md:overflow-hidden relative">
                             <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative z-10">
                                 <button onClick={() => setActiveMobilePage('add-product')} className="absolute left-4 p-2 -m-2 text-indigo-400 active:opacity-50 flex items-center gap-1 z-10">
@@ -2012,7 +2010,7 @@ const WhatsAppDashboard = () => {
                 )}
 
                 {activeMobilePage === 'add-product-media' && (
-                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#030712] md:bg-black/80 z-[80] animate-in slide-in-from-right duration-200 md:items-center md:pt-10">
+                    <div className="md:hidden flex flex-col h-full w-full absolute inset-0 bg-[#030712] md:bg-black/80 z-[80] animate-in slide-in-from-right duration-200 md:items-center md:pt-10">
                         <div className="w-full h-full md:h-[80vh] md:max-w-xl flex flex-col bg-[#030712] md:border md:border-white/10 md:rounded-3xl md:shadow-2xl md:overflow-hidden relative">
                             <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative z-10">
                                 <button onClick={() => setActiveMobilePage('add-product')} className="absolute left-4 p-2 -m-2 text-indigo-400 active:opacity-50 flex items-center gap-1 z-10">
@@ -2083,7 +2081,7 @@ const WhatsAppDashboard = () => {
                 )}
 
                 {activeMobilePage === 'add-product-voice' && (
-                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#030712] md:bg-black/80 z-[80] animate-in slide-in-from-right duration-200 md:items-center md:pt-10">
+                    <div className="md:hidden flex flex-col h-full w-full absolute inset-0 bg-[#030712] md:bg-black/80 z-[80] animate-in slide-in-from-right duration-200 md:items-center md:pt-10">
                         <div className="w-full h-full md:h-[80vh] md:max-w-xl flex flex-col bg-[#030712] md:border md:border-white/10 md:rounded-3xl md:shadow-2xl md:overflow-hidden relative">
                             <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative z-10">
                                 <button onClick={() => setActiveMobilePage('add-product')} className="absolute left-4 p-2 -m-2 text-indigo-400 active:opacity-50 flex items-center gap-1 z-10">
@@ -2152,7 +2150,7 @@ const WhatsAppDashboard = () => {
                 )}
 
                 {activeMobilePage === 'add-product-voice-edit' && (
-                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#030712] md:bg-black/80 z-[90] md:items-center md:pt-10">
+                    <div className="md:hidden flex flex-col h-full w-full absolute inset-0 bg-[#030712] md:bg-black/80 z-[90] md:items-center md:pt-10">
                         <div className="w-full h-full md:h-[80vh] md:max-w-xl bg-[#030712] md:border md:border-white/10 md:rounded-3xl md:shadow-2xl relative overflow-hidden">
                             <MobileVoiceEditor 
                                 audioBlob={audioBlob} 
@@ -2164,7 +2162,7 @@ const WhatsAppDashboard = () => {
                 )}
 
                 {activeMobilePage === 'add-product-voice-transcribe' && (
-                    <div className="flex flex-col h-full w-full absolute inset-0 bg-[#030712] md:bg-black/80 z-[100] animate-in slide-in-from-bottom-2 duration-200 md:items-center md:pt-10">
+                    <div className="md:hidden flex flex-col h-full w-full absolute inset-0 bg-[#030712] md:bg-black/80 z-[100] animate-in slide-in-from-bottom-2 duration-200 md:items-center md:pt-10">
                         <div className="w-full h-full md:h-[80vh] md:max-w-xl flex flex-col bg-[#030712] md:border md:border-white/10 md:rounded-3xl md:shadow-2xl md:overflow-hidden relative">
                             <div className="h-14 bg-[#09090b] border-b border-white/5 flex items-center px-4 shrink-0 shadow-sm relative z-10">
                                 <button onClick={() => setActiveMobilePage('add-product-voice')} className="absolute left-4 p-2 -m-2 text-emerald-400 active:opacity-50 flex items-center gap-1 z-10">
@@ -2201,6 +2199,260 @@ const WhatsAppDashboard = () => {
                                 </p>
                             )}
                         </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* 5) DESKTOP ADD PRODUCT SCREEN */}
+                {activeMobilePage.startsWith('add-product') && (
+                    <div className="hidden md:flex flex-row w-full h-full absolute inset-0 bg-[#030712] z-50">
+                        {/* Left Side Panel */}
+                        <div className="w-64 border-r border-white/5 bg-[#09090b] flex flex-col p-6 shrink-0 shadow-xl z-10">
+                            <h2 className="text-xl font-bold text-white mb-8 tracking-tight">Add Product</h2>
+                            <div className="flex flex-col gap-3">
+                                <button 
+                                    onClick={() => setActiveMobilePage('add-product-text')} 
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold ${activeMobilePage === 'add-product' || activeMobilePage === 'add-product-text' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}`}
+                                >
+                                    <FileText size={18} /> Text Details
+                                </button>
+                                <button 
+                                    onClick={() => setActiveMobilePage('add-product-media')} 
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold ${activeMobilePage === 'add-product-media' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}`}
+                                >
+                                    <ImageIcon size={18} /> Media Upload
+                                </button>
+                                <button 
+                                    onClick={() => setActiveMobilePage('add-product-voice')} 
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold ${activeMobilePage.startsWith('add-product-voice') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}`}
+                                >
+                                    <Mic size={18} /> Voice Record
+                                </button>
+                            </div>
+                            <div className="mt-auto pt-6 border-t border-white/5">
+                                <button onClick={() => setActiveMobilePage('main')} className="w-full flex items-center justify-center gap-2 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-colors font-bold">
+                                    <ChevronLeft size={18} /> Cancel
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Main Content Area */}
+                        <div className="flex-1 flex flex-col relative overflow-hidden bg-[#030712]">
+                            <div className="h-20 border-b border-white/5 flex items-center justify-between px-10 bg-[#09090b]/40 shrink-0">
+                                <h3 className="text-xl font-bold text-white">
+                                    {activeMobilePage === 'add-product' || activeMobilePage === 'add-product-text' ? 'Product Details' :
+                                     activeMobilePage === 'add-product-media' ? 'Media Upload' : 'Voice Note'}
+                                </h3>
+                                <button onClick={handleSubmit} disabled={loading} className="bg-emerald-500 hover:bg-emerald-400 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex items-center gap-2">
+                                    {loading ? <Loader2 size={18} className="animate-spin"/> : null}
+                                    {loading ? 'Saving...' : 'Save Product'}
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-10 custom-scrollbar">
+                                <div className="max-w-2xl mx-auto space-y-8 pb-20">
+                                    {/* Text Details Tab */}
+                                    {(activeMobilePage === 'add-product' || activeMobilePage === 'add-product-text') && (
+                                        <>
+                                            <div className="space-y-4">
+                                                <label className="block text-sm font-bold text-zinc-500 uppercase tracking-widest pl-2">Basic Info</label>
+                                                <div className="bg-[#18181b] rounded-2xl overflow-hidden border border-white/5 shadow-xl">
+                                                    <input type="text" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-6 py-5 text-lg text-white outline-none focus:bg-white/5 transition-colors" placeholder="Product Title" />
+                                                    <input type="number" value={formData.starting_price} onChange={e => setFormData({ ...formData, starting_price: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-6 py-5 text-lg text-white outline-none focus:bg-white/5 transition-colors" placeholder="Starting Price (Rs)" />
+                                                    <input type="number" value={formData.minimum_price} onChange={e => setFormData({ ...formData, minimum_price: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-6 py-5 text-lg text-white outline-none focus:bg-white/5 transition-colors" placeholder="Minimum Price (Rs)" />
+                                                    <input type="text" value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value })} className="w-full bg-transparent px-6 py-5 text-lg text-white outline-none focus:bg-white/5 transition-colors" placeholder="Brand Name" />
+                                                </div>
+                                            </div>
+                                            <div className="space-y-4">
+                                                <label className="block text-sm font-bold text-zinc-500 uppercase tracking-widest pl-2">Details</label>
+                                                <div className="bg-[#18181b] rounded-2xl overflow-hidden border border-white/5 shadow-xl">
+                                                    <select value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-6 py-5 text-lg text-white outline-none appearance-none focus:bg-white/5 transition-colors cursor-pointer">
+                                                        <option value="men" className="bg-[#18181b]">Men</option>
+                                                        <option value="women" className="bg-[#18181b]">Women</option>
+                                                        <option value="unisex" className="bg-[#18181b]">Unisex</option>
+                                                        <option value="kids" className="bg-[#18181b]">Kids</option>
+                                                    </select>
+                                                    <input type="text" value={formData.size_original} onChange={e => setFormData({ ...formData, size_original: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-6 py-5 text-lg text-white outline-none focus:bg-white/5 transition-colors" placeholder="Size" />
+                                                    <input type="text" value={formData.color} onChange={e => setFormData({ ...formData, color: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-6 py-5 text-lg text-white outline-none focus:bg-white/5 transition-colors" placeholder="Color" />
+                                                    <textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} rows={4} className="w-full bg-transparent px-6 py-5 text-lg text-white outline-none resize-none focus:bg-white/5 transition-colors" placeholder="Description / Condition" />
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {/* Media Upload Tab */}
+                                    {activeMobilePage === 'add-product-media' && (
+                                        <>
+                                            <div className="space-y-4">
+                                                <label className="block text-sm font-bold text-zinc-500 uppercase tracking-widest pl-2">Photos</label>
+                                                <div className="grid grid-cols-3 gap-4">
+                                                    <div className="col-span-3">
+                                                        <input type="file" multiple accept="image/*" onChange={handleImageSelect} className="hidden" id="file-images-desk" />
+                                                        <label htmlFor="file-images-desk" className="flex flex-col items-center justify-center gap-3 h-32 bg-[#18181b] border border-white/10 border-dashed rounded-2xl hover:bg-white/5 hover:border-indigo-500/50 transition-all cursor-pointer">
+                                                            <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-full"><Camera size={24} /></div>
+                                                            <span className="text-lg font-bold text-zinc-300">Click to add photos</span>
+                                                        </label>
+                                                    </div>
+                                                    {productImages && productImages.length > 0 && productImages.map((img, i) => (
+                                                        <div key={i} className="aspect-square rounded-2xl bg-[#18181b] border border-white/10 overflow-hidden relative shadow-lg group">
+                                                            <img src={img.url} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                                                            <button onClick={() => setProductImages((prev) => prev.filter((_, idx) => idx !== i))} className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 backdrop-blur text-red-400 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                            <div className="absolute bottom-2 left-2 right-2 flex justify-between opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <button disabled={i === 0} onClick={() => {
+                                                                    const newArr = [...productImages];
+                                                                    const temp = newArr[i-1];
+                                                                    newArr[i-1] = newArr[i];
+                                                                    newArr[i] = temp;
+                                                                    setProductImages(newArr);
+                                                                }} className="w-8 h-8 rounded-full bg-black/60 backdrop-blur text-white flex items-center justify-center disabled:opacity-30">
+                                                                    <ChevronLeft size={14} />
+                                                                </button>
+                                                                <button disabled={i === productImages.length - 1} onClick={() => {
+                                                                    const newArr = [...productImages];
+                                                                    const temp = newArr[i+1];
+                                                                    newArr[i+1] = newArr[i];
+                                                                    newArr[i] = temp;
+                                                                    setProductImages(newArr);
+                                                                }} className="w-8 h-8 rounded-full bg-black/60 backdrop-blur text-white flex items-center justify-center disabled:opacity-30">
+                                                                    <ChevronRight size={14} />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div className="space-y-4">
+                                                <label className="block text-sm font-bold text-zinc-500 uppercase tracking-widest pl-2">Video</label>
+                                                <input type="file" accept="video/*" onChange={handleVideoSelect} className="hidden" id="file-video-desk" />
+                                                <label htmlFor="file-video-desk" className="flex flex-col items-center justify-center gap-3 h-32 bg-[#18181b] border border-white/10 border-dashed rounded-2xl hover:bg-white/5 hover:border-indigo-500/50 transition-all cursor-pointer">
+                                                    <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-full"><Video size={24} /></div>
+                                                    <span className="text-lg font-bold text-zinc-300">{selectedVideo ? 'Change Video' : 'Add Video'}</span>
+                                                </label>
+                                                {selectedVideo && (
+                                                    <div className="relative mt-4 rounded-2xl overflow-hidden border border-white/10 shadow-xl group">
+                                                        <video src={URL.createObjectURL(selectedVideo)} className="w-full h-auto max-h-[400px] object-cover" controls />
+                                                        <button onClick={() => setSelectedVideo(null)} className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/60 backdrop-blur text-red-400 flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {/* Voice Record Tab */}
+                                    {activeMobilePage === 'add-product-voice' && (
+                                        <div className="flex flex-col items-center justify-center py-10">
+                                            {audioPreviewUrl ? (
+                                                <div className="w-full flex flex-col items-center max-w-md">
+                                                    <audio controls src={audioPreviewUrl} className="w-full mb-10 h-14" />
+                                                    <button 
+                                                        onClick={() => setActiveMobilePage('add-product-voice-edit')}
+                                                        className="bg-indigo-600 hover:bg-indigo-500 text-white w-full py-4 rounded-xl font-bold shadow-lg shadow-indigo-600/20 active:scale-95 transition-all text-lg flex items-center justify-center gap-3 mb-4"
+                                                    >
+                                                        <Edit3 size={20} /> Advanced Edit
+                                                    </button>
+                                                    <button 
+                                                        onClick={handleTranscribe}
+                                                        className="bg-[#18181b] hover:bg-white/5 border border-white/10 text-white w-full py-4 rounded-xl font-bold shadow-lg active:scale-95 transition-all text-lg flex items-center justify-center gap-3 mb-6"
+                                                    >
+                                                        <FileText size={20} className="text-emerald-400" /> Transcribe Voice
+                                                    </button>
+                                                    <button onClick={() => {setAudioBlob(null); setAudioPreviewUrl(null);}} className="text-red-400 hover:text-red-300 font-bold p-4 transition-colors">
+                                                        Discard & Retake
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="w-full flex flex-col items-center max-w-md">
+                                                    <div className={`w-40 h-40 rounded-full flex items-center justify-center mb-10 shadow-2xl transition-all ${isRecording ? 'bg-red-500/20 shadow-red-500/20 scale-105' : 'bg-[#18181b]'}`}>
+                                                        <div className={`w-32 h-32 rounded-full flex items-center justify-center ${isRecording ? 'bg-red-500 animate-pulse' : 'bg-[#27272a]'}`}>
+                                                            <Mic size={50} className="text-white" />
+                                                        </div>
+                                                    </div>
+                                                    {isRecording ? (
+                                                        <>
+                                                            <p className="text-4xl font-mono font-bold text-white mb-10">Recording...</p>
+                                                            <div className="flex gap-4 w-full">
+                                                                {!isPaused ? (
+                                                                    <button onClick={pauseRecording} className="flex-1 bg-amber-500 hover:bg-amber-400 text-white py-4 rounded-xl font-bold text-lg active:scale-95 shadow-lg flex items-center justify-center gap-2 transition-colors">
+                                                                        <Pause size={20} /> Pause
+                                                                    </button>
+                                                                ) : (
+                                                                    <button onClick={resumeRecording} className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white py-4 rounded-xl font-bold text-lg active:scale-95 shadow-lg flex items-center justify-center gap-2 transition-colors">
+                                                                        <Play size={20} /> Resume
+                                                                    </button>
+                                                                )}
+                                                                <button onClick={stopRecording} className="flex-1 bg-white hover:bg-zinc-200 text-black py-4 rounded-xl font-bold text-lg active:scale-95 shadow-lg flex items-center justify-center gap-2 transition-colors">
+                                                                    <Square size={20} /> Stop
+                                                                </button>
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <p className="text-zinc-400 text-lg mb-10 font-medium">Click to start speaking</p>
+                                                            <button onClick={startRecording} className="bg-indigo-600 hover:bg-indigo-500 text-white w-full py-5 rounded-xl font-bold text-xl active:scale-95 shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-3 transition-all">
+                                                                <Play size={24} /> Start Recording
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Voice Advanced Edit Tab */}
+                                    {activeMobilePage === 'add-product-voice-edit' && (
+                                        <div className="w-full bg-[#18181b] border border-white/10 rounded-3xl shadow-2xl relative overflow-hidden h-[600px]">
+                                            <MobileVoiceEditor 
+                                                audioBlob={audioBlob} 
+                                                onCancel={() => setActiveMobilePage('add-product-voice')} 
+                                                onSave={(blob) => { setAudioBlob(blob); setAudioPreviewUrl(URL.createObjectURL(blob)); setActiveMobilePage('add-product-voice'); }} 
+                                            />
+                                        </div>
+                                    )}
+
+                                    {/* Voice Transcribe Tab */}
+                                    {activeMobilePage === 'add-product-voice-transcribe' && (
+                                        <div className="flex flex-col items-center max-w-2xl mx-auto py-10">
+                                            <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center mb-8 shadow-xl shadow-emerald-900/20">
+                                                {isTranscribing ? <Loader2 size={48} className="text-emerald-400 animate-spin" /> : <FileText size={48} className="text-emerald-400" />}
+                                            </div>
+                                            <h2 className="text-2xl font-bold text-white mb-10">{isTranscribing ? "Transcribing audio..." : "Voice to Text"}</h2>
+                                            
+                                            <div className="w-full bg-[#18181b] rounded-3xl p-1 border border-white/10 shadow-inner relative group">
+                                                <textarea 
+                                                    value={transcriptionText} 
+                                                    onChange={e => setTranscriptionText(e.target.value)}
+                                                    disabled={isTranscribing}
+                                                    className="w-full h-80 bg-transparent text-white text-xl p-8 outline-none resize-none leading-relaxed font-medium disabled:opacity-50"
+                                                    placeholder={isTranscribing ? "Processing audio..." : "Transcription will appear here..."}
+                                                />
+                                                {!isTranscribing && (
+                                                    <div className="absolute top-6 right-6 opacity-30 group-focus-within:opacity-100 transition-opacity">
+                                                        <Edit3 size={24} className="text-indigo-400" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {!isTranscribing && (
+                                                <p className="text-sm text-zinc-500 mt-6 font-semibold uppercase tracking-widest flex items-center gap-2">
+                                                    <CheckCircle size={16} className="text-emerald-500" /> Auto-saving enabled
+                                                </p>
+                                            )}
+                                            <div className="w-full flex justify-between mt-10 border-t border-white/5 pt-10">
+                                                <button onClick={() => setActiveMobilePage('add-product-voice')} className="text-zinc-400 hover:text-white font-bold transition-colors">
+                                                    Back to Voice
+                                                </button>
+                                                <button onClick={() => setActiveMobilePage('add-product-voice')} className="bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-indigo-600/20 transition-all">
+                                                    Save Transcription
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}
