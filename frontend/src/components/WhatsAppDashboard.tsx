@@ -2380,12 +2380,12 @@ const WhatsAppDashboard = () => {
                                                 <input type="file" accept="video/*" onChange={handleVideoSelect} className="hidden" id="file-video-desk" />
                                                 <label htmlFor="file-video-desk" className="flex flex-col items-center justify-center gap-3 h-32 bg-[#18181b] border border-white/10 border-dashed rounded-2xl hover:bg-white/5 hover:border-indigo-500/50 transition-all cursor-pointer">
                                                     <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-full"><Video size={24} /></div>
-                                                    <span className="text-lg font-bold text-zinc-300">{selectedVideo ? 'Change Video' : 'Add Video'}</span>
+                                                    <span className="text-lg font-bold text-zinc-300">{videoPreviewUrl ? 'Change Video' : 'Add Video'}</span>
                                                 </label>
-                                                {selectedVideo && (
+                                                {videoPreviewUrl && (
                                                     <div className="relative mt-4 rounded-2xl overflow-hidden border border-white/10 shadow-xl group">
-                                                        <video src={URL.createObjectURL(selectedVideo)} className="w-full h-auto max-h-[400px] object-cover" controls />
-                                                        <button onClick={() => setSelectedVideo(null)} className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/60 backdrop-blur text-red-400 flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <video src={videoPreviewUrl} className="w-full h-auto max-h-[400px] object-cover" controls />
+                                                        <button onClick={removeVideo} className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/60 backdrop-blur text-red-400 flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity">
                                                             <Trash2 size={18} />
                                                         </button>
                                                     </div>
