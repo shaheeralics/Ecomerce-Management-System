@@ -7,7 +7,7 @@ import LiveConversations from './LiveConversations';
 import OrdersPage from './OrdersPage';
 import AIAgentPanel from './AIAgentPanel';
 import React, { useState, useEffect, useRef } from 'react';
-import { Package, ShieldAlert, Mic2, MessageSquare, Settings, Plus, Trash2, Edit3, Camera, Video, Mic, ShoppingCart, BarChart, Square, Play, Pause, Volume2, CheckCircle, X, Upload, Download, StopCircle, SkipBack, SkipForward, Save, LayoutDashboard, Database, RefreshCw, Tag, DollarSign, Box, FileAudio, Loader2, Sparkles, Menu, ChevronLeft, MoreHorizontal, FileText, ChevronRight , ImageIcon, Search } from 'lucide-react';
+import { Package, ShieldAlert, Mic2, MessageSquare, Settings, Plus, Trash2, Edit3, Camera, Video, Mic, ShoppingCart, BarChart, Square, Play, Pause, Volume2, CheckCircle, X, Upload, Download, StopCircle, SkipBack, SkipForward, Save, LayoutDashboard, Database, RefreshCw, Tag, DollarSign, Box, FileAudio, Loader2, Sparkles, Menu, ChevronLeft, MoreHorizontal, FileText, ChevronRight , ImageIcon, Search, LayoutGrid, List } from 'lucide-react';
 
 const apiGuidanceData = {
     metaToken: {
@@ -107,6 +107,7 @@ async function audioBufferToOggBlob(buffer: AudioBuffer): Promise<Blob> {
 const WhatsAppDashboard = () => {
     const [subTab, setSubTab] = useState<'products' | 'conversations' | 'policy' | 'prerecorded' | 'orders' | 'analytics' | 'ai-agent'>('products');
     const [searchQuery, setSearchQuery] = useState('');
+    const [viewMode, setViewMode] = useState<'grid'|'list'>('list');
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(false);
@@ -1742,73 +1743,116 @@ const WhatsAppDashboard = () => {
                         <div className="flex-1 overflow-y-auto pb-[85px] md:pb-6 pt-4 px-4 w-full max-w-6xl mx-auto custom-scrollbar">
                             {subTab === 'products' && (
                                 <div className="flex flex-col w-full h-full">
-                                    {/* Desktop Search & Add Button (Hidden on Mobile) */}
-                                    <div className="hidden md:flex justify-between items-center mb-6 w-full">
-                                        <div className="relative w-[300px]">
-                                            <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                                    {/* Desktop Toolbar (Hidden on Mobile) */}
+                                    <div className="hidden md:flex justify-center items-center mb-8 w-full relative">
+                                        <div className="relative w-full max-w-xl">
+                                            <Search size={20} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-400" />
                                             <input 
                                                 type="text" 
                                                 value={searchQuery}
                                                 onChange={e => setSearchQuery(e.target.value)}
                                                 placeholder="Search products..." 
-                                                className="pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-white focus:outline-none focus:border-indigo-500/50 w-full transition-all"
+                                                className="pl-14 pr-4 py-3.5 rounded-2xl bg-[#18181b] border border-white/5 text-base text-white focus:outline-none focus:border-indigo-500/50 w-full transition-all shadow-xl"
                                             />
                                         </div>
+                                        {/* View Toggle */}
+                                        <div className="absolute right-0 flex bg-[#18181b] border border-white/5 rounded-xl p-1 shadow-lg">
+                                            <button onClick={() => setViewMode('grid')} className={`p-2.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-indigo-600 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300'}`}>
+                                                <LayoutGrid size={20} />
+                                            </button>
+                                            <button onClick={() => setViewMode('list')} className={`p-2.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-indigo-600 text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300'}`}>
+                                                <List size={20} />
+                                            </button>
+                                        </div>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                    <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" : "flex flex-col gap-4"}>
                                     {loading ? (
-                                        <div className="flex items-center justify-center h-32"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div></div>
+                                        <div className="flex items-center justify-center h-32 col-span-full"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div></div>
                                     ) : products.length === 0 ? (
-                                        <div className="text-center text-zinc-500 py-10 text-sm">No products listed. Tap + to add.</div>
+                                        <div className="text-center text-zinc-500 py-10 text-sm col-span-full">No products listed. Tap + to add.</div>
                                     ) : (
                                         (() => {
                                             const filteredProducts = products.filter(p => p.title?.toLowerCase().includes(searchQuery.toLowerCase()) || p.brand?.toLowerCase().includes(searchQuery.toLowerCase()));
                                             if (filteredProducts.length === 0) {
-                                                return <div className="text-center text-zinc-500 py-10 text-sm">No products match your search.</div>;
+                                                return <div className="text-center text-zinc-500 py-10 text-sm col-span-full">No products match your search.</div>;
                                             }
                                             return filteredProducts.map(product => {
                                                 const allImages = getProductAllImages(product);
                                                 const currentImgUrl = allImages[0] || product.main_image_url;
+                                                const isGrid = viewMode === 'grid';
                                                 return (
-                                                    <div key={product.id} className="bg-[#09090b] border border-white/5 rounded-2xl p-3 flex flex-col gap-3 relative shadow-sm">
-                                                        <div className="flex gap-4">
-                                                            <div className="w-24 h-24 rounded-xl bg-[#18181b] shrink-0 overflow-hidden relative">
-                                                                {currentImgUrl ? <img src={currentImgUrl} className="w-full h-full object-cover" /> : <Camera size={24} className="text-zinc-700 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />}
-                                                            </div>
-                                                            <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
-                                                                <div>
-                                                                    <h4 className="font-bold text-zinc-100 text-base leading-tight line-clamp-2">{product.title}</h4>
-                                                                    <p className="text-xs text-zinc-500 truncate mt-1">{product.brand} • {product.gender}</p>
+                                                    <div key={product.id} className={`group bg-[#09090b] border border-white/5 hover:border-white/10 rounded-3xl overflow-hidden shadow-xl transition-all hover:-translate-y-1 hover:shadow-indigo-500/10 ${isGrid ? 'flex flex-col' : 'flex flex-row p-4 gap-6 items-center'}`}>
+                                                        
+                                                        {/* Media Section */}
+                                                        <div className={`relative bg-[#18181b] overflow-hidden ${isGrid ? 'aspect-square w-full' : 'w-32 h-32 md:w-40 md:h-40 rounded-2xl shrink-0'}`}>
+                                                            {currentImgUrl ? (
+                                                                <img src={currentImgUrl} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                                            ) : (
+                                                                <div className="w-full h-full flex items-center justify-center">
+                                                                    <Camera size={32} className="text-zinc-700" />
                                                                 </div>
-                                                                <div className="mt-auto pt-2">
-                                                                    <p className="text-lg font-bold text-white tracking-tight">Rs {product.starting_price}</p>
-                                                                </div>
+                                                            )}
+                                                            {/* Overlay Badges on Image */}
+                                                            <div className="absolute top-3 left-3 flex gap-2">
+                                                                {product.brand && <span className="bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] md:text-xs font-bold text-white shadow-sm border border-white/10 uppercase tracking-wider">{product.brand}</span>}
                                                             </div>
                                                         </div>
-                                                        
-                                                        {/* Voice & Action Buttons Row */}
-                                                        <div className="flex items-center justify-between border-t border-white/5 pt-3 mt-1">
-                                                            {product.voice_note_url ? (
-                                                                <button 
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        const audio = new Audio(product.voice_note_url as string);
-                                                                        audio.play();
-                                                                    }}
-                                                                    className="flex items-center gap-2 bg-indigo-500/10 text-indigo-400 px-4 py-2 rounded-full text-xs font-bold active:bg-indigo-500/20"
-                                                                >
-                                                                    <Play size={14} className="fill-current" /> Play Voice
-                                                                </button>
-                                                            ) : (
-                                                                <div className="text-[10px] text-zinc-600 font-medium px-2">No Voice Note</div>
-                                                            )}
-                                                            <div className="flex items-center gap-2">
-                                                                <button onClick={() => { handleEdit(product); setActiveMobilePage('add-product'); }} className="bg-white/5 text-zinc-300 px-4 py-2 rounded-full text-xs font-bold active:bg-white/10 flex items-center gap-1.5">
-                                                                    <Edit3 size={14} /> Edit
-                                                                </button>
-                                                                <button onClick={() => handleDelete(product.id)} className="bg-red-500/10 text-red-400 w-8 h-8 rounded-full active:bg-red-500/20 flex items-center justify-center">
-                                                                    <Trash2 size={14} />
-                                                                </button>
+
+                                                        {/* Info Section */}
+                                                        <div className={`flex flex-col flex-1 h-full justify-between ${isGrid ? 'p-5' : 'py-2'}`}>
+                                                            <div>
+                                                                <div className="flex justify-between items-start gap-4 mb-2">
+                                                                    <h4 className="font-bold text-zinc-100 text-base md:text-lg leading-tight line-clamp-2 group-hover:text-indigo-400 transition-colors">{product.title}</h4>
+                                                                    <span className="text-lg md:text-2xl font-black text-white shrink-0 tracking-tight">Rs {product.starting_price}</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-2 md:gap-3 text-xs md:text-sm text-zinc-500 font-medium flex-wrap">
+                                                                    {product.gender && <span>{product.gender}</span>}
+                                                                    {product.gender && product.size_original && <span className="w-1 h-1 rounded-full bg-zinc-600"></span>}
+                                                                    {product.size_original && <span>Size {product.size_original}</span>}
+                                                                    {(product.gender || product.size_original) && product.color && <span className="w-1 h-1 rounded-full bg-zinc-600"></span>}
+                                                                    {product.color && <span>{product.color}</span>}
+                                                                </div>
+                                                                {product.description && !isGrid && (
+                                                                    <p className="mt-3 text-zinc-400 text-sm line-clamp-2 leading-relaxed hidden md:block">{product.description}</p>
+                                                                )}
+                                                            </div>
+
+                                                            {/* Actions Section */}
+                                                            <div className={`flex items-center gap-2 mt-4 pt-4 border-t border-white/5 ${isGrid ? 'w-full' : ''}`}>
+                                                                {product.voice_note_url && (
+                                                                    <button 
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            const audio = new Audio(product.voice_note_url as string);
+                                                                            audio.play();
+                                                                        }}
+                                                                        className={`flex-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 py-2.5 rounded-xl font-bold text-xs md:text-sm flex items-center justify-center gap-2 transition-colors border border-indigo-500/10 ${!isGrid && 'px-4 flex-none'}`}
+                                                                    >
+                                                                        <Volume2 size={16} /> <span className={!isGrid ? 'hidden lg:inline' : ''}>Play Voice</span>
+                                                                    </button>
+                                                                )}
+                                                                {product.video_url && (
+                                                                    <button 
+                                                                        onClick={() => setActiveMediaPreview({ type: 'video', url: product.video_url as string })}
+                                                                        className={`flex-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 py-2.5 rounded-xl font-bold text-xs md:text-sm flex items-center justify-center gap-2 transition-colors border border-emerald-500/10 ${!isGrid && 'px-4 flex-none'}`}
+                                                                    >
+                                                                        <Video size={16} /> <span className={!isGrid ? 'hidden lg:inline' : ''}>View Video</span>
+                                                                    </button>
+                                                                )}
+                                                                <div className="flex gap-2 ml-auto">
+                                                                    <button 
+                                                                        onClick={() => { handleEdit(product); setActiveMobilePage('add-product'); }}
+                                                                        className="w-10 h-10 bg-white/5 hover:bg-white/10 text-zinc-300 rounded-xl flex items-center justify-center transition-colors border border-white/5"
+                                                                    >
+                                                                        <Edit3 size={16} />
+                                                                    </button>
+                                                                    <button 
+                                                                        onClick={() => handleDelete(product.id)}
+                                                                        className="w-10 h-10 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl flex items-center justify-center transition-colors border border-red-500/10"
+                                                                    >
+                                                                        <Trash2 size={16} />
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
