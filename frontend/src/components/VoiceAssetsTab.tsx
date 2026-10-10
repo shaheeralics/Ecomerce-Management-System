@@ -238,40 +238,40 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
         }
 
         return (
-            <div className="flex w-full h-full absolute inset-0 bg-[#050D10] z-50 md:justify-center">
-                <div className="flex flex-col md:flex-row w-full md:max-w-6xl h-full border-x border-teal-900/30 bg-[#050D10]">
+            <div className="flex w-full h-full absolute inset-0 bg-[#030712] z-50 md:justify-center">
+                <div className="flex flex-col md:flex-row w-full md:max-w-6xl h-full border-x border-white/5 bg-[#030712]">
                 {/* Mobile Header & Tabs */}
                 <div className="md:hidden flex flex-col w-full">
-                    <div className="flex items-center justify-between p-4 border-b border-teal-900/30 bg-[#0B1E26]">
-                        <button onClick={() => setViewState('list')} className="text-teal-400 hover:text-teal-300 flex items-center">
+                    <div className="flex items-center justify-between p-4 border-b border-white/5 bg-[#09090b]">
+                        <button onClick={() => setViewState('list')} className="text-zinc-400 hover:text-white flex items-center">
                             <ChevronLeft size={24} />
                         </button>
-                        <h2 className="text-lg font-bold text-slate-100">
+                        <h2 className="text-lg font-bold text-white">
                             {editId 
                                 ? (category === 'prerecorded' ? 'Edit Voice Asset' : 'Edit Policy Voice') 
                                 : (category === 'prerecorded' ? 'Add Voice Asset' : 'Add Policy Voice')}
                         </h2>
-                        <button onClick={submitVoice} className="text-teal-400 hover:text-teal-300 font-bold flex items-center gap-1 text-sm">
-                            <Save size={16} /> Save
+                        <button onClick={submitVoice} className="text-indigo-400 hover:text-indigo-300 font-bold text-sm">
+                            Save
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-3 border-b border-teal-900/30 bg-[#050D10]">
+                    <div className="grid grid-cols-3 border-b border-white/5 bg-[#030712]">
                         <button 
                             onClick={() => setActiveTab('details')}
-                            className={`py-3 text-sm font-semibold transition-colors ${activeTab === 'details' ? 'text-teal-400 border-b-2 border-teal-400' : 'text-slate-500'}`}
+                            className={`py-3 text-sm font-semibold transition-colors ${activeTab === 'details' ? 'text-indigo-400 border-b-2 border-indigo-400' : 'text-zinc-500'}`}
                         >
                             Voice Details
                         </button>
                         <button 
                             onClick={() => setActiveTab('voice')}
-                            className={`py-3 text-sm font-semibold transition-colors ${activeTab === 'voice' ? 'text-teal-400 border-b-2 border-teal-400' : 'text-slate-500'}`}
+                            className={`py-3 text-sm font-semibold transition-colors ${activeTab === 'voice' ? 'text-indigo-400 border-b-2 border-indigo-400' : 'text-zinc-500'}`}
                         >
                             Recording
                         </button>
                         <button 
                             onClick={() => setActiveTab('transcription')}
-                            className={`py-3 text-sm font-semibold transition-colors ${activeTab === 'transcription' ? 'text-teal-400 border-b-2 border-teal-400' : 'text-slate-500'}`}
+                            className={`py-3 text-sm font-semibold transition-colors ${activeTab === 'transcription' ? 'text-indigo-400 border-b-2 border-indigo-400' : 'text-zinc-500'}`}
                         >
                             Transcription
                         </button>
@@ -279,9 +279,9 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
                 </div>
 
                 {/* Desktop Side Panel */}
-                <div className="hidden md:flex w-64 border-r border-teal-900/30 bg-[#0B1E26] flex-col p-6 shrink-0 shadow-xl z-10">
+                <div className="hidden md:flex w-64 border-r border-white/5 bg-[#09090b] flex-col p-6 shrink-0 shadow-xl z-10">
                     <div className="mb-8">
-                        <button onClick={() => setViewState('list')} className="flex items-center gap-2 text-teal-400 hover:text-teal-300 transition-colors font-semibold mb-6">
+                        <button onClick={() => setViewState('list')} className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors font-semibold mb-6">
                             <ChevronLeft size={18} /> Back
                         </button>
                         <h2 className="text-xl font-bold text-white tracking-tight">
@@ -291,26 +291,26 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
                         </h2>
                     </div>
                     <div className="flex flex-col gap-3">
-                        <button onClick={() => setActiveTab('details')} className={`flex items-center px-4 py-3 rounded-xl transition-all font-semibold ${activeTab === 'details' ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
+                        <button onClick={() => setActiveTab('details')} className={`flex items-center px-4 py-3 rounded-xl transition-all font-semibold ${activeTab === 'details' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}`}>
                             Voice Details
                         </button>
-                        <button onClick={() => setActiveTab('voice')} className={`flex items-center px-4 py-3 rounded-xl transition-all font-semibold ${activeTab === 'voice' ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
+                        <button onClick={() => setActiveTab('voice')} className={`flex items-center px-4 py-3 rounded-xl transition-all font-semibold ${activeTab === 'voice' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}`}>
                             Recording
                         </button>
-                        <button onClick={() => setActiveTab('transcription')} className={`flex items-center px-4 py-3 rounded-xl transition-all font-semibold ${activeTab === 'transcription' ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
+                        <button onClick={() => setActiveTab('transcription')} className={`flex items-center px-4 py-3 rounded-xl transition-all font-semibold ${activeTab === 'transcription' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}`}>
                             Transcription
                         </button>
                     </div>
                 </div>
 
                 {/* Main Content Area */}
-                <div className="flex-1 flex flex-col relative overflow-hidden bg-[#050D10]">
-                    <div className="hidden md:flex h-20 border-b border-teal-900/30 items-center justify-between px-10 bg-[#0B1E26]/40 shrink-0">
+                <div className="flex-1 flex flex-col relative overflow-hidden bg-[#030712]">
+                    <div className="hidden md:flex h-20 border-b border-white/5 items-center justify-between px-10 bg-[#09090b]/40 shrink-0">
                         <h3 className="text-xl font-bold text-white">
                             {activeTab === 'details' ? 'Voice Details' : activeTab === 'voice' ? 'Voice Recording' : 'Transcription'}
                         </h3>
-                        <button onClick={submitVoice} className="bg-teal-500 hover:bg-teal-400 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg shadow-teal-500/20 flex items-center gap-2">
-                            <Save size={18} /> Save Asset
+                        <button onClick={submitVoice} className="bg-emerald-500 hover:bg-emerald-400 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg shadow-emerald-500/20">
+                            Save
                         </button>
                     </div>
                     
@@ -318,28 +318,28 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
                     {activeTab === 'details' && (
                         <div className="space-y-5">
                             <div>
-                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">Voice Title</label>
+                                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5 pl-2">Voice Title</label>
                                 <input 
                                     type="text" 
                                     value={formData.title} 
                                     onChange={e => setFormData({ ...formData, title: e.target.value })} 
-                                    className="w-full bg-[#0A181D] border border-teal-900/50 rounded-xl px-4 py-3 text-sm text-slate-100 outline-none focus:border-teal-500 transition-colors" 
+                                    className="w-full bg-[#18181b] border border-white/5 rounded-2xl px-6 py-4 text-lg text-white outline-none focus:bg-white/5 transition-colors shadow-xl" 
                                     placeholder="e.g. Greeting, Policy..." 
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">When should AI use this voice?</label>
+                                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5 pl-2">When should AI use this voice?</label>
                                 <textarea 
                                     value={formData.usage_instructions} 
                                     onChange={e => setFormData({ ...formData, usage_instructions: e.target.value })} 
-                                    className="w-full bg-[#0A181D] border border-teal-900/50 rounded-xl px-4 py-3 text-sm text-slate-100 h-28 outline-none resize-none focus:border-teal-500 transition-colors" 
+                                    className="w-full bg-[#18181b] border border-white/5 rounded-2xl px-6 py-4 text-lg text-white h-32 outline-none resize-none focus:bg-white/5 transition-colors shadow-xl" 
                                     placeholder="e.g. Play this when customer asks about..." 
                                 />
                             </div>
 
                             <button 
                                 onClick={() => setActiveTab('voice')}
-                                className="w-full bg-teal-900/30 hover:bg-teal-900/50 text-teal-400 border border-teal-800/50 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 mt-4"
+                                className="w-full bg-indigo-900/30 hover:bg-indigo-900/50 text-indigo-400 border border-indigo-800/50 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 mt-4 transition-colors"
                             >
                                 Next: Record Voice <ArrowRight size={18} />
                             </button>
@@ -385,27 +385,27 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
 
                             {audioPreviewUrl && !isRecording && (
                                 <div className="w-full max-w-sm space-y-6">
-                                    <div className="bg-[#0A181D] border border-teal-900/50 rounded-2xl p-4">
-                                        <audio src={audioPreviewUrl} controls className="w-full h-10 custom-audio-player" />
+                                    <div className="bg-[#18181b] border border-white/5 rounded-3xl p-4 shadow-xl">
+                                        <audio src={audioPreviewUrl} controls className="w-full h-14 custom-audio-player" />
                                     </div>
-                                    <div className="flex flex-wrap items-center justify-center gap-3">
+                                    <div className="flex flex-wrap items-center justify-center gap-3 mt-8">
                                         <button
                                             onClick={startRecording}
-                                            className="flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-sm font-semibold transition-colors"
+                                            className="px-6 py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-xl text-sm font-bold transition-colors"
                                         >
-                                            <RotateCcw size={16} /> Retake
+                                            Retake
                                         </button>
                                         <button
                                             onClick={() => setIsEditingVoice(true)}
-                                            className="flex items-center gap-1.5 px-4 py-2 bg-indigo-900/40 hover:bg-indigo-900/60 border border-indigo-500/30 text-indigo-300 rounded-lg text-sm font-semibold transition-colors"
+                                            className="px-6 py-3 bg-indigo-900/40 hover:bg-indigo-900/60 border border-indigo-500/30 text-indigo-300 rounded-xl text-sm font-bold transition-colors"
                                         >
-                                            <Edit3 size={16} /> Edit
+                                            Edit
                                         </button>
                                         <button
                                             onClick={submitVoice}
-                                            className="flex items-center gap-1.5 px-6 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg text-sm font-bold shadow-lg shadow-teal-900/50 transition-colors"
+                                            className="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/20 transition-colors"
                                         >
-                                            <Save size={16} /> Submit
+                                            Submit
                                         </button>
                                     </div>
                                 </div>
@@ -417,11 +417,11 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
                     {activeTab === 'transcription' && (
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">Transcribed Text</label>
+                                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1.5 pl-2">Transcribed Text</label>
                                 <textarea 
                                     value={formData.transcription} 
                                     onChange={e => setFormData({ ...formData, transcription: e.target.value })} 
-                                    className="w-full bg-[#0A181D] border border-teal-900/50 rounded-xl px-4 py-3 text-sm text-slate-100 h-48 outline-none resize-none focus:border-teal-500 transition-colors" 
+                                    className="w-full bg-[#18181b] border border-white/5 rounded-2xl px-6 py-4 text-lg text-white h-64 outline-none resize-none focus:bg-white/5 transition-colors shadow-xl" 
                                     placeholder="Voice will be transcribed here automatically in background. You can manually edit it if AI made a mistake." 
                                 />
                             </div>
