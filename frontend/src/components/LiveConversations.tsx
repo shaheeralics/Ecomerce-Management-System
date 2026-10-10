@@ -176,11 +176,20 @@ export default function LiveConversations() {
 
     const desktopMessagesEndRef = useRef<HTMLDivElement>(null);
     const mobileMessagesEndRef = useRef<HTMLDivElement>(null);
+    const prevMessagesLength = useRef<number>(0);
+    const isFirstLoadRef = useRef<boolean>(true);
 
     useLayoutEffect(() => {
-        desktopMessagesEndRef.current?.scrollIntoView({ behavior: "auto" });
-        mobileMessagesEndRef.current?.scrollIntoView({ behavior: "auto" });
-    }, [messages, activeConvId]);
+        if (isFirstLoadRef.current && messages.length > 0) {
+            desktopMessagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+            mobileMessagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+            isFirstLoadRef.current = false;
+        } else if (!isFirstLoadRef.current && messages.length > prevMessagesLength.current) {
+            desktopMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+            mobileMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }
+        prevMessagesLength.current = messages.length;
+    }, [messages]);
     
     // Modals
     const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
@@ -218,8 +227,14 @@ export default function LiveConversations() {
 
     // Fetch messages & orders for active conversation
     useEffect(() => {
-        if (!activeConvId) return;
-        let isFirstLoad = true;
+        if (!activeConvId) {
+            setMessages([]);
+            return;
+        }
+        
+        setMessages([]); // Clear immediately so we don't show old chat
+        isFirstLoadRef.current = true; // Mark as first load for this conversation
+        
         const loadActiveData = async () => {
             try {
                 // Fetch Messages
@@ -227,7 +242,6 @@ export default function LiveConversations() {
                 const data = await res.json();
                 if (data.data) {
                     setMessages(data.data);
-                    isFirstLoad = false;
                 }
             } catch (e) { console.error(e); }
         };
