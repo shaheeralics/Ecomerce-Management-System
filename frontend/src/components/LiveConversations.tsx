@@ -173,9 +173,13 @@ export default function LiveConversations() {
     const [loading, setLoading] = useState(true);
     const [errorMsg, setErrorMsg] = useState('');
 
+    const desktopMessagesEndRef = useRef<HTMLDivElement>(null);
+    const mobileMessagesEndRef = useRef<HTMLDivElement>(null);
+
     useLayoutEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
-    }, [messages]);
+        desktopMessagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+        mobileMessagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+    }, [messages, activeConvId]);
     
     // Modals
     const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
@@ -184,8 +188,6 @@ export default function LiveConversations() {
     
     // Profile View State
     const [showProfile, setShowProfile] = useState(false);
-    
-    const messagesEndRef = useRef<HTMLDivElement>(null);
 
     // Fetch conversations
     const loadConversations = async () => {
@@ -269,7 +271,8 @@ export default function LiveConversations() {
             });
             // Instantly append local message
             setMessages(prev => [...prev, { id: Date.now(), sender: 'human', type: 'text', text_content: text, created_at: new Date().toISOString() }]);
-            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            desktopMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            mobileMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
         } catch (e) {
             console.error(e);
         }
@@ -321,7 +324,8 @@ export default function LiveConversations() {
             }]);
             
             setTimeout(() => {
-                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+                desktopMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+                mobileMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
             }, 50);
         } catch (e) {
             console.error(e);
@@ -477,7 +481,7 @@ export default function LiveConversations() {
                                             </div>
                                         );
                                     })}
-                                    <div ref={messagesEndRef} />
+                                    <div ref={desktopMessagesEndRef} />
                                 </div>
 
                                 {/* Chat Input Box */}
@@ -647,7 +651,7 @@ export default function LiveConversations() {
                                     </div>
                                 );
                             })}
-                            <div ref={messagesEndRef} />
+                            <div ref={mobileMessagesEndRef} />
                         </div>
 
                         {/* Mobile Keyboard / Input area */}
