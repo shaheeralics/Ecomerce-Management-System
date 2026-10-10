@@ -119,12 +119,25 @@ const WhatsAppDashboard = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(false);
-    const [showAddModal, setShowAddModal] = useState(false);
-    const [activeMobilePage, setActiveMobilePage] = useState<"main" | "add-product" | "more-menu" | "analytics" | "policy" | "prerecorded" | "ai-agent">(() => {
+    const [showAddModal, setShowAddModal] = useState(() => {
+        return localStorage.getItem('showAddModal') === 'true';
+    });
+    const [activeMobilePage, setActiveMobilePage] = useState<any>(() => {
+        const stored = localStorage.getItem('activeMobilePage');
+        if (stored) return stored;
         const initial = getInitialSubTab();
         if (initial === 'policy' || initial === 'prerecorded' || initial === 'ai-agent') return initial;
         return 'main';
     });
+
+    useEffect(() => {
+        localStorage.setItem('showAddModal', showAddModal.toString());
+    }, [showAddModal]);
+
+    useEffect(() => {
+        localStorage.setItem('activeMobilePage', activeMobilePage);
+    }, [activeMobilePage]);
+
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
     // Multi-phase stepper state (Phase 1: Details, Phase 2: Media Images & Video, Phase 3: Voice Note Pitch)
