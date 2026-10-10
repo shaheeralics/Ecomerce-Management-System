@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { Search, ChevronLeft, MoreVertical, Paperclip, Image as ImageIcon, FileText, Smile, Mic, Send, MapPin, Phone, Mail, ShoppingBag, User, XCircle, Bot, UserCheck, MessageSquare, Video, Plus, Play, Pause, Trash2 } from 'lucide-react';
 import OrderDetailPage from './OrderDetailPage'; // Assuming this exists for modal
 import AddOrderModal from './AddOrderModal';
+import CustomAudioPlayer from './CustomAudioPlayer';
 
 interface Conversation { [key: string]: any }
 
@@ -478,7 +479,7 @@ export default function LiveConversations() {
                                                             )
                                                             : (msg.type === 'audio' || msg.media_url.includes('.ogg') || msg.media_url.includes('.mp3')) ? (
                                                                 <div className="bg-[#09090b] rounded-xl p-2 border border-white/5 shadow-inner">
-                                                                    <audio controls preload="metadata" className="w-full max-w-[250px] h-10 outline-none custom-audio-player"><source src={msg.media_url} /></audio>
+                                                                    <CustomAudioPlayer src={msg.media_url} />
                                                                 </div>
                                                             )
                                                             : <a href={msg.media_url} target="_blank" rel="noopener noreferrer" className="text-blue-400 underline text-xs break-all">{msg.media_url}</a>}
@@ -651,7 +652,7 @@ export default function LiveConversations() {
                                                     )
                                                     : (msg.type === 'audio' || msg.media_url.includes('.ogg') || msg.media_url.includes('.mp3') || msg.media_url.includes('.webm')) ? (
                                                         <div className="bg-[#09090b] rounded-xl p-2 border border-white/5 shadow-inner min-w-[200px] flex items-center justify-center">
-                                                            <audio controls preload="metadata" className="w-full max-w-[250px] h-10 outline-none custom-audio-player"><source src={msg.media_url} /></audio>
+                                                            <CustomAudioPlayer src={msg.media_url} />
                                                         </div>
                                                     )
                                                     : <a href={msg.media_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline text-sm break-all">Media File</a>}

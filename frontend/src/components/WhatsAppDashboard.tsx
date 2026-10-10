@@ -6,6 +6,7 @@ import AnalyticsPage from './AnalyticsPage';
 import LiveConversations from './LiveConversations';
 import OrdersPage from './OrdersPage';
 import AIAgentPanel from './AIAgentPanel';
+import CustomAudioPlayer from './CustomAudioPlayer';
 import React, { useState, useEffect, useRef } from 'react';
 import { Package, ShieldAlert, Mic2, MessageSquare, Settings, Plus, Trash2, Edit3, Camera, Video, Mic, ShoppingCart, BarChart, Square, Play, Pause, Volume2, CheckCircle, X, Upload, Download, StopCircle, SkipBack, SkipForward, Save, LayoutDashboard, Database, RefreshCw, Tag, DollarSign, Box, FileAudio, Loader2, Sparkles, Menu, ChevronLeft, MoreHorizontal, FileText, ChevronRight , ImageIcon, Search, LayoutGrid, List } from 'lucide-react';
 
@@ -2396,7 +2397,7 @@ const WhatsAppDashboard = () => {
                                         <div className="flex flex-col items-center justify-center py-10">
                                             {audioPreviewUrl ? (
                                                 <div className="w-full flex flex-col items-center max-w-md">
-                                                    <audio controls src={audioPreviewUrl} className="w-full mb-10 h-14" />
+                                                    <CustomAudioPlayer src={audioPreviewUrl} className="w-full mb-10 h-14" />
                                                     <button 
                                                         onClick={() => setActiveMobilePage('add-product-voice-edit')}
                                                         className="bg-indigo-600 hover:bg-indigo-500 text-white w-full py-4 rounded-xl font-bold shadow-lg shadow-indigo-600/20 active:scale-95 transition-all text-lg flex items-center justify-center gap-3 mb-4"
@@ -2523,7 +2524,7 @@ const WhatsAppDashboard = () => {
                         ) : (
                             <div className="p-10 text-center space-y-6">
                                 <Volume2 size={48} className="text-white mx-auto" />
-                                <audio src={activeMediaPreview.url} controls autoPlay className="w-full custom-audio-player" />
+                                <CustomAudioPlayer src={activeMediaPreview.url} autoPlay className="w-full max-w-sm mx-auto" />
                             </div>
                         )}
                     </div>

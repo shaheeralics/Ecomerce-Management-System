@@ -3,6 +3,7 @@ import {
     Mic, Play, Pause, Trash2, Edit3, Plus, ChevronLeft, Save, X, RotateCcw, ArrowRight
 } from 'lucide-react';
 import MobileVoiceEditor from './MobileVoiceEditor';
+import CustomAudioPlayer from './CustomAudioPlayer';
 
 interface VoiceAssetsTabProps {
     category?: 'policy' | 'prerecorded';
@@ -386,7 +387,7 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
                             {audioPreviewUrl && !isRecording && (
                                 <div className="w-full max-w-sm space-y-6">
                                     <div className="bg-[#18181b] border border-white/5 rounded-3xl p-4 shadow-xl">
-                                        <audio src={audioPreviewUrl} controls className="w-full h-14 custom-audio-player" />
+                                        <CustomAudioPlayer src={audioPreviewUrl} className="w-full h-10" />
                                     </div>
                                     <div className="flex flex-wrap items-center justify-center gap-3 mt-8">
                                         <button
@@ -464,7 +465,7 @@ export default function VoiceAssetsTab({ category = 'policy', title }: VoiceAsse
                                     </div>
                                 </div>
                                 {voice.voice_url && (
-                                    <audio src={voice.voice_url} controls className="w-full h-8 custom-audio-player" />
+                                    <CustomAudioPlayer src={voice.voice_url} className="w-full h-10 mb-2" />
                                 )}
                                 <div className="text-xs text-slate-400 line-clamp-2 italic">
                                     "{voice.transcription || 'No transcription available.'}"
