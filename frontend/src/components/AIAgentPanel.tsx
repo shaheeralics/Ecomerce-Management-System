@@ -356,9 +356,6 @@ export default function AIAgentPanel() {
         <div className="flex-1 flex flex-col h-full bg-[#030712]">
             <div className="h-16 border-b border-white/5 bg-[#09090b] flex items-center px-4 md:px-6 justify-between shrink-0">
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
-                        <Save size={14} className="text-indigo-400" />
-                    </div>
                     <span className="font-bold text-white">System Prompts</span>
                 </div>
                 <button
@@ -367,7 +364,7 @@ export default function AIAgentPanel() {
                     disabled={saving}
                     className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 md:px-6 md:py-2 rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20 transition-all flex items-center gap-2"
                 >
-                    {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                    {saving && <Loader2 size={16} className="animate-spin" />}
                     {saving ? 'Saving...' : 'Save All'}
                 </button>
             </div>
@@ -595,9 +592,6 @@ export default function AIAgentPanel() {
                     className="bg-[#09090b] rounded-2xl border border-white/5 p-4 active:bg-white/5 transition-colors flex items-center justify-between cursor-pointer shadow-sm"
                 >
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-400">
-                            <Save size={24} />
-                        </div>
                         <div>
                             <h3 className="font-bold text-white text-base">System Prompts</h3>
                             <p className="text-xs text-zinc-500">Edit rules & behaviors</p>
@@ -611,9 +605,6 @@ export default function AIAgentPanel() {
                     className="bg-[#09090b] rounded-2xl border border-white/5 p-4 active:bg-white/5 transition-colors flex items-center justify-between cursor-pointer shadow-sm"
                 >
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-400">
-                            <Sparkles size={24} />
-                        </div>
                         <div>
                             <h3 className="font-bold text-white text-base">Test AI Agent</h3>
                             <p className="text-xs text-zinc-500">Live chat sandbox</p>
@@ -644,7 +635,6 @@ export default function AIAgentPanel() {
                             onClick={() => setDesktopView('prompts')}
                             className={`w-full flex items-center gap-3 px-4 py-4 rounded-2xl transition-all ${desktopView === 'prompts' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shadow-sm' : 'text-zinc-400 hover:bg-white/5 border border-transparent'}`}
                         >
-                            <Save size={20} />
                             <div className="text-left flex-1">
                                 <h3 className="font-bold text-sm">System Prompts</h3>
                                 <p className="text-[11px] opacity-70">Manage agent rules</p>
@@ -654,7 +644,6 @@ export default function AIAgentPanel() {
                             onClick={() => setDesktopView('chat')}
                             className={`w-full flex items-center gap-3 px-4 py-4 rounded-2xl transition-all ${desktopView === 'chat' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 shadow-sm' : 'text-zinc-400 hover:bg-white/5 border border-transparent'}`}
                         >
-                            <MessageSquare size={20} />
                             <div className="text-left flex-1">
                                 <h3 className="font-bold text-sm">Test Agent</h3>
                                 <p className="text-[11px] opacity-70">Sandbox chat</p>
