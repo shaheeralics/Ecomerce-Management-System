@@ -1858,14 +1858,16 @@ const WhatsAppDashboard = () => {
                 )}
 
                 {/* Desktop Global Content Pages (Like Analytics, Policy, etc) rendered when they are selected via Top Nav */}
-                <div className="hidden md:block absolute inset-0 bg-[#030712] z-40">
-                    <div className="flex-1 overflow-y-auto p-6 w-full max-w-6xl mx-auto h-full custom-scrollbar">
-                        {(activeMobilePage as any) === 'analytics' && <AnalyticsPage />}
-                        {(activeMobilePage as any) === 'policy' && <VoiceAssetsTab category="policy" title="Policy Voices" description="" />}
-                        {(activeMobilePage as any) === 'prerecorded' && <PreRecordedVoicesTab title="Pre recorded voices" description="" />}
-                        {(activeMobilePage as any) === 'ai-agent' && <AIAgentPanel />}
+                {['analytics', 'policy', 'prerecorded', 'ai-agent'].includes(activeMobilePage as string) && (
+                    <div className="hidden md:block absolute inset-0 bg-[#030712] z-40">
+                        <div className="flex-1 overflow-y-auto p-6 w-full max-w-6xl mx-auto h-full custom-scrollbar">
+                            {(activeMobilePage as any) === 'analytics' && <AnalyticsPage />}
+                            {(activeMobilePage as any) === 'policy' && <VoiceAssetsTab category="policy" title="Policy Voices" description="" />}
+                            {(activeMobilePage as any) === 'prerecorded' && <PreRecordedVoicesTab title="Pre recorded voices" description="" />}
+                            {(activeMobilePage as any) === 'ai-agent' && <AIAgentPanel />}
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* 2) MORE MENU SCREEN (Full Screen Independent View - Hidden on Desktop) */}
                 {activeMobilePage === 'more-menu' && (
