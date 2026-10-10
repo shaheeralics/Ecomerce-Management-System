@@ -2250,34 +2250,38 @@ const WhatsAppDashboard = () => {
                             </div>
 
                             <div className="flex-1 overflow-y-auto p-10 custom-scrollbar">
-                                <div className="max-w-2xl mx-auto space-y-8 pb-20">
+                                <div className="max-w-5xl mx-auto space-y-8 pb-20">
                                     {/* Text Details Tab */}
                                     {(activeMobilePage === 'add-product' || activeMobilePage === 'add-product-text') && (
-                                        <>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                             <div className="space-y-4">
                                                 <label className="block text-sm font-bold text-zinc-500 uppercase tracking-widest pl-2">Basic Info</label>
-                                                <div className="bg-[#18181b] rounded-2xl overflow-hidden border border-white/5 shadow-xl">
+                                                <div className="bg-[#18181b] rounded-2xl overflow-hidden border border-white/5 shadow-xl h-full flex flex-col">
                                                     <input type="text" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-6 py-5 text-lg text-white outline-none focus:bg-white/5 transition-colors" placeholder="Product Title" />
-                                                    <input type="number" value={formData.starting_price} onChange={e => setFormData({ ...formData, starting_price: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-6 py-5 text-lg text-white outline-none focus:bg-white/5 transition-colors" placeholder="Starting Price (Rs)" />
-                                                    <input type="number" value={formData.minimum_price} onChange={e => setFormData({ ...formData, minimum_price: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-6 py-5 text-lg text-white outline-none focus:bg-white/5 transition-colors" placeholder="Minimum Price (Rs)" />
-                                                    <input type="text" value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value })} className="w-full bg-transparent px-6 py-5 text-lg text-white outline-none focus:bg-white/5 transition-colors" placeholder="Brand Name" />
+                                                    <input type="text" value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-6 py-5 text-lg text-white outline-none focus:bg-white/5 transition-colors" placeholder="Brand Name" />
+                                                    <div className="flex border-b border-white/5">
+                                                        <input type="number" value={formData.starting_price} onChange={e => setFormData({ ...formData, starting_price: e.target.value })} className="w-1/2 bg-transparent border-r border-white/5 px-6 py-5 text-lg text-white outline-none focus:bg-white/5 transition-colors" placeholder="Starting Price (Rs)" />
+                                                        <input type="number" value={formData.minimum_price} onChange={e => setFormData({ ...formData, minimum_price: e.target.value })} className="w-1/2 bg-transparent px-6 py-5 text-lg text-white outline-none focus:bg-white/5 transition-colors" placeholder="Minimum Price (Rs)" />
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div className="space-y-4">
                                                 <label className="block text-sm font-bold text-zinc-500 uppercase tracking-widest pl-2">Details</label>
-                                                <div className="bg-[#18181b] rounded-2xl overflow-hidden border border-white/5 shadow-xl">
-                                                    <select value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-6 py-5 text-lg text-white outline-none appearance-none focus:bg-white/5 transition-colors cursor-pointer">
-                                                        <option value="men" className="bg-[#18181b]">Men</option>
-                                                        <option value="women" className="bg-[#18181b]">Women</option>
-                                                        <option value="unisex" className="bg-[#18181b]">Unisex</option>
-                                                        <option value="kids" className="bg-[#18181b]">Kids</option>
-                                                    </select>
-                                                    <input type="text" value={formData.size_original} onChange={e => setFormData({ ...formData, size_original: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-6 py-5 text-lg text-white outline-none focus:bg-white/5 transition-colors" placeholder="Size" />
-                                                    <input type="text" value={formData.color} onChange={e => setFormData({ ...formData, color: e.target.value })} className="w-full bg-transparent border-b border-white/5 px-6 py-5 text-lg text-white outline-none focus:bg-white/5 transition-colors" placeholder="Color" />
-                                                    <textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} rows={4} className="w-full bg-transparent px-6 py-5 text-lg text-white outline-none resize-none focus:bg-white/5 transition-colors" placeholder="Description / Condition" />
+                                                <div className="bg-[#18181b] rounded-2xl overflow-hidden border border-white/5 shadow-xl h-full flex flex-col">
+                                                    <div className="flex border-b border-white/5">
+                                                        <select value={formData.gender} onChange={e => setFormData({ ...formData, gender: e.target.value })} className="w-1/3 bg-transparent border-r border-white/5 px-6 py-5 text-lg text-white outline-none appearance-none focus:bg-white/5 transition-colors cursor-pointer">
+                                                            <option value="men" className="bg-[#18181b]">Men</option>
+                                                            <option value="women" className="bg-[#18181b]">Women</option>
+                                                            <option value="unisex" className="bg-[#18181b]">Unisex</option>
+                                                            <option value="kids" className="bg-[#18181b]">Kids</option>
+                                                        </select>
+                                                        <input type="text" value={formData.size_original} onChange={e => setFormData({ ...formData, size_original: e.target.value })} className="w-1/3 bg-transparent border-r border-white/5 px-6 py-5 text-lg text-white outline-none focus:bg-white/5 transition-colors" placeholder="Size" />
+                                                        <input type="text" value={formData.color} onChange={e => setFormData({ ...formData, color: e.target.value })} className="w-1/3 bg-transparent px-6 py-5 text-lg text-white outline-none focus:bg-white/5 transition-colors" placeholder="Color" />
+                                                    </div>
+                                                    <textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} className="w-full flex-1 min-h-[140px] bg-transparent px-6 py-5 text-lg text-white outline-none resize-none focus:bg-white/5 transition-colors" placeholder="Description / Condition" />
                                                 </div>
                                             </div>
-                                        </>
+                                        </div>
                                     )}
 
                                     {/* Media Upload Tab */}
