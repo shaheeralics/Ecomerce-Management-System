@@ -2252,30 +2252,30 @@ const WhatsAppDashboard = () => {
                     <div className="hidden md:flex flex-row w-full h-full absolute inset-0 bg-[#030712] z-50">
                         {/* Left Side Panel */}
                         <div className="w-64 border-r border-white/5 bg-[#09090b] flex flex-col p-6 shrink-0 shadow-xl z-10">
-                            <h2 className="text-xl font-bold text-white mb-8 tracking-tight">Add Product</h2>
+                            <div className="mb-8">
+                                <button onClick={() => { setActiveMobilePage('main'); resetForm(); }} className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors font-semibold mb-6">
+                                    <ChevronLeft size={18} /> Back
+                                </button>
+                                <h2 className="text-xl font-bold text-white tracking-tight">Add Product</h2>
+                            </div>
                             <div className="flex flex-col gap-3">
                                 <button 
                                     onClick={() => setActiveMobilePage('add-product-text')} 
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold ${activeMobilePage === 'add-product' || activeMobilePage === 'add-product-text' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}`}
+                                    className={`flex items-center px-4 py-3 rounded-xl transition-all font-semibold ${activeMobilePage === 'add-product' || activeMobilePage === 'add-product-text' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}`}
                                 >
-                                    <FileText size={18} /> Text Details
+                                    Text Details
                                 </button>
                                 <button 
                                     onClick={() => setActiveMobilePage('add-product-media')} 
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold ${activeMobilePage === 'add-product-media' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}`}
+                                    className={`flex items-center px-4 py-3 rounded-xl transition-all font-semibold ${activeMobilePage === 'add-product-media' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}`}
                                 >
-                                    <ImageIcon size={18} /> Media Upload
+                                    Media Upload
                                 </button>
                                 <button 
                                     onClick={() => setActiveMobilePage('add-product-voice')} 
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-semibold ${activeMobilePage.startsWith('add-product-voice') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}`}
+                                    className={`flex items-center px-4 py-3 rounded-xl transition-all font-semibold ${activeMobilePage.startsWith('add-product-voice') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-zinc-400 hover:bg-white/5 hover:text-white'}`}
                                 >
-                                    <Mic size={18} /> Voice Record
-                                </button>
-                            </div>
-                            <div className="mt-auto pt-6 border-t border-white/5">
-                                <button onClick={() => setActiveMobilePage('main')} className="w-full flex items-center justify-center gap-2 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-colors font-bold">
-                                    <ChevronLeft size={18} /> Cancel
+                                    Voice Record
                                 </button>
                             </div>
                         </div>

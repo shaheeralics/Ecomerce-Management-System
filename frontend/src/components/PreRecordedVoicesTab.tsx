@@ -238,44 +238,78 @@ export default function PreRecordedVoicesTab({ title }: PreRecordedVoicesTabProp
         }
 
         return (
-            <div className="flex flex-col h-full w-full bg-[#050D10] absolute inset-0 z-50">
-                {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-teal-900/30 bg-[#0B1E26]">
-                    <button onClick={() => setViewState('list')} className="text-teal-400 hover:text-teal-300 flex items-center">
-                        <ChevronLeft size={24} />
-                    </button>
-                    <h2 className="text-lg font-bold text-slate-100">
-                        {editId ? 'Edit Voice Asset' : 'Add Voice Asset'}
-                    </h2>
-                    <button onClick={submitVoice} className="text-teal-400 hover:text-teal-300 font-bold flex items-center gap-1 text-sm">
-                        <Save size={16} /> Save
-                    </button>
+            <div className="flex flex-col md:flex-row h-full w-full bg-[#050D10] absolute inset-0 z-50">
+                {/* Mobile Header & Tabs */}
+                <div className="md:hidden flex flex-col w-full">
+                    <div className="flex items-center justify-between p-4 border-b border-teal-900/30 bg-[#0B1E26]">
+                        <button onClick={() => setViewState('list')} className="text-teal-400 hover:text-teal-300 flex items-center">
+                            <ChevronLeft size={24} />
+                        </button>
+                        <h2 className="text-lg font-bold text-slate-100">
+                            {editId ? 'Edit Voice Asset' : 'Add Voice Asset'}
+                        </h2>
+                        <button onClick={submitVoice} className="text-teal-400 hover:text-teal-300 font-bold flex items-center gap-1 text-sm">
+                            <Save size={16} /> Save
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-3 border-b border-teal-900/30 bg-[#050D10]">
+                        <button 
+                            onClick={() => setActiveTab('details')}
+                            className={`py-3 text-sm font-semibold transition-colors ${activeTab === 'details' ? 'text-teal-400 border-b-2 border-teal-400' : 'text-slate-500'}`}
+                        >
+                            Voice Details
+                        </button>
+                        <button 
+                            onClick={() => setActiveTab('voice')}
+                            className={`py-3 text-sm font-semibold transition-colors ${activeTab === 'voice' ? 'text-teal-400 border-b-2 border-teal-400' : 'text-slate-500'}`}
+                        >
+                            Recording
+                        </button>
+                        <button 
+                            onClick={() => setActiveTab('transcription')}
+                            className={`py-3 text-sm font-semibold transition-colors ${activeTab === 'transcription' ? 'text-teal-400 border-b-2 border-teal-400' : 'text-slate-500'}`}
+                        >
+                            Transcription
+                        </button>
+                    </div>
                 </div>
 
-                {/* Mobile Tabs in 3 Columns */}
-                <div className="grid grid-cols-3 border-b border-teal-900/30 bg-[#050D10]">
-                    <button 
-                        onClick={() => setActiveTab('details')}
-                        className={`py-3 text-sm font-semibold transition-colors ${activeTab === 'details' ? 'text-teal-400 border-b-2 border-teal-400' : 'text-slate-500'}`}
-                    >
-                        Voice Details
-                    </button>
-                    <button 
-                        onClick={() => setActiveTab('voice')}
-                        className={`py-3 text-sm font-semibold transition-colors ${activeTab === 'voice' ? 'text-teal-400 border-b-2 border-teal-400' : 'text-slate-500'}`}
-                    >
-                        Recording
-                    </button>
-                    <button 
-                        onClick={() => setActiveTab('transcription')}
-                        className={`py-3 text-sm font-semibold transition-colors ${activeTab === 'transcription' ? 'text-teal-400 border-b-2 border-teal-400' : 'text-slate-500'}`}
-                    >
-                        Transcription
-                    </button>
+                {/* Desktop Side Panel */}
+                <div className="hidden md:flex w-64 border-r border-teal-900/30 bg-[#0B1E26] flex-col p-6 shrink-0 shadow-xl z-10">
+                    <div className="mb-8">
+                        <button onClick={() => setViewState('list')} className="flex items-center gap-2 text-teal-400 hover:text-teal-300 transition-colors font-semibold mb-6">
+                            <ChevronLeft size={18} /> Back
+                        </button>
+                        <h2 className="text-xl font-bold text-white tracking-tight">
+                            {editId ? 'Edit Voice Asset' : 'Add Voice Asset'}
+                        </h2>
+                    </div>
+                    <div className="flex flex-col gap-3">
+                        <button onClick={() => setActiveTab('details')} className={`flex items-center px-4 py-3 rounded-xl transition-all font-semibold ${activeTab === 'details' ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
+                            Voice Details
+                        </button>
+                        <button onClick={() => setActiveTab('voice')} className={`flex items-center px-4 py-3 rounded-xl transition-all font-semibold ${activeTab === 'voice' ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
+                            Recording
+                        </button>
+                        <button onClick={() => setActiveTab('transcription')} className={`flex items-center px-4 py-3 rounded-xl transition-all font-semibold ${activeTab === 'transcription' ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/20' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}>
+                            Transcription
+                        </button>
+                    </div>
                 </div>
 
-                {/* Tab Content */}
-                <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                {/* Main Content Area */}
+                <div className="flex-1 flex flex-col relative overflow-hidden bg-[#050D10]">
+                    <div className="hidden md:flex h-20 border-b border-teal-900/30 items-center justify-between px-10 bg-[#0B1E26]/40 shrink-0">
+                        <h3 className="text-xl font-bold text-white">
+                            {activeTab === 'details' ? 'Voice Details' : activeTab === 'voice' ? 'Voice Recording' : 'Transcription'}
+                        </h3>
+                        <button onClick={submitVoice} className="bg-teal-500 hover:bg-teal-400 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg shadow-teal-500/20 flex items-center gap-2">
+                            <Save size={18} /> Save Asset
+                        </button>
+                    </div>
+                    
+                    <div className="flex-1 overflow-y-auto p-4 md:p-10 custom-scrollbar">
                     {activeTab === 'details' && (
                         <div className="space-y-5">
                             <div>
@@ -379,6 +413,7 @@ export default function PreRecordedVoicesTab({ title }: PreRecordedVoicesTabProp
                         </div>
                     )}
                 </div>
+            </div>
             </div>
         );
     }
