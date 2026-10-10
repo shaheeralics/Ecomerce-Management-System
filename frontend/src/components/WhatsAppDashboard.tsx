@@ -1823,6 +1823,7 @@ const WhatsAppDashboard = () => {
                                         })()
                                     )}
                                 </div>
+                                </div>
                             )}
 
                             {subTab === 'conversations' && <LiveConversations />}
@@ -1963,6 +1964,7 @@ const WhatsAppDashboard = () => {
                                 <ChevronRight size={20} className="text-zinc-600" />
                             </button>
                         </div>
+                        </div>
                     </div>
                 )}
 
@@ -2002,6 +2004,7 @@ const WhatsAppDashboard = () => {
                                     <textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} rows={3} className="w-full bg-transparent px-4 py-4 text-base text-white outline-none resize-none" placeholder="Description / Condition" />
                                 </div>
                             </div>
+                        </div>
                         </div>
                     </div>
                 )}
@@ -2073,8 +2076,6 @@ const WhatsAppDashboard = () => {
                                 )}
                             </div>
                         </div>
-                    </div>
-                            </div>
                         </div>
                     </div>
                 )}
@@ -2196,9 +2197,6 @@ const WhatsAppDashboard = () => {
                                 <p className="text-xs text-zinc-600 mt-4 font-semibold uppercase tracking-widest flex items-center gap-1">
                                     <CheckCircle size={12} className="text-emerald-500" /> Auto-saving enabled
                                 </p>
-                            )}
-                        </div>
-                    </div>
                             )}
                         </div>
                         </div>
