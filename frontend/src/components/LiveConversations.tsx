@@ -439,6 +439,17 @@ export default function LiveConversations() {
                                             <p className="text-xs text-zinc-500">{activeConv?.phone_number}</p>
                                         </div>
                                     </div>
+                                    <div className="flex items-center gap-4" onClick={(e) => e.stopPropagation()}>
+                                        <div className="flex items-center gap-2 bg-[#18181b] px-3 py-1.5 rounded-full border border-white/5">
+                                            <span className="text-xs font-semibold text-zinc-400">AI Agent</span>
+                                            <button 
+                                                onClick={handleToggleTakeover}
+                                                className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${activeConv?.status !== 'human_takeover' ? 'bg-indigo-500' : 'bg-zinc-600'}`}
+                                            >
+                                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${activeConv?.status !== 'human_takeover' ? 'translate-x-4' : 'translate-x-1'}`} />
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {/* Chat Messages */}
@@ -467,7 +478,7 @@ export default function LiveConversations() {
                                                             )
                                                             : (msg.type === 'audio' || msg.media_url.includes('.ogg') || msg.media_url.includes('.mp3')) ? (
                                                                 <div className="bg-[#09090b] rounded-xl p-2 border border-white/5 shadow-inner">
-                                                                    <audio controls preload="metadata" className="w-full max-w-[250px] h-10 outline-none"><source src={msg.media_url} /></audio>
+                                                                    <audio controls preload="metadata" className="w-full max-w-[250px] h-10 outline-none custom-audio-player"><source src={msg.media_url} /></audio>
                                                                 </div>
                                                             )
                                                             : <a href={msg.media_url} target="_blank" rel="noopener noreferrer" className="text-blue-400 underline text-xs break-all">{msg.media_url}</a>}
@@ -602,13 +613,16 @@ export default function LiveConversations() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex items-center pr-2">
-                                <button 
-                                    onClick={handleToggleTakeover} 
-                                    className={`p-2 flex items-center justify-center rounded-full transition-all ${activeConv?.status === 'human_takeover' ? 'text-zinc-400 bg-white/5' : 'text-emerald-400 bg-emerald-500/10'}`}
-                                >
-                                    <Bot size={20} />
-                                </button>
+                            <div className="flex items-center gap-2 pr-2" onClick={(e) => e.stopPropagation()}>
+                                <div className="flex items-center gap-2 bg-[#18181b] px-3 py-1.5 rounded-full border border-white/5">
+                                    <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Agent</span>
+                                    <button 
+                                        onClick={handleToggleTakeover}
+                                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${activeConv?.status !== 'human_takeover' ? 'bg-indigo-500' : 'bg-zinc-600'}`}
+                                    >
+                                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${activeConv?.status !== 'human_takeover' ? 'translate-x-4' : 'translate-x-1'}`} />
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -637,7 +651,7 @@ export default function LiveConversations() {
                                                     )
                                                     : (msg.type === 'audio' || msg.media_url.includes('.ogg') || msg.media_url.includes('.mp3') || msg.media_url.includes('.webm')) ? (
                                                         <div className="bg-[#09090b] rounded-xl p-2 border border-white/5 shadow-inner min-w-[200px] flex items-center justify-center">
-                                                            <audio controls preload="metadata" className="w-full max-w-[250px] h-10 outline-none"><source src={msg.media_url} /></audio>
+                                                            <audio controls preload="metadata" className="w-full max-w-[250px] h-10 outline-none custom-audio-player"><source src={msg.media_url} /></audio>
                                                         </div>
                                                     )
                                                     : <a href={msg.media_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline text-sm break-all">Media File</a>}
